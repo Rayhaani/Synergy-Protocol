@@ -82,21 +82,32 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         
-                
-                const firebaseConfig = { apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", authDomain: "synergy-protocol.firebaseapp.com", projectId: "synergy-protocol", storageBucket: "synergy-protocol.firebasestorage.app", messagingSenderId: "179647543031", appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" };
+                // 1. CONFIGURATION & INITIALIZATION
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+            authDomain: "synergy-protocol.firebaseapp.com", 
+            projectId: "synergy-protocol", 
+            storageBucket: "synergy-protocol.firebasestorage.app", 
+            messagingSenderId: "179647543031", 
+            appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const testUser = "mamba_001";
 
         let player, currentCode = "", lastTime = 0, skipStrikes = 0;
 
+        // 2. LIVE DATABASE SYNC
         function syncBalance() {
             db.collection("users").doc(testUser).onSnapshot((doc) => {
-                if (doc.exists) { document.getElementById('vault-balance').innerText = "₦" + (doc.data().balance || 0).toLocaleString(); }
+                if (doc.exists) { 
+                    document.getElementById('vault-balance').innerText = "₦" + (doc.data().balance || 0).toLocaleString(); 
+                }
             });
         }
         syncBalance();
 
+        // 3. SYNERGY CUSTOM ALERTS (COLORED)
         function showSynergyAlert(msg, type = 'info') {
             let toast = document.getElementById('custom-toast');
             if(!toast) {
@@ -106,75 +117,107 @@
                 toast.innerHTML = `<span class="toast-icon">!</span> <span style="font-size:10px; letter-spacing:1px;"></span>`;
                 document.body.appendChild(toast);
             }
-            if(type === 'success') toast.style.borderColor = '#4ade80';
-            else if(type === 'error') toast.style.borderColor = '#f87171';
-            else toast.style.borderColor = '#00f2fe';
+            // Saita kalar sanarwa
+            if(type === 'success') toast.style.borderColor = '#4ade80'; // KORE
+            else if(type === 'error') toast.style.borderColor = '#f87171'; // JA
+            else toast.style.borderColor = '#00f2fe'; // CYAN
+
             toast.querySelector('span:last-child').innerText = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        function onYouTubeIframeAPIReady() { player = new YT.Player('yt-player', { height: '100%', width: '100%', videoId: 'dQw4w9WgXcQ', playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 }, events: { 'onStateChange': onPlayerStateChange } }); }
+        // 4. YOUTUBE API & SESSION START
+        function onYouTubeIframeAPIReady() { 
+            player = new YT.Player('yt-player', { 
+                height: '100%', width: '100%', videoId: 'dQw4w9WgXcQ', 
+                playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 }, 
+                events: { 'onStateChange': onPlayerStateChange } 
+            }); 
+        }
         
-        function startQuantumSession() { document.getElementById('shutter').style.opacity = "0"; setTimeout(() => document.getElementById('shutter').style.display = "none", 1000); player.playVideo(); }
+        function startQuantumSession() { 
+            document.getElementById('shutter').style.opacity = "0"; 
+            setTimeout(() => document.getElementById('shutter').style.display = "none", 1000); 
+            player.playVideo(); 
+        }
 
+        // 5. CORE SECURITY & PROGRESS LOGIC
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 const securityTicker = setInterval(() => {
                     let currentTime = player.getCurrentTime();
                     let progress = Math.min(Math.floor((currentTime / player.getDuration()) * 100), 100);
 
+                    // --- ANTI-SKIP STRIKE LOGIC ---
                     if (currentTime > lastTime + 2.1) { 
                         skipStrikes++;
                         player.seekTo(0); 
                         lastTime = 0;
                         if (skipStrikes >= 3) {
-                            document.body.innerHTML = "<div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:red; font-family:Syncopate; text-align:center; padding:20px;'><h1>PROTOCOL BREACH</h1><p style='color:white; margin-top:20px;'>Your access has been suspended.</p></div>";
+                            document.body.innerHTML = "<div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:red; font-family:Syncopate; text-align:center; padding:20px;'><h1>PROTOCOL BREACH</h1><p style='color:white; margin-top:20px;'>Your access has been suspended due to skip attempts.</p></div>";
                             clearInterval(securityTicker);
                         } else {
-                            showSynergyAlert("STRIKE " + skipStrikes + "/3: RESET", "error");
+                            showSynergyAlert("STRIKE " + skipStrikes + "/3: RESET TO 0%", "error");
                         }
                     } else { lastTime = currentTime; }
 
+                    // Update UI Progress
                     document.getElementById("ring").innerText = progress + "%";
                     document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
+                    
                     let mins = Math.floor(currentTime / 60), secs = Math.floor(currentTime % 60);
                     document.getElementById('timer-display').innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
 
-                    if (progress >= 90) {
+                    // TRIGGER VERIFICATION (At 5% for testing)
+                    if (progress >= 5) { 
                         const p = document.getElementById('verifier-panel'); 
                         p.style.opacity = "1"; p.style.transform = "translateY(0)"; p.style.pointerEvents = "all"; p.classList.add('is-active-floating');
-                        if(currentCode === "") generateCode();
+                        if(currentCode === "") {
+                            generateCode();
+                            showSynergyAlert("HASH CODE GENERATED", "info");
+                        }
                     }
                 }, 1000);
             }
         }
 
-        function generateCode() { currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); document.getElementById("generated-code-display").innerText = currentCode; }
+        function generateCode() { 
+            currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+            document.getElementById("generated-code-display").innerText = currentCode; 
+        }
 
+        // 6. TRANSACTION & AUTO-REFRESH COUNTDOWN
         async function authenticateNode() {
             const inputVal = document.getElementById('node-code').value.toUpperCase();
             if(inputVal === currentCode) {
                 const userRef = db.collection("users").doc(testUser);
                 await userRef.set({ balance: firebase.firestore.FieldValue.increment(150) }, { merge: true });
+
+                // Start 3s Countdown
                 let secondsLeft = 3;
                 const refreshInterval = setInterval(() => {
                     showSynergyAlert(`SUCCESS: ₦150 EARNED. REFRESHING IN ${secondsLeft}s...`, "success");
                     secondsLeft--;
-                    if (secondsLeft < 0) { clearInterval(refreshInterval); location.reload(); }
+                    if (secondsLeft < 0) { 
+                        clearInterval(refreshInterval); 
+                        location.reload(); 
+                    }
                 }, 1000);
             } else { 
                 showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
             }
         }
 
+        // 7. TAB PROTECTION (VISIBILITY API)
         document.addEventListener("visibilitychange", function() {
             if (document.hidden && player && player.pauseVideo) { 
                 player.pauseVideo(); 
                 showSynergyAlert("PAUSED: DON'T LEAVE THE PAGE", "info");
             }
         });
-        
+                        
+                 
         
     </script>
 </body>
