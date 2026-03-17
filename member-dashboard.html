@@ -173,16 +173,33 @@
 
         async function authenticateNode() {
             const inputVal = document.getElementById('node-code').value.toUpperCase();
-            if(inputVal === currentCode) {
+                        if(inputVal === currentCode) {
                 const userRef = db.collection("users").doc(testUser);
                 await userRef.set({ balance: firebase.firestore.FieldValue.increment(150) }, { merge: true });
-                showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-setTimeout(() => location.reload(), 2000);
-                
-          } else { 
-    showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
-            }
+
+                // --- COUNTDOWN TIMER LOGIC ---
+                let secondsLeft = 3;
+                const refreshInterval = setInterval(() => {
+                    showSynergyAlert(`SUCCESS: ₦150 EARNED. REFRESHING IN ${secondsLeft}s...`, "success");
+                    secondsLeft--;
+                    
+                    if (secondsLeft < 0) {
+                        clearInterval(refreshInterval);
+                        location.reload(); // Wannan zai yi reload a sakan na 0
+                    }
+                }, 1000); 
+                // ------------------------------
+
+            } else { 
+                showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
+                        }
             
+            
+                // Wannan shi ne Auto-Refresh bayan sakan 3 (3000 milliseconds)
+setTimeout(() => {
+    location.reload();
+}, 3000);
+                
 
         // --- TAB SWITCHING PROTECTION (Visibility API) ---
 document.addEventListener("visibilitychange", function() {
