@@ -20,6 +20,20 @@
         .node-input-clean { background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; color: white !important; font-size: 1.4rem !important; text-align: center; padding: 18px !important; width: 100%; outline: none; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .is-active-floating { animation: float 6s ease-in-out infinite; }
+    
+            .synergy-toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px);
+            border: 1px solid var(--aqua); border-top: 3px solid var(--aqua);
+            color: white; padding: 15px 30px; border-radius: 15px;
+            z-index: 9999; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2);
+        }
+        .synergy-toast.show { top: 30px; }
+        .toast-icon { color: var(--aqua); font-weight: bold; font-size: 20px; }
+                
+    
     </style>
 </head>
 <body>
@@ -83,22 +97,78 @@
         function onYouTubeIframeAPIReady() { player = new YT.Player('yt-player', { height: '100%', width: '100%', videoId: 'dQw4w9WgXcQ', playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 }, events: { 'onStateChange': onPlayerStateChange } }); }
         function startQuantumSession() { document.getElementById('shutter').style.opacity = "0"; setTimeout(() => document.getElementById('shutter').style.display = "none", 1000); player.playVideo(); }
 
+                
+        let skipStrikes = 0; 
+        
+                function showSynergyAlert(msg, type = 'info') {
+            let toast = document.getElementById('custom-toast');
+            if(!toast) {
+                toast = document.createElement('div');
+                toast.id = 'custom-toast';
+                toast.className = 'synergy-toast orbitron';
+                toast.innerHTML = `<span class="toast-icon">!</span> <span style="font-size:10px; letter-spacing:1px;"></span>`;
+                document.body.appendChild(toast);
+            }
+            
+            // Canza kala dangane da nau'in sako (Type)
+            if(type === 'success') toast.style.borderColor = '#4ade80'; // Kore
+            else if(type === 'error') toast.style.borderColor = '#f87171'; // Ja
+            else toast.style.borderColor = '#00f2fe'; // Cyan (Normal)
+
+            toast.querySelector('span:last-child').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+                }
+        
+                
+        
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
-                setInterval(() => {
-                    let currentTime = player.getCurrentTime(), progress = Math.min(Math.floor((currentTime / player.getDuration()) * 100), 100);
-                    if (currentTime > lastTime + 2.5) { player.seekTo(lastTime); } else { lastTime = currentTime; }
+                const securityTicker = setInterval(() => {
+                    let currentTime = player.getCurrentTime();
+                    let progress = Math.min(Math.floor((currentTime / player.getDuration()) * 100), 100);
+
+                    // --- STRIKE SYSTEM ANTI-SKIP ---
+                   
+                    if (skipStrikes >= 3) {
+    // ... code na kulle shafi ...
+} else {
+    showSynergyAlert("STRIKE " + skipStrikes + "/3: RESET", "error");
+                    }
+                    
+                        skipStrikes++;
+                        player.seekTo(0); 
+                        lastTime = 0;
+
+                        if (skipStrikes >= 3) {
+                            document.body.innerHTML = "<div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:red; font-family:Syncopate; text-align:center; padding:20px;'><h1>PROTOCOL BREACH</h1><p style='color:white; margin-top:20px;'>Your access has been suspended for multiple fraud attempts. <br> Please refresh and follow the rules.</p></div>";
+                            clearInterval(securityTicker);
+                        } else {
+                            alert("WARNING (" + skipStrikes + "/3): Skip detected. Resetting to 0%. Attempt 3 will lock the session.");
+                        }
+                    } else {
+                        lastTime = currentTime; 
+                    }
+
                     document.getElementById("ring").innerText = progress + "%";
                     document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
+                    
                     let mins = Math.floor(currentTime / 60), secs = Math.floor(currentTime % 60);
                     document.getElementById('timer-display').innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
-                    if (progress >= 5) {
-                        const p = document.getElementById('verifier-panel'); p.style.opacity = "1"; p.style.transform = "translateY(0)"; p.style.pointerEvents = "all"; p.classList.add('is-active-floating');
+
+                    if (progress >= 90) { // Na mayar da shi 90% yanzu tunda mun gama gwaji
+                        const p = document.getElementById('verifier-panel'); 
+                        p.style.opacity = "1"; 
+                        p.style.transform = "translateY(0)"; 
+                        p.style.pointerEvents = "all"; 
+                        p.classList.add('is-active-floating');
                         if(currentCode === "") generateCode();
                     }
                 }, 1000);
             }
-        }
+                            }
+
+        
         function generateCode() { currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); document.getElementById("generated-code-display").innerText = currentCode; }
 
         async function authenticateNode() {
@@ -106,9 +176,13 @@
             if(inputVal === currentCode) {
                 const userRef = db.collection("users").doc(testUser);
                 await userRef.set({ balance: firebase.firestore.FieldValue.increment(150) }, { merge: true });
-                alert("SUCCESS: ₦150 Added!"); location.reload();
-            } else { alert("ERROR: Mismatch!"); }
-        }
+                showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
+setTimeout(() => location.reload(), 2000);
+                
+          } else { 
+    showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
+            }
+            
 
         // --- TAB SWITCHING PROTECTION (Visibility API) ---
 document.addEventListener("visibilitychange", function() {
