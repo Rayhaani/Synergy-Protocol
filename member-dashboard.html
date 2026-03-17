@@ -109,6 +109,21 @@
                 alert("SUCCESS: ₦150 Added!"); location.reload();
             } else { alert("ERROR: Mismatch!"); }
         }
+
+        // --- TAB SWITCHING PROTECTION (Visibility API) ---
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        // Idan mamba ya bar shafin, tsayar da bidiyon
+        if (player && player.pauseVideo) {
+            player.pauseVideo();
+            console.log("Session Paused: User left the tab.");
+        }
+    } else {
+        // Idan ya dawo, zai iya ci gaba da kallo daga inda ya tsaya
+        console.log("Session Resumed: User returned to tab.");
+    }
+});
+        
     </script>
 </body>
 </html>
