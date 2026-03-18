@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY PROTOCOL | NETWORK NODES</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            overflow-x: hidden; 
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); 
+            min-height: 100vh; 
+        }
+        .glass-premium { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(40px) saturate(180%); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(0, 242, 254, 0.3); 
+        }
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 3px; }
+        
+        /* Animation don Referral Card */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-node { animation: slideIn 1s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+
+        main { padding-bottom: 150px; }
+    </style>
+</head>
+<body>
+
+    <nav class="sticky top-0 z-50 glass-premium p-5 flex justify-between items-center px-8">
+        <div class="orbitron text-[14px] text-cyan-400 font-bold tracking-[5px]">SYNERGY PROTOCOL</div>
+        <div class="flex items-center gap-6">
+            <div class="text-right">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest">Vault Balance</p>
+                <p id="vault-balance" class="text-lg font-bold text-green-400 font-mono">₦2,850</p>
+            </div>
+            <div class="w-10 h-10 rounded-full border border-cyan-500/30 p-1">
+                <div class="w-full h-full bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full shadow-[0_0_15px_cyan]"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto p-6 mt-4 space-y-10">
+        
+        <section class="glass-premium p-10 rounded-[45px] animate-node relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 blur-[80px]"></div>
+            
+            <div class="text-center space-y-10 relative z-10">
+                <h2 class="orbitron text-[12px] text-cyan-400 tracking-[6px]">Network Expansion</h2>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-black/40 p-8 rounded-[35px] border border-white/5 shadow-inner">
+                        <p class="orbitron text-[9px] text-gray-500 tracking-[2px] mb-2 uppercase">Total Referrals</p>
+                        <h4 id="ref-count" class="text-4xl font-black text-white">0</h4>
+                    </div>
+                    <div class="bg-black/40 p-8 rounded-[35px] border border-white/5 shadow-inner">
+                        <p class="orbitron text-[9px] text-gray-500 tracking-[2px] mb-2 uppercase">Node Status</p>
+                        <h4 class="text-[12px] font-bold text-green-400 orbitron tracking-[2px] animate-pulse">ACTIVE</h4>
+                    </div>
+                </div>
+
+                <div class="space-y-6 pt-4">
+                    <p class="orbitron text-[9px] text-gray-400 tracking-[3px] uppercase">Your Unique Referral Link</p>
+                    <div class="flex items-center gap-3 bg-black/60 p-5 rounded-2xl border border-cyan-500/20 group hover:border-cyan-500/50 transition-all duration-500">
+                        <input type="text" id="ref-link" readonly value="https://synergy.io/ref/mamba_001" 
+                               class="bg-transparent text-[12px] text-cyan-300 w-full outline-none font-mono tracking-widest">
+                        <button onclick="copyRef()" class="p-2 text-cyan-400 hover:text-white hover:scale-110 transition-all">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-600 italic">Share this link to expand your node network and increase yield.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="fixed bottom-8 left-10 right-10 h-20 glass-premium rounded-[35px] flex justify-around items-center z-[100]">
+        <a href="index.html" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-all group">
+            <span class="text-[10px] font-bold text-gray-500 orbitron group-hover:text-cyan-400">Core</span>
+        </a>
+
+        <a href="nodes.html" class="flex flex-col items-center gap-1">
+            <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-[0_0_15px_cyan]"></div>
+            <span class="text-[10px] font-bold text-cyan-400 orbitron">Nodes</span>
+        </a>
+
+        <a href="vault.html" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-all group">
+            <span class="text-[10px] font-bold text-gray-500 orbitron group-hover:text-cyan-400">Vault</span>
+        </a>
+
+        <a href="meta.html" class="flex flex-col items-center gap-1 opacity-50 hover:opacity-100 transition-all group">
+            <span class="text-[10px] font-bold text-gray-500 orbitron group-hover:text-cyan-400">Meta</span>
+        </a>
+    </footer>
+
+    <script>
+        function copyRef() {
+            const copyText = document.getElementById("ref-link");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            
+            // Synergy Alert Style
+            const alertBox = document.createElement('div');
+            alertBox.style.cssText = "position:fixed; top:30px; left:50%; transform:translateX(-50%); background:rgba(0,242,254,0.1); border:1px solid #00f2fe; color:white; padding:12px 25px; border-radius:12px; font-family:Syncopate; font-size:10px; z-index:9999; backdrop-filter:blur(10px);";
+            alertBox.innerText = "LINK COPIED TO CLIPBOARD";
+            document.body.appendChild(alertBox);
+            setTimeout(() => alertBox.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
