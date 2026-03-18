@@ -74,16 +74,19 @@
         </section>
 
         <section id="verifier-panel" class="floating-card-v3 glass-premium p-10 relative">
-            <div class="text-center space-y-8">
-                <div><h2 class="orbitron text-[10px] text-white/40 mb-2">Security Hash Code</h2><div id="generated-code-display" class="orbitron">------</div></div>
-                <div class="space-y-6">
-                    <input type="text" id="node-code" maxlength="6" class="node-input-clean orbitron" placeholder="••••••">
-                    <button onclick="authenticateNode()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[12px] hover:bg-cyan-400 transition-all">Verify Transaction</button>
-                </div>
-            </div>
-
-
-<section class="grid grid-cols-1 gap-4 mt-8 px-2">
+    <div class="text-center space-y-8">
+        <div>
+            <h2 class="orbitron text-[10px] text-white/40 mb-2">Security Hash Code</h2>
+            <div id="generated-code-display" class="orbitron">------</div>
+        </div>
+        <div class="space-y-6">
+            <input type="text" id="node-code" maxlength="6" class="node-input-clean orbitron" placeholder="••••••">
+            <button onclick="authenticateNode()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[12px] hover:bg-cyan-400 transition-all">Verify Transaction</button>
+        </div>
+    </div>
+</section> 
+        
+        <section class="grid grid-cols-1 gap-4 mt-8 px-2">
     <div class="glass-premium p-5 rounded-[24px] border-b-2 border-b-cyan-500/30 relative overflow-hidden group">
         <div class="flex justify-between items-end mb-3">
             <div>
@@ -113,8 +116,7 @@
             <div class="mt-2 text-[12px]" id="status-icon">🚀</div>
         </div>
     </div>
-            
-            
+ 
         </section>
     </main>
 
