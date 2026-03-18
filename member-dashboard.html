@@ -345,8 +345,7 @@ function syncBalance() {
     });
         }
 
-        
-   function updateFuturisticHUD(watchedCount) {
+    function updateFuturisticHUD(watchedCount) {
     const dailyGoal = 10;
     const payPerVideo = 150;
 
@@ -370,15 +369,19 @@ function syncBalance() {
         estEarnings.innerText = "₦" + monthlyEst.toLocaleString();
     }
 
-    // 4. TASK RING (CIRCULAR) LOGIC
-    const overallProgress = Math.min((watchedCount / dailyGoal) * 360, 360);
+    // 4. TASK RING (CIRCULAR) LOGIC - GYARAN YANA NAN:
+    // Muna amfani da Math.min don lissafin bai wuce 360 degrees ba
+    const currentProgressDegrees = Math.min((watchedCount / dailyGoal) * 360, 360);
     const outerRing = document.getElementById('task-ring-outer');
+    
     if(outerRing) {
         if (watchedCount >= dailyGoal) {
-            outerRing.style.background = `conic-gradient(#4ade80 ${overallProgress}deg, rgba(255,255,255,0.05) 0deg)`;
+            // Idan an cika burin rana (Gold/10 units)
+            outerRing.style.background = `conic-gradient(#4ade80 360deg, rgba(255,255,255,0.05) 0deg)`;
             outerRing.style.boxShadow = "0 0 40px rgba(74, 222, 128, 0.4)";
         } else {
-            outerRing.style.background = `conic-gradient(#00f2fe ${overallProgress}deg, rgba(255,255,255,0.05) 0deg)`;
+            // Idan ana kan aiki (Blue circle yana tafiya)
+            outerRing.style.background = `conic-gradient(#00f2fe ${currentProgressDegrees}deg, rgba(255,255,255,0.05) 0deg)`;
             outerRing.style.boxShadow = "0 0 20px rgba(0, 242, 254, 0.1)";
         }
     }
@@ -406,8 +409,9 @@ function syncBalance() {
     const statusIcon = document.getElementById('status-icon');
     if(taskDesc) taskDesc.innerText = taskMsg;
     if(statusIcon) statusIcon.innerText = icon;
-   }
+    }
         
+   
         
 
     
