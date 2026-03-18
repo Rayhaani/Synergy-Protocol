@@ -143,15 +143,7 @@
 
         let player, currentCode = "", lastTime = 0, skipStrikes = 0;
 
-        // 2. LIVE DATABASE SYNC
-        function syncBalance() {
-            db.collection("users").doc(testUser).onSnapshot((doc) => {
-                if (doc.exists) { 
-                    document.getElementById('vault-balance').innerText = "₦" + (doc.data().balance || 0).toLocaleString(); 
-                }
-            });
-        }
-        syncBalance();
+        
 
         // 3. SYNERGY CUSTOM ALERTS (COLORED)
         function showSynergyAlert(msg, type = 'info') {
@@ -233,34 +225,34 @@
             document.getElementById("generated-code-display").innerText = currentCode; 
         }
 
-        // 6. TRANSACTION & AUTO-REFRESH COUNTDOWN
-        async function authenticateNode() {
-            const inputVal = document.getElementById('node-code').value.toUpperCase();
-            if(inputVal === currentCode) {
-                const userRef = db.collection("users").doc(testUser);
-                await userRef.set({ balance: firebase.firestore.FieldValue.increment(150) }, { merge: true });
-                
-await userRef.set({ 
-    balance: firebase.firestore.FieldValue.increment(150),
-    videosWatchedToday: firebase.firestore.FieldValue.increment(1) // Kara adadin kallo
-}, { merge: true });
-                
-                
+        // 6. TRANSACTION & AUTO-REFRESH COUNTDOWN (GYARARRE)
+async function authenticateNode() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    if(inputVal === currentCode) {
+        const userRef = db.collection("users").doc(testUser);
+        
+        // Mun hade su waje daya: balance +150, video count +1, sannan mun saita kwanan wata
+        await userRef.set({ 
+            balance: firebase.firestore.FieldValue.increment(150),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }) 
+        }, { merge: true });
 
-                // Start 3s Countdown
-                let secondsLeft = 3;
-                const refreshInterval = setInterval(() => {
-                    showSynergyAlert(`SUCCESS: ₦150 EARNED. REFRESHING IN ${secondsLeft}s...`, "success");
-                    secondsLeft--;
-                    if (secondsLeft < 0) { 
-                        clearInterval(refreshInterval); 
-                        location.reload(); 
-                    }
-                }, 1000);
-            } else { 
-                showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
+        // Countdown na sakan 3 kafin refresh
+        let secondsLeft = 3;
+        const refreshInterval = setInterval(() => {
+            showSynergyAlert(`SUCCESS: ₦150 EARNED. REFRESHING IN ${secondsLeft}s...`, "success");
+            secondsLeft--;
+            if (secondsLeft < 0) { 
+                clearInterval(refreshInterval); 
+                location.reload(); 
             }
-        }
+        }, 1000);
+    } else { 
+        showSynergyAlert("ERROR: CODE MISMATCH", "error"); 
+    }
+}
+        
 
         // 7. TAB PROTECTION (VISIBILITY API)
         document.addEventListener("visibilitychange", function() {
@@ -333,17 +325,7 @@ syncMemberDashboard();
     else document.getElementById('task-status-icon').innerText = statusIcon;
 }
 
-// Gyara cikin syncBalance() don ya rika kiran wannan function din
-function syncBalance() {
-    db.collection("users").doc(testUser).onSnapshot((doc) => {
-        if (doc.exists) { 
-            const data = doc.data();
-            document.getElementById('vault-balance').innerText = "₦" + (data.balance || 0).toLocaleString(); 
-            // Kira Dashboard Update
-            updateDashboardUI(data.videosWatchedToday || 0);
-        }
-    });
-        }
+
 
         function checkAndResetDailyStats(userData, userId) {
     const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
@@ -362,22 +344,6 @@ function syncBalance() {
     }
 }
 
-// Cikin syncBalance dinka, sai ka kira function din kamar haka:
-function syncBalance() {
-    db.collection("users").doc(testUser).onSnapshot((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            
-            // 1. Kira Reset Logic din a nan
-            checkAndResetDailyStats(data, testUser);
-
-            // 2. Sauran UI updates dinka
-            document.getElementById('vault-balance').innerText = "₦" + (data.balance || 0).toLocaleString();
-            updateFuturisticHUD(data.videosWatchedToday || 0);
-        }
-    });
-}
-        
 
         
     function updateFuturisticHUD(watchedCount) {
@@ -404,8 +370,7 @@ function syncBalance() {
         estEarnings.innerText = "₦" + monthlyEst.toLocaleString();
     }
 
-    // 4. TASK RING (CIRCULAR) LOGIC - GYARAN YANA NAN:
-    // Muna amfani da Math.min don lissafin bai wuce 360 degrees ba
+        // Muna amfani da Math.min don lissafin bai wuce 360 degrees ba
     const currentProgressDegrees = Math.min((watchedCount / dailyGoal) * 360, 360);
     const outerRing = document.getElementById('task-ring-outer');
     
@@ -447,39 +412,42 @@ function syncBalance() {
     }
         
    
-        
+     
 
     
-        
-// Kira wannan a cikin syncBalance()
+// WANNAN SHI NE SABON SYNCBALANCE DINKA (KADA A BARTSOHON)
 function syncBalance() {
     db.collection("users").doc(testUser).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('vault-balance').innerText = "₦" + (data.balance || 0).toLocaleString();
-            // HUD Update
+            const userId = testUser;
+            const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+            const lastDate = data.lastActivityDate || "";
+
+            // 1. DUBAN RESET (Duk karfe 12 na dare)
+            if (lastDate !== "" && lastDate !== today) {
+                db.collection("users").doc(userId).update({
+                    videosWatchedToday: 0,
+                    lastActivityDate: today
+                });
+                return; // Tsaya anan har sai an gama update
+            }
+
+            // 2. UPDATE VAULT BALANCE
+            const vaultEl = document.getElementById('vault-balance');
+            if(vaultEl) {
+                vaultEl.innerText = "₦" + (data.balance || 0).toLocaleString();
+            }
+
+            // 3. UPDATE HUD (Ring, Progress, Rank)
             updateFuturisticHUD(data.videosWatchedToday || 0);
         }
     });
-        }
-        function checkAndResetDailyStats(userData, userId) {
-    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
-    const lastActivityDate = userData.lastActivityDate || "";
-
-    // Idan ranar yau ta bambanta da ranar karshe da aka kalli video
-    if (today !== lastActivityDate) {
-        db.collection("users").doc(userId).update({
-            videosWatchedToday: 0,
-            lastActivityDate: today // Task zai sake farawa daga 0 a wannan sabuwar ranar
-        }).then(() => {
-            console.log("Daily reset successful for new day: " + today);
-        }).catch((error) => {
-            console.error("Error resetting daily stats: ", error);
-        });
-    }
 }
 
-            
+// Kira shi sau daya kacal a kasan code dinka
+syncBalance();
+              
         
 
         // 1. GENERATE SESSION ID
