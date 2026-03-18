@@ -199,12 +199,18 @@
             player.playVideo(); 
         }
 
-        // 5. CORE SECURITY & PROGRESS LOGIC
+                // 5. CORE SECURITY & PROGRESS LOGIC (GYARARRE)
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 const securityTicker = setInterval(() => {
+                    if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                        clearInterval(securityTicker);
+                        return;
+                    }
+
                     let currentTime = player.getCurrentTime();
-                    let progress = Math.min(Math.floor((currentTime / player.getDuration()) * 100), 100);
+                    let duration = player.getDuration();
+                    let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
 
                     // --- ANTI-SKIP STRIKE LOGIC ---
                     if (currentTime > lastTime + 2.1) { 
@@ -219,30 +225,41 @@
                         }
                     } else { lastTime = currentTime; }
 
-                    // Update UI Progress
-                    document.getElementById("ring").innerText = progress + "%";
-                    document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
+                    // Update UI Progress (Ring & Timer)
+                    const ring = document.getElementById("ring");
+                    if(ring) {
+                        ring.innerText = progress + "%";
+                        ring.style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
+                    }
                     
                     let mins = Math.floor(currentTime / 60), secs = Math.floor(currentTime % 60);
-                    document.getElementById('timer-display').innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
+                    const timerDisp = document.getElementById('timer-display');
+                    if(timerDisp) {
+                        timerDisp.innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
+                    }
 
-                    
-                    // A maimakon tsohon code din, saka wannan:
-if (progress >= 5) { 
-    const p = document.getElementById('verifier-panel'); 
-    p.classList.add('is-visible-now'); // Zai bude sararin yanzu
-    setTimeout(() => {
-        p.style.opacity = "1"; 
-        p.style.transform = "translateY(0)"; 
-        p.style.pointerEvents = "all"; 
-        p.classList.add('is-active-floating');
-    }, 10);
+                    // --- VERIFICATION TRIGGER (At 5%) ---
+                    if (progress >= 5) { 
+                        const p = document.getElementById('verifier-panel'); 
+                        if (p && p.style.display !== 'block') {
+                            p.style.display = 'block'; // Dawo da sararin
+                            setTimeout(() => {
+                                p.style.opacity = "1"; 
+                                p.style.transform = "translateY(0)"; 
+                                p.style.pointerEvents = "all"; 
+                                p.classList.add('is-active-floating');
+                            }, 50);
 
-    if(currentCode === "") {
-        generateCode();
-        showSynergyAlert("HASH CODE GENERATED", "info");
-    }
-}
+                            if(currentCode === "") {
+                                generateCode();
+                                showSynergyAlert("HASH CODE GENERATED", "info");
+                            }
+                        }
+                    }
+                }, 1000);
+            }
+        }
+        
                     
 
         function generateCode() { 
