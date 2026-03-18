@@ -168,7 +168,10 @@
     <footer class="fixed bottom-8 left-10 right-10 h-20 glass-premium rounded-[35px] flex justify-around items-center z-[100]">
         <div class="flex flex-col items-center gap-1 group cursor-pointer"><div class="w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-[0_0_15px_cyan]"></div><span class="text-[10px] font-bold text-cyan-400 orbitron">Core</span></div>
         <div class="text-gray-500 flex flex-col items-center gap-1 opacity-50"><span class="text-[10px] font-bold orbitron">Vault</span></div>
-        <div class="text-gray-500 flex flex-col items-center gap-1 opacity-50"><span class="text-[10px] font-bold orbitron">Nodes</span></div>
+       <div id="nodes-btn" onclick="showTab('nodes')" class="text-gray-500 flex flex-col items-center gap-1 opacity-50 cursor-pointer">
+    <span class="text-[10px] font-bold orbitron">Nodes</span>
+       </div>
+    
         <div class="text-gray-500 flex flex-col items-center gap-1 opacity-50"><span class="text-[10px] font-bold orbitron">Meta</span></div>
     </footer>
 
@@ -601,42 +604,56 @@ setInterval(() => {
 }, 1000);
         
 
-        function showTab(tabName) {
+     function showTab(tabName) {
     const mainContent = document.querySelector('main');
     const refPanel = document.getElementById('referral-panel');
-    const footerButtons = document.querySelectorAll('footer div');
-
-    // Reset dukkan buttons opacity
-    footerButtons.forEach(btn => btn.classList.add('opacity-50'));
+    const coreBtn = document.querySelector('footer div:nth-child(1)');
+    const nodesBtn = document.getElementById('nodes-btn');
 
     if (tabName === 'nodes') {
-        // Boye sassan bidiyo da boxes
+        // 1. Boye dukkan sassan Core
         Array.from(mainContent.children).forEach(child => {
-            if(child.id !== 'referral-panel') child.style.display = 'none';
+            if (child.id !== 'referral-panel') child.style.display = 'none';
         });
-        refPanel.classList.remove('hidden');
-        refPanel.style.display = 'block';
-    } else if (tabName === 'core') {
-        // Dawo da komai amma bar su a tsarin da kake so (Block layout)
+
+        // 2. Nuna Referral Panel
+        if (refPanel) {
+            refPanel.classList.remove('hidden');
+            refPanel.style.display = 'block';
+        }
+
+        // 3. Canza kalar Buttons (Active state)
+        nodesBtn.classList.remove('opacity-50', 'text-gray-500');
+        nodesBtn.classList.add('text-cyan-400');
+        coreBtn.classList.add('opacity-50');
+        
+        showSynergyAlert("NETWORK NODE ACTIVE", "info");
+    } 
+    else if (tabName === 'core') {
+        // 1. Dawo da sassan Core a jere (kamar yadda kake so)
         Array.from(mainContent.children).forEach(child => {
-            if(child.id === 'referral-panel') {
+            if (child.id === 'referral-panel') {
                 child.style.display = 'none';
-            } else if(child.id === 'verifier-panel') {
-                // Kar a nuna verifier idan ba lokacin sa bane
-                child.style.display = (parseInt(document.getElementById('ring').innerText) >= 5) ? 'block' : 'none';
+            } else if (child.id === 'verifier-panel') {
+                // Idan an riga an kai 5% ne kawai zai nuna
+                const progress = parseInt(document.getElementById('ring').innerText) || 0;
+                child.style.display = (progress >= 5) ? 'block' : 'none';
             } else {
-                // Wannan zai dawo da sassan bidiyo da boxes a matsayin Block (daya bayan daya)
                 child.style.display = 'block';
-                
-                // Idan wannan sashin boxes ne na Stability/Timer/Yield
-                if(child.classList.contains('grid-cols-3')) {
+                // Gyara layout din ya zama stacked (kamar hoton da kake so)
+                if (child.classList.contains('grid-cols-3')) {
                     child.classList.remove('grid-cols-3');
-                    child.classList.add('grid-cols-1'); // Sanya su su jero kasa-kasa
+                    child.classList.add('grid-cols-1');
                 }
             }
         });
+
+        // 2. Canza kalar Buttons
+        nodesBtn.classList.add('opacity-50', 'text-gray-500');
+        nodesBtn.classList.remove('text-cyan-400');
+        coreBtn.classList.remove('opacity-50');
     }
-    }
+     }
         
         
     </script>
