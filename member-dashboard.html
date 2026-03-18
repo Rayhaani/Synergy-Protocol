@@ -69,6 +69,36 @@
                     <button onclick="authenticateNode()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[12px] hover:bg-cyan-400 transition-all">Verify Transaction</button>
                 </div>
             </div>
+
+
+
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="glass-premium p-6 rounded-[28px] relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all"></div>
+        <p class="text-[10px] orbitron text-gray-500 mb-2">Videos Today</p>
+        <h3 id="videos-today" class="text-3xl font-bold text-white tracking-tighter">0 <span class="text-xs text-cyan-400">/ 10</span></h3>
+        <div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
+            <div id="video-progress-bar" class="bg-cyan-400 h-full w-0 transition-all duration-1000"></div>
+        </div>
+    </div>
+
+    <div class="glass-premium p-6 rounded-[28px] border-l-2 border-l-green-500/50">
+        <p class="text-[10px] orbitron text-gray-500 mb-2">Est. Monthly</p>
+        <h3 id="est-earnings" class="text-3xl font-bold text-green-400 tracking-tighter">₦0</h3>
+        <p class="text-[9px] text-gray-500 mt-2 uppercase tracking-widest">Based on current pace</p>
+    </div>
+
+    <div class="glass-premium p-6 rounded-[28px] flex items-center justify-between">
+        <div>
+            <p class="text-[10px] orbitron text-gray-500 mb-1">Member Rank</p>
+            <h3 id="member-rank" class="text-xl font-bold text-purple-400 orbitron italic">Iron</h3>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(112,0,255,0.4)]">
+            <span id="rank-icon" class="text-xl">🛡️</span>
+        </div>
+    </div>
+        
+            
         </section>
     </main>
 
@@ -193,6 +223,12 @@
             if(inputVal === currentCode) {
                 const userRef = db.collection("users").doc(testUser);
                 await userRef.set({ balance: firebase.firestore.FieldValue.increment(150) }, { merge: true });
+                
+await userRef.update({
+    balance: firebase.firestore.FieldValue.increment(150),
+    videosWatchedToday: firebase.firestore.FieldValue.increment(11) // Wannan zai kara adadin bidiyo 1
+});
+                
 
                 // Start 3s Countdown
                 let secondsLeft = 3;
@@ -216,8 +252,47 @@
                 showSynergyAlert("PAUSED: DON'T LEAVE THE PAGE", "info");
             }
         });
-                        
-                 
+
+        
+                 // Wannan function din zai rika lissafa nasarar mamba
+function updateMemberStats(watchedCount) {
+    const dailyGoal = 10; // Adadin bidiyon da kake so ya kalla a rana
+    const payPerVideo = 150; // Kudin kowane bidiyo guda daya
+    
+    // 1. Update Videos Today
+    document.getElementById('videos-today').innerHTML = `${watchedCount} <span class="text-xs text-cyan-400">/ ${dailyGoal}</span>`;
+    
+    // 2. Update Progress Bar
+    const percent = (watchedCount / dailyGoal) * 100;
+    document.getElementById('video-progress-bar').style.width = `${percent}%`;
+
+    // 3. Estimated Monthly Earnings (Lissafin: kudi a rana * 30 kwanaki)
+    const monthlyEst = (watchedCount * payPerVideo) * 30;
+    document.getElementById('est-earnings').innerText = "₦" + monthlyEst.toLocaleString();
+
+    // 4. Member Rank Logic
+    let rank = "Iron";
+    let icon = "🛡️";
+    if (watchedCount >= 5) { rank = "Bronze"; icon = "⚔️"; }
+    if (watchedCount >= 8) { rank = "Silver"; icon = "🎖️"; }
+    if (watchedCount >= 10) { rank = "Gold"; icon = "👑"; }
+    
+    document.getElementById('member-rank').innerText = rank;
+    document.getElementById('rank-icon').innerText = icon;
+}
+
+// Kira wannan a cikin syncBalance() don mu dauko data daga Firebase
+function syncMemberDashboard() {
+    db.collection("users").doc(testUser).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            const watched = data.videosWatchedToday || 0;
+            updateMemberStats(watched);
+        }
+    });
+}
+syncMemberDashboard();
+                                  
         
     </script>
 </body>
