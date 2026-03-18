@@ -614,83 +614,64 @@ setInterval(() => {
     }
 }, 1000);
         
-
-    function showTab(tabName) {
+function showTab(tabName) {
     const mainContent = document.querySelector('main');
     const refPanel = document.getElementById('referral-panel');
-    
-    // UI Elements for Buttons
-    const coreText = document.getElementById('core-text');
-    const coreDot = document.getElementById('core-dot');
-    const nodesText = document.getElementById('nodes-text');
-    const nodesDot = document.getElementById('nodes-dot');
+    const coreBtn = document.querySelector('footer div:nth-child(1)');
+    const nodesBtn = document.getElementById('nodes-btn');
 
     if (tabName === 'nodes') {
-        // 1. BOYÈ KOMAI NA CORE: Muna boye dukkan yaran dake cikin main ban da referral panel
+        // 1. Boye dukkan komai dake cikin main
         Array.from(mainContent.children).forEach(child => {
-            if (child.id !== 'referral-panel') {
-                child.style.display = 'none';
-            }
+            child.style.display = 'none';
         });
 
-        // 2. NUNA NODES PAGE:
+        // 2. Nuna Referral Panel kadai
         if (refPanel) {
             refPanel.style.display = 'block';
+            refPanel.classList.remove('hidden');
         }
 
-        // 3. CANZA KALAR BUTTONS: (Nodes ya koma Cyan, Core ya koma Gray)
-        updateButtonStyles('nodes');
-        showSynergyAlert("NODES INTERFACE SECURED", "info");
+        // 3. Update Buttons
+        nodesBtn.classList.remove('opacity-50');
+        nodesBtn.classList.add('text-cyan-400');
+        coreBtn.classList.add('opacity-50');
+        
+        showSynergyAlert("NETWORK NODE ACTIVE", "info");
     } 
     else if (tabName === 'core') {
-        // 1. BOYÈ NODES PAGE:
+        // 1. Da farko, boye Referral Panel din
         if (refPanel) {
             refPanel.style.display = 'none';
         }
 
-        // 2. DAWO DA KOMAI NA CORE:
+        // 2. Nuna sauran sassan Core daya bayan daya
         Array.from(mainContent.children).forEach(child => {
-            if (child.id !== 'referral-panel') {
-                // Verifier panel zai bayyana ne kawai idan an kai 5%
-                if (child.id === 'verifier-panel') {
-                    const progress = parseInt(document.getElementById('ring').innerText) || 0;
-                    child.style.display = (progress >= 5) ? 'block' : 'none';
-                } else {
-                    child.style.display = 'block';
+            if (child.id === 'referral-panel') {
+                child.style.display = 'none';
+            } else if (child.id === 'verifier-panel') {
+                // Verifier sai idan an kai 5% (Kamar yadda ka bukata)
+                const progressText = document.getElementById('ring').innerText;
+                const progress = parseInt(progressText) || 0;
+                child.style.display = (progress >= 5) ? 'block' : 'none';
+            } else {
+                // Dawo da sassan bidiyo da boxes a stacked layout
+                child.style.display = 'block';
+                if (child.classList.contains('grid-cols-3')) {
+                    child.classList.remove('grid-cols-3');
+                    child.classList.add('grid-cols-1');
                 }
             }
         });
 
-        // 3. CANZA KALAR BUTTONS: (Core ya koma Cyan, Nodes ya koma Gray)
-        updateButtonStyles('core');
+        // 3. Reset Buttons
+        nodesBtn.classList.add('opacity-50');
+        nodesBtn.classList.remove('text-cyan-400');
+        coreBtn.classList.remove('opacity-50');
     }
 }
-
-// Function na taimakawa wajen gyara kalar buttons
-function updateButtonStyles(activeTab) {
-    const coreText = document.getElementById('core-text');
-    const coreDot = document.getElementById('core-dot');
-    const nodesText = document.getElementById('nodes-text');
-    const nodesDot = document.getElementById('nodes-dot');
-
-    if (activeTab === 'nodes') {
-        nodesText.style.color = "#00f2fe";
-        nodesDot.style.backgroundColor = "#00f2fe";
-        nodesDot.classList.add('shadow-[0_0_15px_#00f2fe]');
         
-        coreText.style.color = "#6b7280";
-        coreDot.style.backgroundColor = "transparent";
-        coreDot.classList.remove('shadow-[0_0_15px_#00f2fe]');
-    } else {
-        coreText.style.color = "#00f2fe";
-        coreDot.style.backgroundColor = "#00f2fe";
-        coreDot.classList.add('shadow-[0_0_15px_#00f2fe]');
-        
-        nodesText.style.color = "#6b7280";
-        nodesDot.style.backgroundColor = "transparent";
-        nodesDot.classList.remove('shadow-[0_0_15px_#00f2fe]');
-    }
-                             }
+    
         
         
         
