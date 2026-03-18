@@ -606,36 +606,38 @@ setInterval(() => {
     const refPanel = document.getElementById('referral-panel');
     const footerButtons = document.querySelectorAll('footer div');
 
-    // Reset dukkan buttons zuwa launin asali
+    // Reset dukkan buttons opacity
     footerButtons.forEach(btn => btn.classList.add('opacity-50'));
 
     if (tabName === 'nodes') {
-        // Boye komai na main, nuna Referral kadai
+        // Boye sassan bidiyo da boxes
         Array.from(mainContent.children).forEach(child => {
             if(child.id !== 'referral-panel') child.style.display = 'none';
         });
         refPanel.classList.remove('hidden');
         refPanel.style.display = 'block';
     } else if (tabName === 'core') {
-        // Dawo da komai yadda yake
+        // Dawo da komai amma bar su a tsarin da kake so (Block layout)
         Array.from(mainContent.children).forEach(child => {
-            if(child.id !== 'referral-panel') child.style.display = 'block';
-            if(child.id === 'verifier-panel') child.style.display = 'none'; // Boye verifier har sai lokaci yayi
+            if(child.id === 'referral-panel') {
+                child.style.display = 'none';
+            } else if(child.id === 'verifier-panel') {
+                // Kar a nuna verifier idan ba lokacin sa bane
+                child.style.display = (parseInt(document.getElementById('ring').innerText) >= 5) ? 'block' : 'none';
+            } else {
+                // Wannan zai dawo da sassan bidiyo da boxes a matsayin Block (daya bayan daya)
+                child.style.display = 'block';
+                
+                // Idan wannan sashin boxes ne na Stability/Timer/Yield
+                if(child.classList.contains('grid-cols-3')) {
+                    child.classList.remove('grid-cols-3');
+                    child.classList.add('grid-cols-1'); // Sanya su su jero kasa-kasa
+                }
+            }
         });
-        refPanel.style.display = 'none';
     }
-}
-
-// Sanya function a jikin buttons din footer
-document.querySelector('footer div:nth-child(1)').onclick = () => showTab('core');
-document.querySelector('footer div:nth-child(3)').onclick = () => showTab('nodes');
-
-function copyRef() {
-    const copyText = document.getElementById("ref-link");
-    copyText.select();
-    document.execCommand("copy");
-    showSynergyAlert("LINK COPIED TO CLIPBOARD", "success");
-}
+    }
+        
         
     </script>
 </body>
