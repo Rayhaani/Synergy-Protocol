@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY PROTOCOL | SECURE VAULT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            overflow-x: hidden; 
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); 
+            min-height: 100vh; 
+        }
+        .glass-premium { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(40px) saturate(180%); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(0, 242, 254, 0.3); 
+        }
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 3px; }
+        main { padding-bottom: 150px; }
+
+        .btn-withdraw {
+            background: linear-gradient(90deg, #00f2fe, #7000ff);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+            transition: all 0.5s ease;
+        }
+        .btn-withdraw:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(0, 242, 254, 0.5); }
+    </style>
+</head>
+<body>
+
+    <nav class="sticky top-0 z-50 glass-premium p-5 flex justify-between items-center px-8">
+        <div class="orbitron text-[14px] text-cyan-400 font-bold tracking-[5px]">SYNERGY PROTOCOL</div>
+        <div class="w-10 h-10 rounded-full border border-cyan-500/30 p-1">
+            <div class="w-full h-full bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full shadow-[0_0_15px_cyan]"></div>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto p-6 mt-4 space-y-8">
+        
+        <section class="glass-premium p-10 rounded-[45px] text-center space-y-4">
+            <p class="orbitron text-[10px] text-gray-400 tracking-[5px]">Available Balance</p>
+            <h1 class="text-5xl font-black text-white neon-text tracking-tighter">₦2,850.00</h1>
+            <div class="flex justify-center gap-3">
+                <div class="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] text-green-400 orbitron">Verified Node</div>
+            </div>
+            <button class="w-full mt-6 py-5 rounded-[25px] btn-withdraw orbitron text-[12px] font-bold text-black">Initiate Withdrawal</button>
+        </section>
+
+        <section class="grid grid-cols-2 gap-4">
+            <div class="glass-premium p-6 rounded-[35px] border-l-2 border-l-cyan-500/30">
+                <p class="orbitron text-[8px] text-gray-500 mb-2">Total Earned</p>
+                <h4 class="text-xl font-bold text-white">₦15,400</h4>
+            </div>
+            <div class="glass-premium p-6 rounded-[35px] border-l-2 border-l-purple-500/30">
+                <p class="orbitron text-[8px] text-gray-500 mb-2">Total Withdrawn</p>
+                <h4 class="text-xl font-bold text-white">₦12,550</h4>
+            </div>
+        </section>
+
+        <section class="glass-premium p-8 rounded-[40px] space-y-6">
+            <h3 class="orbitron text-[10px] text-cyan-400 tracking-[4px]">Transaction History</h3>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div>
+                        <p class="text-xs font-bold text-white">Bank Transfer</p>
+                        <p class="text-[9px] text-gray-500 uppercase">March 15, 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-red-400">-₦5,000</p>
+                        <p class="text-[8px] text-green-500 orbitron">Success</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5 opacity-60">
+                    <div>
+                        <p class="text-xs font-bold text-white">Daily Yield</p>
+                        <p class="text-[9px] text-gray-500 uppercase">March 14, 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-green-400">+₦150</p>
+                        <p class="text-[8px] text-gray-500 orbitron">Credit</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="fixed bottom-8 left-10 right-10 h-20 glass-premium rounded-[35px] flex justify-around items-center z-[100]">
+        <a href="index.html" class="flex flex-col items-center gap-1 opacity-50">
+            <span class="text-[10px] font-bold text-gray-500 orbitron">Core</span>
+        </a>
+
+        <a href="nodes.html" class="flex flex-col items-center gap-1 opacity-50">
+            <span class="text-[10px] font-bold text-gray-500 orbitron">Nodes</span>
+        </a>
+
+        <a href="vault.html" class="flex flex-col items-center gap-1">
+            <div class="w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-[0_0_15px_cyan]"></div>
+            <span class="text-[10px] font-bold text-cyan-400 orbitron">Vault</span>
+        </a>
+
+        <a href="meta.html" class="flex flex-col items-center gap-1 opacity-50">
+            <span class="text-[10px] font-bold text-gray-500 orbitron">Meta</span>
+        </a>
+    </footer>
+
+</body>
+          </html>
+          
