@@ -370,17 +370,23 @@ function syncBalance() {
     }
 
     // 4. TASK RING (CIRCULAR) LOGIC
-    const overallProgress = Math.min((watchedCount / dailyGoal) * 360, 360);
-    const outerRing = document.getElementById('task-ring-outer');
-    if(outerRing) {
-        if (watchedCount >= dailyGoal) {
-            outerRing.style.background = `conic-gradient(#4ade80 ${overallProgress}deg, rgba(255,255,255,0.05) 0deg)`;
-            outerRing.style.boxShadow = "0 0 40px rgba(74, 222, 128, 0.4)";
-        } else {
-            outerRing.style.background = `conic-gradient(#00f2fe ${overallProgress}deg, rgba(255,255,255,0.05) 0deg)`;
-            outerRing.style.boxShadow = "0 0 20px rgba(0, 242, 254, 0.1)";
-        }
+const dailyGoal = 10; // Tabbatar wannan adadin ya dace da lissafin kamfaninka
+const safeWatchedCount = Math.min(watchedCount, dailyGoal); // Wannan zai hana shi wuce 10
+const overallProgress = (safeWatchedCount / dailyGoal) * 360; 
+
+const outerRing = document.getElementById('task-ring-outer');
+if(outerRing) {
+    if (watchedCount >= dailyGoal) {
+        // Idan an gama task din rana, ya nuna kore (Full Circle)
+        outerRing.style.background = `conic-gradient(#4ade80 360deg, rgba(255,255,255,0.05) 0deg)`;
+        outerRing.style.boxShadow = "0 0 40px rgba(74, 222, 128, 0.4)";
+    } else {
+        // Idan ana kai, ya nuna blue gwargwadon progress
+        outerRing.style.background = `conic-gradient(#00f2fe ${overallProgress}deg, rgba(255,255,255,0.05) 0deg)`;
+        outerRing.style.boxShadow = "0 0 20px rgba(0, 242, 254, 0.1)";
     }
+}
+           
 
     // 5. Rank & Icon Updates
     let rank = "IRON", taskMsg = "Initialize 10 sessions to unlock Silver", icon = "🚀", color = "#00f2fe";
