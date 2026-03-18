@@ -345,6 +345,41 @@ function syncBalance() {
     });
         }
 
+        function checkAndResetDailyStats(userData, userId) {
+    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+    const lastActivityDate = userData.lastActivityDate || "";
+
+    // Idan ranar yau ta bambanta da ranar karshe da aka kalli video
+    if (today !== lastActivityDate) {
+        db.collection("users").doc(userId).update({
+            videosWatchedToday: 0,
+            lastActivityDate: today // Task zai sake farawa daga 0 a wannan sabuwar ranar
+        }).then(() => {
+            console.log("Daily reset successful for new day: " + today);
+        }).catch((error) => {
+            console.error("Error resetting daily stats: ", error);
+        });
+    }
+}
+
+// Cikin syncBalance dinka, sai ka kira function din kamar haka:
+function syncBalance() {
+    db.collection("users").doc(testUser).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // 1. Kira Reset Logic din a nan
+            checkAndResetDailyStats(data, testUser);
+
+            // 2. Sauran UI updates dinka
+            document.getElementById('vault-balance').innerText = "₦" + (data.balance || 0).toLocaleString();
+            updateFuturisticHUD(data.videosWatchedToday || 0);
+        }
+    });
+}
+        
+
+        
     function updateFuturisticHUD(watchedCount) {
     const dailyGoal = 10;
     const payPerVideo = 150;
