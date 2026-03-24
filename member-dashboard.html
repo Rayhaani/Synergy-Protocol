@@ -61,19 +61,18 @@
     transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     mask-image: radial-gradient(transparent 65%, black 66%);
     -webkit-mask-image: radial-gradient(transparent 65%, black 66%);
-                                 }
+           
+        }
                 
         
     </style>
 </head>
 <body>
+
     <nav class="sticky top-0 z-50 glass-premium p-5 flex justify-between items-center px-8">
-        <div class="orbitron text-[14px] text-cyan-400 font-bold tracking-[5px]">SYNERGY PROTOCOL</div>
-        <div class="flex items-center gap-6">
-            <div class="text-right"><p class="text-[10px] text-gray-400 uppercase tracking-widest">Vault Balance</p><p id="vault-balance" class="text-lg font-bold text-green-400 font-mono">₦0.00</p></div>
-            <div class="w-10 h-10 rounded-full border border-cyan-500/30 p-1"><div class="w-full h-full bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full animate-pulse shadow-[0_0_15px_cyan]"></div></div>
-        </div>
-    </nav>
+    <div class="orbitron text-[14px] text-cyan-400 font-bold tracking-[5px]">SYNERGY PROTOCOL</div>
+    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 animate-pulse"></div>
+</nav>
 
     <main class="max-w-2xl mx-auto p-6 mt-4 space-y-10">
         <section class="glass-premium rounded-[32px] overflow-hidden aspect-video relative">
@@ -91,11 +90,21 @@
         </div>
         
     
-        <section class="grid grid-cols-3 gap-6">
-            <div class="glass-premium p-6 rounded-[28px] text-center"><small class="text-[9px] text-gray-500 block mb-2">STABILITY</small><span class="text-sm font-bold text-cyan-400">99.9%</span></div>
-            <div class="glass-premium p-6 rounded-[28px] text-center"><small class="text-[9px] text-gray-500 block mb-2">TIMER</small><span id="timer-display" class="text-sm font-bold text-white">00:00</span></div>
-            <div class="glass-premium p-6 rounded-[28px] text-center"><small class="text-[9px] text-gray-500 block mb-2">YIELD</small><span class="text-sm font-bold text-green-400">+₦150</span></div>
+        <section class="grid grid-cols-3 gap-3">
+    <div class="glass-premium p-4 rounded-[24px] text-center">
+        <small class="text-[8px] text-gray-500 block mb-1">VIDEO VAULT</small>
+        <span id="video-balance" class="text-[12px] font-bold text-cyan-400">₦0</span>
+    </div>
+    <div class="glass-premium p-4 rounded-[24px] text-center">
+        <small class="text-[8px] text-gray-500 block mb-1">SHARE VAULT</small>
+        <span id="share-balance" class="text-[12px] font-bold text-green-400">₦0</span>
+    </div>
+    <div class="glass-premium p-4 rounded-[24px] text-center border-t border-white/20">
+        <small class="text-[8px] text-white/70 block mb-1">TOTAL YIELD</small>
+        <span id="total-balance" class="text-[12px] font-bold text-white">₦0</span>
+    </div>
         </section>
+        
 
         <section id="verifier-panel" class="floating-card-v3 glass-premium p-10 relative">
     <div class="text-center space-y-8">
@@ -545,42 +554,24 @@ syncMemberDashboard();
     }
         
    
-     
-
-    
-// WANNAN SHI NE SABON SYNCBALANCE DINKA (KADA A BARTSOHON)
-function syncBalance() {
+     function syncBalance() {
     db.collection("users").doc(testUser).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            const userId = testUser;
-            const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
-            const lastDate = data.lastActivityDate || "";
+            const videoBal = data.videoBalance || 0;
+            const shareBal = data.shareBalance || 0;
+            const totalBal = videoBal + shareBal;
 
-            // 1. DUBAN RESET (Duk karfe 12 na dare)
-            if (lastDate !== "" && lastDate !== today) {
-                db.collection("users").doc(userId).update({
-                    videosWatchedToday: 0,
-                    lastActivityDate: today
-                });
-                return; // Tsaya anan har sai an gama update
-            }
+            // Wannan zai nuna kudaden a sababbin boxes dinka
+            if(document.getElementById('video-balance')) document.getElementById('video-balance').innerText = "₦" + videoBal.toLocaleString();
+            if(document.getElementById('share-balance')) document.getElementById('share-balance').innerText = "₦" + shareBal.toLocaleString();
+            if(document.getElementById('total-balance')) document.getElementById('total-balance').innerText = "₦" + totalBal.toLocaleString();
 
-            // 2. UPDATE VAULT BALANCE
-            const vaultEl = document.getElementById('vault-balance');
-            if(vaultEl) {
-                vaultEl.innerText = "₦" + (data.balance || 0).toLocaleString();
-            }
-
-            // 3. UPDATE HUD (Ring, Progress, Rank)
             updateFuturisticHUD(data.videosWatchedToday || 0);
         }
     });
 }
-
-// Kira shi sau daya kacal a kasan code dinka
-syncBalance();
-              
+syncBalance();         
         
 
         // 1. GENERATE SESSION ID
@@ -731,9 +722,7 @@ function showTab(tabName) {
 }
 
       async function secureShareAndEarn(videoId) {
-    // Yin amfani da youtu.be yana taimakawa WhatsApp kwaso hoto (preview) da wuri
     const videoUrl = "https://youtu.be/" + videoId; 
-    
     const shareData = {
         title: 'SYNERGY PROTOCOL',
         text: 'Kalli wannan bidiyon don samun karin yield a protocol dinka: ',
@@ -743,40 +732,28 @@ function showTab(tabName) {
     const startTime = Date.now();
     let hasLeftPage = false;
 
-    // 1. Gano lokacin da mamba ya bar shafin (Visibility API)
-    const checkExit = () => {
-        if (document.hidden) {
-            hasLeftPage = true;
-        }
-    };
+    const checkExit = () => { if (document.hidden) hasLeftPage = true; };
     document.addEventListener("visibilitychange", checkExit);
 
     try {
-        // Bude tsarin sharing na waya
         await navigator.share(shareData);
         
-        // 2. Jira mamba ya dawo shafin (Window Focus)
-        window.onfocus = function() {
-            const endTime = Date.now();
-            const timeElapsed = (endTime - startTime) / 1000;
+        window.onfocus = async function() {
+            const timeElapsed = (Date.now() - startTime) / 1000;
 
-            // MATAKAN TSARO (Anti-Cheat Logic)
-            // Dole ya kasance ya bar shafin, kuma ya dauki akalla sakan 6 kafin ya dawo
             if (hasLeftPage && timeElapsed >= 6) { 
-                // Tura lada zuwa Firebase
-                db.collection("users").doc(testUser).update({
-                    balance: firebase.firestore.FieldValue.increment(50),
+                // NAN NE GYARAN: Muna tura kudi zuwa shareBalance
+                await db.collection("users").doc(testUser).update({
+                    shareBalance: firebase.firestore.FieldValue.increment(50),
                     lastShareTime: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    showSynergyAlert("SUCCESS: ₦50 ADDED TO VAULT", "success");
                 });
+                showSynergyAlert("SUCCESS: ₦50 SHARE YIELD ADDED", "success");
             } else if (!hasLeftPage) {
                 showSynergyAlert("FAILED: YOU MUST SHARE TO WHATSAPP", "error");
             } else {
                 showSynergyAlert("TOO FAST: COMPLETE THE SHARING PROCESS", "error");
             }
 
-            // Share bayan an gama (Clean up)
             document.removeEventListener("visibilitychange", checkExit);
             window.onfocus = null;
         };
@@ -784,6 +761,7 @@ function showTab(tabName) {
         console.log("Share cancelled or not supported");
     }
       }
+        
       
         
           
