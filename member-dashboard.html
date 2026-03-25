@@ -538,21 +538,20 @@ syncMemberDashboard();
     db.collection("users").doc(testUser).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            // Muna dauko kudaden daga Firebase
-            const vBal = data.videoBalance || 0;
-            const sBal = data.shareBalance || 0;
-            const tBal = vBal + sBal;
+            const videoBal = data.videoBalance || 0;
+            const shareBal = data.shareBalance || 0;
+            const totalBal = videoBal + shareBal;
 
-            // Saka kudaden a cikin HTML ta amfani da IDs dinsu
-            document.getElementById('video-balance').innerText = "₦" + vBal.toLocaleString();
-            document.getElementById('share-balance').innerText = "₦" + sBal.toLocaleString();
-            document.getElementById('total-balance').innerText = "₦" + tBal.toLocaleString();
+            // Wannan zai nuna kudaden a sababbin boxes dinka
+            if(document.getElementById('video-balance')) document.getElementById('video-balance').innerText = "₦" + videoBal.toLocaleString();
+            if(document.getElementById('share-balance')) document.getElementById('share-balance').innerText = "₦" + shareBal.toLocaleString();
+            if(document.getElementById('total-balance')) document.getElementById('total-balance').innerText = "₦" + totalBal.toLocaleString();
 
             updateFuturisticHUD(data.videosWatchedToday || 0);
         }
     });
-     }
-        
+}
+syncBalance();
         
 
         // 1. GENERATE SESSION ID
