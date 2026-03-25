@@ -10,13 +10,14 @@
         :root { --neon: #00f2fe; --glow: rgba(0, 242, 254, 0.4); --bg: #050505; }
         body { 
             background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; padding: 0; /* Na cire p-4 a nan don cover ya cika bango */
             background-image: radial-gradient(circle at 90% 10%, rgba(112, 0, 255, 0.08), transparent 40%);
             min-height: 100vh; overflow-x: hidden;
         }
 
         /* 1. COVER PHOTO SECTION */
         .cover-wrapper {
-            width: 90%;
+            width: 100%; /* Na maida shi 100% don gyara space din dama */
             height: 220px;
             position: absolute;
             top: 0; left: 0;
@@ -26,14 +27,13 @@
         .cover-photo {
             width: 100%; height: 100%;
             object-fit: cover;
-            opacity: 0.7; /* Hasken hoton cover */
+            opacity: 0.7;
             background: linear-gradient(to bottom, transparent, var(--bg));
         }
 
-        /* KYAMARAR COVER - Tana saman komai yanzu */
         .camera-cover-main {
             position: absolute;
-            top: 120px; 
+            top: 100px; 
             right: 20px;
             width: 40px; height: 40px;
             background: #e4e6eb;
@@ -41,14 +41,14 @@
             display: flex; align-items: center; justify-content: center;
             z-index: 100;
             border: 3px solid var(--bg);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         /* 2. MAIN CONTAINER */
         .profile-content {
             position: relative;
             z-index: 20;
-            margin-top: 140px; /* Ya jawo komai sama ya hau kan cover */
+            margin-top: 140px;
+            padding: 0 15px; /* Na bar sarari a gefe anan kawai */
         }
 
         .glass-vault {
@@ -58,13 +58,11 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 25px;
             position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
         }
 
         .avatar-container {
             position: absolute;
-            top: -50px;
-            left: 25px;
+            top: -50px; left: 25px;
             z-index: 50;
         }
         .avatar-circle {
@@ -72,12 +70,10 @@
             border-radius: 35px;
             padding: 4px;
             background: linear-gradient(135deg, var(--neon), #7000ff);
-            box-shadow: 0 10px 30px var(--glow);
             position: relative;
         }
         .avatar-circle img { width: 100%; height: 100%; border-radius: 31px; object-fit: cover; border: 3px solid var(--bg); }
 
-        /* KYAMARAR PROFILE */
         .camera-profile-main {
             position: absolute;
             bottom: -2px; right: -2px;
@@ -89,7 +85,16 @@
             z-index: 60;
         }
 
-        /* SLIM BUTTONS */
+        /* STATS SECTION STYLE */
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+        }
+        .stat-item { text-align: left; }
+        .stat-num { font-weight: 800; font-size: 14px; color: #fff; display: block; }
+        .stat-label { font-size: 10px; color: #888; text-transform: lowercase; }
+
         .btn-slim {
             flex: 1; font-family: 'Syncopate', sans-serif; font-size: 8px; font-weight: 700;
             padding: 10px 0; border-radius: 12px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center;
@@ -102,40 +107,29 @@
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 242, 254, 0.15);
             border-radius: 24px; padding: 15px; margin-top: 20px;
         }
-
         .highlights-scroll { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; }
         .highlight-item { text-align: center; min-width: 65px; }
         .highlight-ring { width: 60px; height: 60px; border-radius: 20px; border: 1.5px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; }
         .highlight-ring img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; }
         .highlight-label { font-size: 8px; font-family: 'Syncopate'; margin-top: 6px; color: #666; font-weight: 700; }
 
-        /* GRID WITH GLOW */
         .insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .grid-item { 
-            aspect-ratio: 1/1; border-radius: 20px; overflow: hidden; background: #111;
-            border: 1px solid rgba(0, 242, 254, 0.1); box-shadow: 0 4px 15px rgba(0, 242, 254, 0.05);
-        }
+        .grid-item { aspect-ratio: 1/1; border-radius: 20px; overflow: hidden; background: #111; border: 1px solid rgba(0, 242, 254, 0.1); }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
-   
-    
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <!-- COVER PHOTO -->
     <div class="cover-wrapper">
         <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=1200" class="cover-photo" alt="Cover">
     </div>
 
-    <!-- KYAMARAR COVER (A FILI A SAMA) -->
     <div class="camera-cover-main">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
     </div>
 
     <main class="max-w-2xl mx-auto profile-content">
-        
         <div class="relative">
-            <!-- AVATAR TARE DA KYAMARA -->
             <div class="avatar-container">
                 <div class="avatar-circle">
                     <img src="https://api.dicebear.com/7.x/bottts/svg?seed=mamba" alt="Profile">
@@ -145,13 +139,29 @@
                 </div>
             </div>
 
-            <!-- GLASS VAULT BOX -->
             <div class="glass-vault">
                 <div class="flex flex-col ml-28">
-                    <div class="flex items-center gap-2 mb-2" style="margin-top: -5px;">
+                    <!-- SUNA & VERIFIED BADGE -->
+                    <div class="flex items-center gap-2" style="margin-top: -5px;">
                         <h1 class="text-[17px] font-extrabold text-white tracking-tight">Aliyu Haedar</h1>
                         <div class="w-4 h-4 bg-cyan-400 rounded-lg flex items-center justify-center">
                             <svg width="10" height="10" fill="none" stroke="black" stroke-width="4" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- SABON SASHE: STATS (Posts, Followers, Friends) -->
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-num">419</span>
+                            <span class="stat-label">posts</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-num">2,521</span>
+                            <span class="stat-label">followers</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-num">2,037</span>
+                            <span class="stat-label">friends</span>
                         </div>
                     </div>
                 </div>
@@ -163,13 +173,11 @@
                         Wholesaler of Luxury Sudanese Toubs & Traditional Wear.
                     </p>
 
-                    <!-- FOLLOW & CONTACT SLIM -->
                     <div class="flex gap-3 mb-6">
                         <button class="btn-slim btn-black">Follow Node</button>
                         <button class="btn-slim btn-white">Contact</button>
                     </div>
 
-                    <!-- HIGHLIGHTS -->
                     <div class="smart-box-highlights">
                         <div class="highlights-scroll">
                             <div class="highlight-item"><div class="highlight-ring"><img src="https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?w=100"></div><p class="highlight-label">Toubs</p></div>
@@ -182,13 +190,11 @@
             </div>
         </div>
 
-        <!-- SHOWCASE & TIMELINE SLIM -->
         <div class="flex gap-4 my-6">
              <button class="btn-slim btn-white">Showcase</button>
              <button class="btn-slim btn-trans">Timeline</button>
         </div>
 
-        <!-- GRID SECTION -->
         <div class="insta-grid pb-10">
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1583944438403-f5260a7c0838?w=400"></div>
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?w=400"></div>
@@ -200,8 +206,6 @@
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400"></div>
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?w=400"></div>
         </div>
-
     </main>
 </body>
-                                </html>
-                                
+</html>
