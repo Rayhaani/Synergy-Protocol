@@ -10,103 +10,45 @@
         :root { --neon: #00f2fe; --glow: rgba(0, 242, 254, 0.4); --bg: #050505; }
         body { 
             background: var(--bg); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; padding: 0; /* Na cire p-4 a nan don cover ya cika bango */
+            margin: 0; padding: 0;
             background-image: radial-gradient(circle at 90% 10%, rgba(112, 0, 255, 0.08), transparent 40%);
             min-height: 100vh; overflow-x: hidden;
         }
 
-        /* 1. COVER PHOTO SECTION */
-        .cover-wrapper {
-            width: 100%; /* Na maida shi 100% don gyara space din dama */
-            height: 220px;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 10;
-            overflow: hidden;
-        }
-        .cover-photo {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.7;
-            background: linear-gradient(to bottom, transparent, var(--bg));
-        }
+        .cover-wrapper { width: 100%; height: 220px; position: absolute; top: 0; left: 0; z-index: 10; overflow: hidden; }
+        .cover-photo { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; background: linear-gradient(to bottom, transparent, var(--bg)); }
 
         .camera-cover-main {
-            position: absolute;
-            top: 100px; 
-            right: 20px;
-            width: 40px; height: 40px;
-            background: #e4e6eb;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 100;
-            border: 3px solid var(--bg);
+            position: absolute; top: 170px; right: 20px; width: 40px; height: 40px;
+            background: #e4e6eb; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            z-index: 100; border: 3px solid var(--bg);
         }
 
-        /* 2. MAIN CONTAINER */
-        .profile-content {
-            position: relative;
-            z-index: 20;
-            margin-top: 140px;
-            padding: 0 15px; /* Na bar sarari a gefe anan kawai */
-        }
+        .profile-content { position: relative; z-index: 20; margin-top: 140px; padding: 0 15px; }
 
         .glass-vault {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(40px);
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 25px;
-            position: relative;
+            background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(40px);
+            border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px; position: relative;
         }
 
-        .avatar-container {
-            position: absolute;
-            top: -50px; left: 25px;
-            z-index: 50;
-        }
-        .avatar-circle {
-            width: 100px; height: 100px;
-            border-radius: 35px;
-            padding: 4px;
-            background: linear-gradient(135deg, var(--neon), #7000ff);
-            position: relative;
-        }
+        .avatar-container { position: absolute; top: -50px; left: 25px; z-index: 50; }
+        .avatar-circle { width: 100px; height: 100px; border-radius: 35px; padding: 4px; background: linear-gradient(135deg, var(--neon), #7000ff); position: relative; }
         .avatar-circle img { width: 100%; height: 100%; border-radius: 31px; object-fit: cover; border: 3px solid var(--bg); }
 
-        .camera-profile-main {
-            position: absolute;
-            bottom: -2px; right: -2px;
-            width: 32px; height: 32px;
-            background: #e4e6eb;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 3px solid var(--bg);
-            z-index: 60;
-        }
+        .camera-profile-main { position: absolute; bottom: -2px; right: -2px; width: 32px; height: 32px; background: #e4e6eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg); z-index: 60; }
 
-        /* STATS SECTION STYLE */
-        .stats-row {
-            display: flex;
-            gap: 20px;
-            margin-top: 5px;
-        }
+        .stats-row { display: flex; gap: 20px; margin-top: 5px; }
         .stat-item { text-align: left; }
         .stat-num { font-weight: 800; font-size: 14px; color: #fff; display: block; }
         .stat-label { font-size: 10px; color: #888; text-transform: lowercase; }
 
-        .btn-slim {
-            flex: 1; font-family: 'Syncopate', sans-serif; font-size: 8px; font-weight: 700;
-            padding: 10px 0; border-radius: 12px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center;
-        }
+        .btn-slim { flex: 1; font-family: 'Syncopate', sans-serif; font-size: 8px; font-weight: 700; padding: 12px 0; border-radius: 12px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; }
         .btn-black { background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
         .btn-white { background: #fff; color: #000; }
         .btn-trans { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.1); }
 
-        .smart-box-highlights {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 242, 254, 0.15);
-            border-radius: 24px; padding: 15px; margin-top: 20px;
-        }
+        .smart-box-highlights { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 242, 254, 0.15); border-radius: 24px; padding: 15px; margin-top: 20px; }
         .highlights-scroll { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; }
         .highlight-item { text-align: center; min-width: 65px; }
         .highlight-ring { width: 60px; height: 60px; border-radius: 20px; border: 1.5px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; }
@@ -116,6 +58,7 @@
         .insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .grid-item { aspect-ratio: 1/1; border-radius: 20px; overflow: hidden; background: #111; border: 1px solid rgba(0, 242, 254, 0.1); }
         .grid-item img { width: 100%; height: 100%; object-fit: cover; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -141,7 +84,6 @@
 
             <div class="glass-vault">
                 <div class="flex flex-col ml-28">
-                    <!-- SUNA & VERIFIED BADGE -->
                     <div class="flex items-center gap-2" style="margin-top: -5px;">
                         <h1 class="text-[17px] font-extrabold text-white tracking-tight">Aliyu Haedar</h1>
                         <div class="w-4 h-4 bg-cyan-400 rounded-lg flex items-center justify-center">
@@ -149,20 +91,10 @@
                         </div>
                     </div>
 
-                    <!-- SABON SASHE: STATS (Posts, Followers, Friends) -->
                     <div class="stats-row">
-                        <div class="stat-item">
-                            <span class="stat-num">419</span>
-                            <span class="stat-label">posts</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-num">2,521</span>
-                            <span class="stat-label">followers</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-num">2,037</span>
-                            <span class="stat-label">friends</span>
-                        </div>
+                        <div class="stat-item"><span class="stat-num">419</span><span class="stat-label">posts</span></div>
+                        <div class="stat-item"><span class="stat-num">2,521</span><span class="stat-label">followers</span></div>
+                        <div class="stat-item"><span class="stat-num">2,037</span><span class="stat-label">friends</span></div>
                     </div>
                 </div>
 
@@ -190,16 +122,14 @@
             </div>
         </div>
 
+        <!-- TAB BUTTONS -->
         <div class="flex gap-4 my-6">
-     <!-- Na kara musu id da kuma onclick action -->
-     <button id="btn-showcase" onclick="switchTab('showcase')" class="btn-slim btn-white">Showcase</button>
-     <button id="btn-timeline" onclick="switchTab('timeline')" class="btn-slim btn-trans">Timeline</button>
+             <button id="btn-showcase" onclick="switchTab('showcase')" class="btn-slim btn-white">Showcase</button>
+             <button id="btn-timeline" onclick="switchTab('timeline')" class="btn-slim btn-trans">Timeline</button>
         </div>
         
-
-        <div class="insta-grid pb-10">
-<div id="showcase-area" class="insta-grid pb-10">
-            
+        <!-- SHOWCASE AREA -->
+        <div id="showcase-area" class="insta-grid pb-10">
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1583944438403-f5260a7c0838?w=400"></div>
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?w=400"></div>
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1574169208507-84376144848b?w=400"></div>
@@ -211,60 +141,47 @@
             <div class="grid-item"><img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?w=400"></div>
         </div>
 
-        <div id="timeline-area" class="hidden pb-10 px-2">
-    <!-- Wannan shi ne asalin Timeline dinka -->
-    <div class="relative border-l border-gray-800 ml-4 pl-8 space-y-12">
-        
-        <!-- Post na farko a Timeline -->
-        <div class="relative">
-            <div class="absolute -left-[37px] top-0 w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f2fe]"></div>
-            <h3 class="text-white font-bold text-sm">March 2026</h3>
-            <div class="glass-vault mt-3 p-4">
-                <p class="text-gray-400 text-xs">Successfully updated the Synergy Protocol interface to V14 with full tab switching functionality.</p>
+        <!-- TIMELINE AREA -->
+        <div id="timeline-area" class="hidden pb-10 px-4">
+            <div class="relative border-l border-gray-800 ml-4 pl-8 space-y-12">
+                <div class="relative">
+                    <div class="absolute -left-[37px] top-0 w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f2fe]"></div>
+                    <h3 class="text-white font-bold text-sm">March 2026</h3>
+                    <div class="glass-vault mt-3 p-4">
+                        <p class="text-gray-400 text-xs">Successfully updated the Synergy Protocol interface to V14 with full tab switching functionality.</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute -left-[37px] top-0 w-4 h-4 rounded-full bg-gray-700"></div>
+                    <h3 class="text-gray-500 font-bold text-sm">January 2026</h3>
+                    <div class="glass-vault mt-3 p-4 opacity-60">
+                        <p class="text-gray-400 text-xs">Business name reservation for "KanoMart Limited" completed and SMEDAN certificate secured.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Post na biyu a Timeline -->
-        <div class="relative">
-            <div class="absolute -left-[37px] top-0 w-4 h-4 rounded-full bg-gray-700"></div>
-            <h3 class="text-gray-500 font-bold text-sm">January 2026</h3>
-            <div class="glass-vault mt-3 p-4 opacity-60">
-                <p class="text-gray-400 text-xs">Business name reservation for "KanoMart Limited" completed and SMEDAN certificate secured.</p>
-            </div>
-        </div>
+        <script>
+            function switchTab(tab) {
+                const showcase = document.getElementById('showcase-area');
+                const timeline = document.getElementById('timeline-area');
+                const btnS = document.getElementById('btn-showcase');
+                const btnT = document.getElementById('btn-timeline');
 
-    </div>
-        </div>
-
-
-            <script>
-function switchTab(tab) {
-    const showcase = document.getElementById('showcase-area');
-    const timeline = document.getElementById('timeline-area');
-    const btnS = document.getElementById('btn-showcase');
-    const btnT = document.getElementById('btn-timeline');
-
-    if (tab === 'showcase') {
-        // Nuna hotuna, boye timeline
-        showcase.classList.remove('hidden');
-        timeline.classList.add('hidden');
-        
-        // Canza kalar buttons (Showcase ya koma fari)
-        btnS.className = 'btn-slim btn-white';
-        btnT.className = 'btn-slim btn-trans';
-    } else {
-        // Boye hotuna, nuna timeline
-        showcase.classList.add('hidden');
-        timeline.classList.remove('hidden');
-        
-        // Canza kalar buttons (Timeline ya koma fari)
-        btnT.className = 'btn-slim btn-white';
-        btnS.className = 'btn-slim btn-trans';
-    }
-}
-            </script>
-            
-            
+                if (tab === 'showcase') {
+                    showcase.classList.remove('hidden');
+                    timeline.classList.add('hidden');
+                    btnS.className = 'btn-slim btn-white';
+                    btnT.className = 'btn-slim btn-trans';
+                } else {
+                    showcase.classList.add('hidden');
+                    timeline.classList.remove('hidden');
+                    btnT.className = 'btn-slim btn-white';
+                    btnS.className = 'btn-slim btn-trans';
+                }
+            }
+        </script>
     </main>
 </body>
-</html>
+    </html>
+    
