@@ -64,12 +64,20 @@
 <body>
 
     <div class="cover-wrapper">
-        <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=1200" class="cover-photo" alt="Cover">
+    <img id="main-cover-img" src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=1200" class="cover-photo" alt="Cover">
     </div>
+    
 
-    <div class="camera-cover-main">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-    </div>
+<!-- Kyamarar Cover Photo -->
+<div class="camera-cover-main" onclick="document.getElementById('cover-upload').click()" style="cursor: pointer;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+    </svg>
+    <!-- Wannan shi ne boyayyen input din da zai bude gallery -->
+    <input type="file" id="cover-upload" accept="image/*" class="hidden" onchange="previewCover(event)">
+</div>
+    
 
     <main class="max-w-2xl mx-auto profile-content">
         <div class="relative">
@@ -205,6 +213,18 @@
                     btnS.className = 'btn-slim btn-trans';
                 }
             }
+
+            function previewCover(event) {
+    const reader = new FileReader();
+    reader.onload = function() {
+        const output = document.getElementById('main-cover-img');
+        output.src = reader.result; // Wannan zai canza hoton zuwa wanda ka zaba
+    }
+    if(event.target.files[0]) {
+        reader.readAsDataURL(event.target.files[0]);
+    }
+            }
+            
         </script>
     </main>
 </body>
