@@ -225,18 +225,26 @@
     }
 </style>
 
-        <section id="verifier-panel" class="floating-card-v3 glass-premium p-10 relative">
+<section id="verifier-panel" class="floating-card-v3 glass-premium p-10 relative">
     <div class="text-center space-y-8">
         <div>
-            <h2 class="orbitron text-[10px] text-white/40 mb-2">Security Hash Code</h2>
-            <div id="generated-code-display" class="orbitron">------</div>
+            <h2 class="orbitron text-[9px] text-cyan-500/50 mb-4 tracking-[4px]">Security Hash Code</h2>
+            
+            <!-- Mun rage girman code din, mun mayar dashi tsakiya, kuma mun saka terminal font -->
+            <div id="generated-code-display" class="digits-terminal text-3xl text-white tracking-[12px] opacity-90 block w-full text-center ml-[6px]">
+                ------
+            </div>
         </div>
+        
         <div class="space-y-6">
-            <input type="text" id="node-code" maxlength="6" class="node-input-clean orbitron" placeholder="••••••">
-            <button onclick="authenticateNode()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[12px] hover:bg-cyan-400 transition-all">Verify Transaction</button>
+            <input type="text" id="node-code" maxlength="6" class="node-input-clean digits-terminal" placeholder="••••••">
+            <button onclick="authenticateNode()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[11px] hover:bg-cyan-400 transition-all tracking-[2px]">
+                Verify Transaction
+            </button>
         </div>
     </div>
-</section> 
+</section>
+        
 
 <section class="grid grid-cols-1 gap-4 mt-8 px-2">
     <div class="glass-premium p-5 rounded-[24px] border-b-2 border-b-cyan-500/30 relative overflow-hidden group">
