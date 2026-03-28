@@ -88,23 +88,41 @@
                     <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle>
                 </svg>
             </div>
-            <div id="google-nav" class="google-popup">
-                <div class="menu-item" onclick="location.href='dashboard.html'">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>Dashboard</span>
-                </div>
-                <div class="menu-item" onclick="location.href='wallet.html'">
-                    <svg viewBox="0 0 24 24"><path d="M20 12V8H4v4M20 12v4H4v-4M20 12H4M12 4v16"></path></svg>
-                    <span>Wallet</span>
-                </div>
-                <div class="menu-item" onclick="location.href='network.html'">
-                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    <span>Network</span>
-                </div>
-                <div class="menu-divider"></div>
-                <div class="menu-item" onclick="location.href='profile.html'">
-                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>Profile</span>
+            <!-- POPUP MENU (Compact & Connected) -->
+        <div id="google-nav" class="google-popup" style="width: 165px; padding: 6px;">
+            <div class="menu-item" style="padding: 8px 12px; gap: 10px;" onclick="location.href='dashboard.html'">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span style="font-size: 13px;">Dashboard</span>
+            </div>
+            
+            <div class="menu-item" style="padding: 8px 12px; gap: 10px;" onclick="location.href='wallet.html'">
+                <svg viewBox="0 0 24 24"><path d="M20 12V8H4v4M20 12v4H4v-4M20 12H4M12 4v16"></path></svg>
+                <span style="font-size: 13px;">Wallet</span>
+            </div>
+            
+            <div class="menu-item" style="padding: 8px 12px; gap: 10px;" onclick="location.href='network.html'">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span style="font-size: 13px;">Network</span>
+            </div>
+            
+            <div class="menu-divider" style="margin: 4px 0;"></div>
+            
+        
+<div class="menu-item" style="padding: 8px 12px; gap: 10px;" onclick="location.href='mining.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m13 10 3.5-3.5a2 2 0 0 1 2.8 2.8L15.8 12.8a4.9 4.9 0 0 1-5.3 1.3L4 20l-2-2 5.9-6.5a4.9 4.9 0 0 1 1.3-5.3L12.7 2.7a2 2 0 0 1 2.8 2.8L12 9"></path>
+    </svg>
+    <span style="font-size: 13px;">Mining</span>
+</div>
+
+<div class="menu-item" style="padding: 8px 12px; gap: 10px;" onclick="location.href='profile.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    <span style="font-size: 13px;">Profile</span>
+</div>
+            
                 </div>
             </div>
         </div>
