@@ -137,7 +137,9 @@
                 <div class="w-1 h-1 rounded-full bg-cyan-400 animate-pulse"></div>
                 <span class="orbitron text-[7px] text-cyan-400">Node Verified</span>
             </div>
-            <button class="w-full py-4 rounded-xl btn-action">Initiate Withdrawal</button>
+            <input type="number" id="withdraw-amount" placeholder="Enter Amount" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl digits-terminal text-white outline-none focus:border-cyan-500/50 transition-all">
+            <button onclick="requestPayout()" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[11px] tracking-[2px] hover:bg-cyan-400 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.05)]">
+                  Process Transaction
         </section>
 
         <!-- 2. METRICS GRID -->
