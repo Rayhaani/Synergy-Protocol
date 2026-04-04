@@ -158,26 +158,79 @@
                 <button onclick="switchPanel('staking')" id="tab-staking" class="hud-tab">🛡️</button>
             </div>
 
-            <div id="panel-nodes" class="space-y-4">
-                <div class="quantum-card">
-                    <div class="scanner-line"></div>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="orbitron text-[10px] text-cyan-400 mb-2">Network Status</p>
-                            <h4 class="text-lg font-bold tracking-widest">GLOBAL_MESH_01</h4>
-                        </div>
-                        <div class="text-right">
-                            <span class="digits text-xs text-white">UP: 99.8%</span>
-                            <div class="flex gap-1 mt-1 justify-end">
-                                <div class="w-1 h-3 bg-cyan-400"></div>
-                                <div class="w-1 h-3 bg-cyan-400"></div>
-                                <div class="w-1 h-3 bg-cyan-400"></div>
-                                <div class="w-1 h-3 bg-gray-700"></div>
-                            </div>
-                        </div>
+
+
+            <div class="relative group">
+    <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+    
+    <div class="relative quantum-card border-white/10 bg-[#050a10]/80 backdrop-blur-xl p-6 rounded-3xl overflow-hidden">
+        
+        <div class="absolute inset-0 z-0 opacity-10" 
+             style="background-image: linear-gradient(#00f2fe 1px, transparent 1px), linear-gradient(90deg, #00f2fe 1px, transparent 1px); background-size: 20px 20px;">
+        </div>
+
+        <div class="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent top-0 left-0 opacity-30 animate-[scan_3s_linear_infinite]"></div>
+
+        <div class="relative z-10 flex flex-col gap-6">
+            
+            <div class="flex justify-between items-start">
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_#00f2fe]"></div>
+                        <span class="orbitron text-[9px] text-cyan-400 tracking-[3px]">NETWORK_MESH</span>
                     </div>
+                    <h4 class="text-xl font-black tracking-tighter text-white mt-1">CORE_LINK_01</h4>
+                </div>
+                <div class="bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-md">
+                    <span class="orbitron text-[8px] text-cyan-400 font-bold">FREE_ACCESS</span>
                 </div>
             </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="flex justify-between items-end">
+                    <span class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">Signal Integrity</span>
+                    <span class="digits text-sm text-cyan-400">99.98%</span>
+                </div>
+                <div class="flex gap-1 h-6 items-end">
+                    <div class="flex-1 bg-cyan-500/20 rounded-t-sm h-[40%] animate-[pulse_2s_infinite]"></div>
+                    <div class="flex-1 bg-cyan-500/40 rounded-t-sm h-[70%] animate-[pulse_2.5s_infinite]"></div>
+                    <div class="flex-1 bg-cyan-400 rounded-t-sm h-[90%] shadow-[0_0_10px_#00f2fe]"></div>
+                    <div class="flex-1 bg-cyan-500/40 rounded-t-sm h-[60%] animate-[pulse_1.8s_infinite]"></div>
+                    <div class="flex-1 bg-cyan-500/20 rounded-t-sm h-[30%] animate-[pulse_3s_infinite]"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 border-t border-white/5 pt-4">
+                <div class="flex flex-col">
+                    <span class="text-[8px] text-gray-500 orbitron">Node Status</span>
+                    <span class="text-xs text-green-400 font-bold uppercase tracking-widest">Operational</span>
+                </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-[8px] text-gray-500 orbitron">Hash Type</span>
+                    <span class="text-xs text-white font-mono uppercase">Standard_V13</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes scan {
+    0% { transform: translateY(0); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: translateY(280px); opacity: 0; }
+}
+</style>
+            
+
+
+
+
+
+
+
+            
 
             <div id="panel-contracts" class="hidden">
                 <div class="quantum-card bg-yellow-500/5 border-yellow-500/20">
