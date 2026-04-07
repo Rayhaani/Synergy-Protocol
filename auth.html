@@ -13,13 +13,20 @@
     </div>
 
     <script>
-        function login() {
-            const name = document.getElementById('username').value.toLowerCase().trim();
-            if(name) {
-                localStorage.setItem('synergy_user', name);
-                window.location.href = 'dashboard.html';
-            }
-        }
+async function login() {
+    const username = document.getElementById('username').value.toLowerCase().trim();
+    
+    const userRef = db.collection("users").doc(username);
+    const doc = await userRef.get();
+
+    if (doc.exists) {
+        localStorage.setItem('synergy_user', username);
+        window.location.href = 'dashboard.html';
+    } else {
+        alert("Ba a samu wannan sunan ba! Sai ka fara rijista.");
+    }
+}
+        
     </script>
 </body>
 </html>
