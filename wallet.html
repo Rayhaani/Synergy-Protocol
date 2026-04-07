@@ -184,6 +184,17 @@
         }
         window.onclick = () => document.getElementById('google-nav').classList.remove('active');
     </script>
+
+    <script>
+    // Lokacin da aka bude Wallet, nuna kudin dake ciki
+    window.onload = function() {
+        const balance = localStorage.getItem('synergy_balance') || "0.00";
+        const display = document.getElementById('wallet-balance'); 
+        if (display) {
+            display.innerText = "$" + balance;
+        }
+    };
+    </script>
     
     <script src="app.js"></script>
 </body>
