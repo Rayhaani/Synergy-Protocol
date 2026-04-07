@@ -877,17 +877,26 @@ window.onclick = function(event) {
 
 
 
-        // Idan mamba ya yi login, muna adana sunansa a local storage
-const currentUser = localStorage.getItem('synergy_user');
+        <script>
+  // Wannan zai duba idan mamba ya yi login
+  const currentUser = localStorage.getItem('synergy_user');
 
-// Misali idan ana son dauko kudin Sadiq
-db.collection("users").doc(currentUser).onSnapshot((doc) => {
-    const data = doc.data();
-    document.getElementById('total-yield').innerText = "₦" + data.balance;
-});
-        
+  // Idan babu kowa, a mayar da shi shafin login (auth.html)
+  if (!currentUser) {
+      window.location.href = 'auth.html';
+  }
+
+  // Idan akwai mamba, a dauko kudin sa daga Firebase
+  db.collection("users").doc(currentUser).onSnapshot((doc) => {
+      if (doc.exists) {
+          const data = doc.data();
+          // Saka kudin a babban balance na dashboard
+          document.getElementById('total-balance-main').innerText = data.balance.toLocaleString();
+      }
+  });
+</script>
+    
           
-    </script>
 
         <script src="app.js"></script>
 </body>
