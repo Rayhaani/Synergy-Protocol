@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
+        /* ASALIN ADMIN PANEL STYLES - BA A TABA BA */
         :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --bg: #030712; }
         
         body { 
@@ -23,21 +24,8 @@
         }
         
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
-        
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.01); 
-            backdrop-filter: blur(30px); 
-            border: 1px solid rgba(0, 242, 254, 0.1);
-        }
-
-        .stat-card-slim {
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 2px solid var(--aqua);
-            padding: 10px 15px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
+        .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
+        .stat-card-slim { background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid var(--aqua); padding: 10px 15px; border-radius: 12px; transition: all 0.3s ease; }
         .btn-action { font-size: 10px; font-weight: 700; padding: 12px; border-radius: 10px; transition: all 0.3s ease; border: 1px solid transparent; text-transform: uppercase; white-space: nowrap; flex: 1; }
         .btn-suspend { color: var(--neon-gold); border-color: rgba(255, 172, 0, 0.3); background: rgba(255, 172, 0, 0.05); }
         .btn-suspend:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 15px rgba(255, 172, 0, 0.3); }
@@ -45,23 +33,76 @@
         .btn-ban:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3); }
         .btn-delete { color: #fff; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); }
         .btn-delete:hover { background: #fff; color: black; }
-        
         .btn-update { color: var(--aqua); border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); padding: 10px 20px; font-size: 10px; font-weight: 700; border-radius: 8px; }
-
         tr { cursor: pointer; transition: background 0.3s; }
         tr:hover { background: rgba(0, 242, 254, 0.05); }
-
         .details-row { display: none; }
         .details-row.active { display: table-row; }
-
         .glow-text { text-shadow: 0 0 10px var(--aqua); }
-        
         table { table-layout: fixed; width: 100%; border-collapse: collapse; }
         td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 12px 8px; }
         .v-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+
+        /* --- 3 DOTS MENU (TURA SAMA KADAN) --- */
+        .menu-dots {
+            position: fixed; 
+            top: 20px; /* An riga shi sama daga 50px zuwa 20px */
+            left: 25px; 
+            z-index: 1100;
+            cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+        }
+        .menu-dots span {
+            width: 5px; height: 5px; background: var(--aqua);
+            border-radius: 50%; box-shadow: 0 0 8px var(--aqua);
+        }
+
+        /* --- SIDEBAR MENU (ICONS ONLY + GLOW) --- */
+        .synergy-sidebar {
+            width: 90px; height: 100vh; background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(30px); border-right: 1px solid rgba(0, 242, 254, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            position: fixed; left: -95px; top: 0; z-index: 1050;
+            transition: left 0.3s ease; padding-top: 50px;
+        }
+        .synergy-sidebar.show { left: 0; }
+        
+        .nav-link {
+            width: 55px; height: 55px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; border-radius: 12px; position: relative;
+            transition: all 0.3s ease; text-decoration: none; color: rgba(255,255,255,0.4);
+        }
+        .nav-icon { font-size: 22px; filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.1)); z-index: 2; }
+        
+        .nav-link.active {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+            color: #fff;
+        }
+        .nav-link.active::before {
+            content: ''; position: absolute; left: -12px; width: 4px; height: 25px;
+            background: var(--aqua); border-radius: 0 4px 4px 0; box-shadow: 0 0 15px var(--aqua);
+        }
+        .logout-link { margin-top: auto; margin-bottom: 40px; background: rgba(255, 0, 85, 0.05); border: 1px solid rgba(255, 0, 85, 0.1); color: #ff0055; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1040; display: none; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body class="p-4 md:p-8">
+
+    <div class="menu-dots" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside class="synergy-sidebar" id="mainSidebar">
+        <a href="#" class="nav-link active"><span class="nav-icon">📈</span></a>
+        <a href="#" class="nav-link"><span class="nav-icon">🎥</span></a>
+        <a href="#" class="nav-link"><span class="nav-icon">📡</span></a>
+        <a href="#" class="nav-link"><span class="nav-icon">💬</span></a>
+        <a href="#" class="nav-link logout-link"><span class="nav-icon">🔑</span></a>
+    </aside>
 
     <div class="max-w-7xl mx-auto">
         <div class="mb-10 text-center">
@@ -115,6 +156,11 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            document.getElementById('mainSidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
         const dummyUsers = [
             { id: "sadiq dev", fullName: "Sadiq Abubakar", phone: "+234 801 000 0000", email: "sadiq@synergy.io", state: "Kano", videoBalance: 25000, status: "active", verified: true, payout: 5000 },
             { id: "abdool tech", fullName: "Abdullahi Musa", phone: "+234 802 000 0000", email: "abdool@synergy.io", state: "Kaduna", videoBalance: 12000, status: "inactive", verified: false, payout: 2000 },
@@ -191,4 +237,5 @@
         render(dummyUsers);
     </script>
 </body>
-  </html>
+                                         </html>
+                            
