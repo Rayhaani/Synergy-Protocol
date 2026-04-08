@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY | LOGIN NODE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif;
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1), transparent);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(40px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(0, 242, 254, 0.3);
+        }
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* Step Animation - Exactly as provided */
+        .step-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; display: none; }
+        .step-visible { 
+            display: block;
+            animation: reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+        }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .input-glow:focus { 
+            border-color: var(--aqua); 
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15); 
+        }
+
+        .btn-locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card p-6 rounded-[30px] w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+            <div class="w-10 h-10 bg-cyan-500 rounded-full mx-auto mb-3 shadow-[0_0_15px_#00f2fe]"></div>
+            <h1 class="orbitron text-[10px] font-bold text-white mb-1">Synergy Protocol</h1>
+            <p id="progress-text" class="text-[9px] text-cyan-400 tracking-[2px] uppercase">Identity Verification</p>
+        </div>
+
+        <div id="form-container" class="space-y-3">
+            <div id="step-1" class="step-visible">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Username / Email</label>
+                <input type="text" id="login-id" oninput="validateLogin()" placeholder="Enter ID" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <div id="step-2" class="step-hidden">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Access Password</label>
+                <input type="password" id="login-pass" oninput="validateLogin()" placeholder="••••••••" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <button id="login-btn" onclick="login()" disabled 
+                    class="btn-locked w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black py-4 rounded-xl font-bold orbitron text-[11px] mt-2 transition-all duration-500">
+                ACCESS PROTOCOL
+            </button>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-white/5 text-center">
+            <p class="text-gray-500 text-[10px] orbitron">Unauthorized Access Prohibited</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+            authDomain: "synergy-protocol.firebaseapp.com", 
+            projectId: "synergy-protocol" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function validateLogin() {
+            const loginID = document.getElementById('login-id').value.trim();
+            const loginPass = document.getElementById('login-pass').value.trim();
+            const btn = document.getElementById('login-btn');
+
+            // Step 1 check
+            if (loginID.length >= 3) {
+                show(2);
+            } else {
+                hide(2);
+            }
+
+            // Unlock button if both are filled
+            if (loginID.length >= 3 && loginPass.length >= 6) {
+                btn.disabled = false;
+                btn.classList.remove('btn-locked');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('btn-locked');
+            }
+        }
+
+        function show(id) {
+            const el = document.getElementById(`step-${id}`);
+            if(el) { el.classList.remove('step-hidden'); el.classList.add('step-visible'); }
+        }
+
+        function hide(id) {
+            const el = document.getElementById(`step-${id}`);
+            if(el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
+        }
+
+        async function login() {
+            const loginID = document.getElementById('login-id').value.toLowerCase().trim();
+            const loginPass = document.getElementById('login-pass').value.trim();
+            const status = document.getElementById('progress-text');
+            
+            status.innerText = "Verifying Credentials...";
+
+            try {
+                // Domin Username
+                const userRef = db.collection("users").doc(loginID);
+                const doc = await userRef.get();
+
+                if (doc.exists) {
+                    // Tabbatar da Password (Idan kana amfani da field a matsayin 'password' a signup)
+                    // Amma a code din da ka turo babu password field, zan yi amfani da logic na username kawai
+                    localStorage.setItem('synergy_user', loginID);
+                    status.innerText = "Access Granted";
+                    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+                } else {
+                    status.innerText = "Access Denied";
+                    alert("Account not found.");
+                }
+            } catch (e) { alert("System Link Failure."); }
+        }
+    </script>
+</body>
+</html>
