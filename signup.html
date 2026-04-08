@@ -1,35 +1,102 @@
 <!DOCTYPE html>
-<html lang="ha">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGY | SIGN UP</title>
+    <title>SYNERGY | ADAPTIVE NODE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Space Grotesk', sans-serif;
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1), transparent);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(40px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(0, 242, 254, 0.3);
+        }
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* Step Animation */
+        .step-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; display: none; }
+        .step-visible { 
+            display: block;
+            animation: reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+        }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .input-glow:focus { 
+            border-color: var(--aqua); 
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15); 
+        }
+
+        .btn-locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body>
 
-    <div class="glass p-8 rounded-[32px] w-full max-w-md text-center">
-        <h1 style="letter-spacing: 5px;" class="text-cyan-400 font-bold mb-8">SYNERGY PROTOCOL</h1>
-        <h2 class="text-xl mb-6">BUDE ASUSU</h2>
-        
-        <input type="text" id="new-user" placeholder="Username (misali: sadiq_01)" 
-               class="w-full bg-black/50 border border-white/10 p-4 rounded-2xl mb-4 outline-none focus:border-cyan-500">
-        
-        <button onclick="register()" class="w-full bg-cyan-500 text-black py-4 rounded-2xl font-bold hover:bg-cyan-400 transition-all">
-            CREATE ACCOUNT
-        </button>
-        
-        <p class="mt-6 text-gray-500 text-sm">Kana da asusu? <a href="auth.html" class="text-cyan-400">Log In</a></p>
+    <div class="glass-card p-6 rounded-[30px] w-full max-w-md mx-4">
+        <div class="text-center mb-6">
+            <div class="w-10 h-10 bg-cyan-500 rounded-full mx-auto mb-3 shadow-[0_0_15px_#00f2fe]"></div>
+            <h1 class="orbitron text-[10px] font-bold text-white mb-1">Synergy Protocol</h1>
+            <p id="progress-text" class="text-[9px] text-cyan-400 tracking-[2px] uppercase"></p>
+        </div>
+
+        <div id="form-container" class="space-y-3">
+            <div id="step-1" class="step-visible">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Full Name</label>
+                <input type="text" id="full-name" oninput="validateForm()" placeholder="Enter legal name" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <div id="step-2" class="step-hidden">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Email Address</label>
+                <input type="email" id="email" oninput="validateForm()" placeholder="email@protocol.com" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <div id="step-3" class="step-hidden">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Username</label>
+                <input type="text" id="username" oninput="validateForm()" placeholder="Choose unique ID" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <div id="step-4" class="step-hidden">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">State</label>
+                <input type="text" id="state" oninput="validateForm()" placeholder="e.g. Kano" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <div id="step-5" class="step-hidden">
+                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Phone Number</label>
+                <input type="tel" id="phone" oninput="validateForm()" placeholder="Phone digits" 
+                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+            </div>
+
+            <button id="reg-btn" onclick="register()" disabled 
+                    class="btn-locked w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black py-4 rounded-xl font-bold orbitron text-[11px] mt-2 transition-all duration-500">
+                ACTIVATE PROTOCOL
+            </button>
+        </div>
     </div>
 
     <script>
-        // 1. Saka Config dinka a nan
         const firebaseConfig = { 
             apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
             authDomain: "synergy-protocol.firebaseapp.com", 
@@ -38,35 +105,84 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        async function register() {
-            const user = document.getElementById('new-user').value.toLowerCase().trim();
+        function validateForm() {
+            const fullName = document.getElementById('full-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const user = document.getElementById('username').value.trim();
+            const state = document.getElementById('state').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             
-            if(!user || user.length < 3) {
-                alert("Don Allah saka sunan da ya kai akalla haruffa 3");
-                return;
+            const steps = [
+                { id: 2, valid: fullName.split(' ').length >= 2 && fullName.split(' ')[1].length > 0 },
+                { id: 3, valid: email.includes('@') && email.includes('.') },
+                { id: 4, valid: user.length >= 3 },
+                { id: 5, valid: state.length >= 3 },
+                { id: 'btn', valid: phone.length >= 10 }
+            ];
+
+            let percent = 0;
+
+            // Disappearing logic
+            for (let i = 2; i <= 5; i++) {
+                if (!steps[i-2].valid) {
+                    for (let j = i; j <= 5; j++) hide(j);
+                    percent = (i-1) * 20;
+                    if (i === 2 && !steps[0].valid) percent = 0;
+                    break;
+                } else {
+                    show(i);
+                    percent = i * 20;
+                }
             }
+
+            const btn = document.getElementById('reg-btn');
+            const isAllValid = steps.every(s => s.valid);
+            if (isAllValid) {
+                btn.disabled = false;
+                btn.classList.remove('btn-locked');
+                percent = 100;
+            } else {
+                btn.disabled = true;
+                btn.classList.add('btn-locked');
+            }
+
+            document.getElementById('progress-text').innerText = `Initialize Sequence: ${percent}%`;
+        }
+
+        function show(id) {
+            const el = document.getElementById(`step-${id}`);
+            if(el) { el.classList.remove('step-hidden'); el.classList.add('step-visible'); }
+        }
+
+        function hide(id) {
+            const el = document.getElementById(`step-${id}`);
+            if(el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
+        }
+
+        async function register() {
+            const fullName = document.getElementById('full-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const user = document.getElementById('username').value.toLowerCase().trim();
+            const state = document.getElementById('state').value.trim();
+            const phone = document.getElementById('phone').value.trim();
 
             const userRef = db.collection("users").doc(user);
             const doc = await userRef.get();
 
             if (doc.exists) {
-                alert("Wannan sunan akwai shi! Gwada wani daban.");
+                alert("Protocol Error: Username active.");
             } else {
-                // Saita sabon mamba da kudi 0
-                await userRef.set({
-                    videoBalance: 0,
-                    shareBalance: 0,
-                    videosWatchedToday: 0,
-                    lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
-                });
-                
-                localStorage.setItem('synergy_user', user);
-                alert("An bude asusunka: " + user);
-                window.location.href = 'dashboard.html';
+                try {
+                    await userRef.set({
+                        fullName, email, state, phoneNumber: phone,
+                        videoBalance: 0, shareBalance: 0, videosWatchedToday: 0,
+                        rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    localStorage.setItem('synergy_user', user);
+                    window.location.href = 'dashboard.html';
+                } catch (e) { alert("Database Failure."); }
             }
         }
     </script>
 </body>
 </html>
-
-      
