@@ -94,145 +94,124 @@
             </div>
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
+     
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    // 1. FIREBASE & AUTH (An riga an saka Config dinka na gaskiya)
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+        authDomain: "synergy-protocol.firebaseapp.com", 
+        projectId: "synergy-protocol", 
+        storageBucket: "synergy-protocol.firebasestorage.app", 
+        messagingSenderId: "179647543031", 
+        appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
+    };
 
-        // 1. FIREBASE & AUTH (Na saka maka ainihin bayanan ka na Dashboard)
-const firebaseConfig = { 
-    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
-    authDomain: "synergy-protocol.firebaseapp.com", 
-    projectId: "synergy-protocol", 
-    storageBucket: "synergy-protocol.firebasestorage.app", 
-    messagingSenderId: "179647543031", 
-    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
-};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const currentUser = localStorage.getItem('synergy_user');
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const currentUser = localStorage.getItem('synergy_user');
+    let player, activeNode = 0, currentCode = "", timerInterval;
 
-// 2. CONGESTION CONTROL (Logic din yaudarar YouTube mai Random 0)
-async function checkSystemCapacity() {
-    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
-    const capacityRef = db.collection("system_stats").doc("daily_limit");
+    // 2. CONGESTION CONTROL (Logic din Random 0)
+    async function checkSystemCapacity() {
+        const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+        const capacityRef = db.collection("system_stats").doc("daily_limit");
 
-    const doc = await capacityRef.get();
-    let limitData = doc.data();
-
-    // Idan sabuwar rana ce, tsarin zai zabi adadin mutane (Limit) da kansa
-    if (!limitData || limitData.date !== today) {
-        // Zai zabo lamba tsakanin 0 zuwa 45
-        let rawLimit = Math.floor(Math.random() * 46); 
-        
-        // Idan lambar ba ta kai 7 ba, zai mayar da ita 0 (Ranar hutu don yaudarar Algorithm)
-        let newLimit = (rawLimit < 7) ? 0 : rawLimit;
-
-        await capacityRef.set({ 
-            date: today, 
-            count: 0, 
-            limit: newLimit 
-        });
-        limitData = { count: 0, limit: newLimit };
-    }
-
-    // Duba idan an kai iyaka ko kuma ranar hutu ce (0)
-    const shutter = document.getElementById('congestion-shutter');
-    const main = document.getElementById('main-content');
-
-    if (limitData.limit === 0) {
-        shutter.style.display = 'flex';
-        main.style.display = 'none';
-        shutter.querySelector('p').innerText = "SYSTEM STATUS: All nodes are currently offline for protocol synchronization. Return in 24h.";
-    } else if (limitData.count >= limitData.limit) {
-        shutter.style.display = 'flex';
-        main.style.display = 'none';
-        shutter.querySelector('p').innerText = "NODE SATURATION: Maximum daily capacity reached. Secure synchronization is closed until tomorrow.";
-    }
-}
-
-// Kira function din domin ya fara aiki
-checkSystemCapacity();
-        
-        
-        // 2. CONGESTION CONTROL LOGIC (The "Leader" Strategy)
-        async function checkSystemCapacity() {
-            const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
-            const capacityRef = db.collection("system_stats").doc("daily_limit");
-
+        try {
             const doc = await capacityRef.get();
             let limitData = doc.data();
 
-            // Idan sabuwar rana ce, saita Random Limit (Tsakanin 20 zuwa 45)
             if (!limitData || limitData.date !== today) {
-                const randomLimit = Math.floor(Math.random() * (45 - 20 + 1)) + 20;
-                await capacityRef.set({ date: today, count: 0, limit: randomLimit });
-                limitData = { count: 0, limit: randomLimit };
+                let rawLimit = Math.floor(Math.random() * 46); 
+                let newLimit = (rawLimit < 7) ? 0 : rawLimit;
+                await capacityRef.set({ date: today, count: 0, limit: newLimit });
+                limitData = { count: 0, limit: newLimit, date: today };
             }
 
-            if (limitData.count >= limitData.limit) {
-                document.getElementById('congestion-shutter').style.display = 'flex';
-                document.getElementById('main-content').style.display = 'none';
+            const shutter = document.getElementById('congestion-shutter');
+            const main = document.getElementById('main-content');
+
+            if (limitData.limit === 0) {
+                shutter.style.display = 'flex';
+                main.style.display = 'none';
+                shutter.querySelector('p').innerText = "SYSTEM STATUS: All nodes are currently offline for protocol synchronization. Return in 24h.";
+            } else if (limitData.count >= limitData.limit) {
+                shutter.style.display = 'flex';
+                main.style.display = 'none';
+                shutter.querySelector('p').innerText = "NODE SATURATION: Maximum daily capacity reached. Secure synchronization is closed until tomorrow.";
             }
-        }
-        checkSystemCapacity();
+        } catch (e) { console.error("Capacity Check Error", e); }
+    }
+    checkSystemCapacity();
 
-        let player, activeNode = 0, currentCode = "", timerInterval;
+    // 3. YOUTUBE API LOGIC
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('activation-player', {
+            height: '100%', width: '100%',
+            playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
+            events: { 'onStateChange': onPlayerStateChange }
+        });
+    }
 
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('activation-player', {
-                height: '100%', width: '100%',
-                playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1 },
-                events: { 'onStateChange': onPlayerStateChange }
-            });
-        }
+    function launchActivation(num, vid) {
+        activeNode = num;
+        document.getElementById('nodes-list').classList.add('hidden');
+        document.getElementById('player-area').classList.remove('hidden');
+        player.loadVideoById(vid);
+        player.playVideo();
+    }
 
-        function launchActivation(num, vid) {
-            activeNode = num;
-            document.getElementById('nodes-list').classList.add('hidden');
-            document.getElementById('player-area').classList.remove('hidden');
-            player.loadVideoById(vid);
-            player.playVideo();
-        }
-
-        function onPlayerStateChange(event) {
-            if(event.data === YT.PlayerState.PLAYING) {
-                let timeLeft = 120; // 2 Mins
-                clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    let m = Math.floor(timeLeft/60), s = timeLeft%60;
-                    document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
-                    if(timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        currentCode = Math.random().toString(36).substring(2,8).toUpperCase();
-                        alert("NODE SECURITY HASH: " + currentHash); // Zaka iya saka wannan a UI
-                        document.getElementById('verify-ui').classList.remove('hidden');
-                    }
-                }, 1000);
-            }
-        }
-
-        async function confirmNodeActivation() {
-            const val = document.getElementById('hash-input').value.toUpperCase();
-            if(val === currentCode) {
-                let count = parseInt(document.getElementById('nodes-count').innerText) + 1;
-                document.getElementById('nodes-count').innerText = count + " / 5";
-                document.getElementById('progress-bar').style.width = (count * 20) + "%";
-
-                if(count === 5) {
-                    // CIKAKKEN NASARA
-                    await db.collection("users").doc(currentUser).update({ isVerified: true });
-                    // Kara lissafin mutanen da suka yi subscribe a yau
-                    await db.collection("system_stats").doc("daily_limit").update({
-                        count: firebase.firestore.FieldValue.increment(1)
-                    });
-                    location.href = "dashboard.html";
-                } else {
-                    // Move to next node UI reset logic...
+    function onPlayerStateChange(event) {
+        if(event.data === YT.PlayerState.PLAYING) {
+            let timeLeft = 120; // 2 Minutes
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft/60), s = timeLeft%60;
+                document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    currentCode = Math.random().toString(36).substring(2,8).toUpperCase();
+                    document.getElementById('hash-input').placeholder = "VERIFICATION CODE: " + currentCode;
+                    document.getElementById('verify-ui').classList.remove('hidden');
                 }
-            }
+            }, 1000);
         }
-    </script>
+    }
+
+    async function confirmNodeActivation() {
+        const val = document.getElementById('hash-input').value.toUpperCase();
+        if(val === currentCode && currentCode !== "") {
+            let countSpan = document.getElementById('nodes-count');
+            let currentNodes = parseInt(countSpan.innerText.split(' / ')[0]) + 1;
+            countSpan.innerText = currentNodes + " / 5";
+            document.getElementById('progress-bar').style.width = (currentNodes * 20) + "%";
+
+            if(currentNodes === 5) {
+                // UPDATE USER & INCREMENT DAILY COUNT
+                await db.collection("users").doc(currentUser).update({ isVerified: true });
+                await db.collection("system_stats").doc("daily_limit").update({
+                    count: firebase.firestore.FieldValue.increment(1)
+                });
+                alert("PROTOCOL ACTIVATED! Redirecting to Secure Vault...");
+                location.href = "dashboard.html";
+            } else {
+                // Reset UI for next node
+                document.getElementById('verify-ui').classList.add('hidden');
+                document.getElementById('player-area').classList.add('hidden');
+                document.getElementById('nodes-list').classList.remove('hidden');
+                document.getElementById('hash-input').value = "";
+                currentCode = "";
+                alert("Node " + currentNodes + " Secure. Next node unlocked.");
+            }
+        } else {
+            alert("INVALID HASH. Node security failed.");
+        }
+    }
+</script>
+    
+        
 </body>
     </html>
     
