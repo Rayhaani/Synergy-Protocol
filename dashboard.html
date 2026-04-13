@@ -1013,39 +1013,8 @@ checkMultiLogin();
         
     </script>
     
-<script>
-    
-// 1. Function na lura da bayanan mamba gaba daya
-async function syncUserIdentity() {
-    const userRef = db.collection("users").doc(currentUser);
-    
-    userRef.onSnapshot((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            
-            // 1. Sanya Sunan Mamba (Idan babu suna a DB, zai nuna ID dinsa)
-            const nameDisplay = document.getElementById('display-name');
-            if (nameDisplay) {
-                nameDisplay.innerText = data.username || "NODE_" + currentUser.substring(0, 5);
-            }
-            
-            // 2. Duba idan mamba Verified ne
-            const badge = document.getElementById('verified-badge');
-            if (badge) {
-                if (data.isVerified === true) {
-                    badge.style.display = 'flex'; // Nuna badge
-                } else {
-                    badge.style.display = 'none'; // Boye badge
-                }
-            }
-        }
-    });
-}
 
-// 2. Kira aikin
-syncUserIdentity();
-   </script>                     
 
-        
+        <script src="app.js"></script>
 </body>
 </html>
