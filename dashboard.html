@@ -551,6 +551,23 @@ document.onkeydown = function(e) {
 };
 
 checkMultiLogin();
+
+
+    // DAILY RESET ENGINE
+function checkAndResetDailyStats(userData) {
+    // Saita lokacin Nigeria (Lagos)
+    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+    const lastActivityDate = userData.lastActivityDate || "";
+
+    if (today !== lastActivityDate && lastActivityDate !== "") {
+        db.collection("users").doc(currentUser).update({
+            videosWatchedToday: 0,
+            lastActivityDate: today
+        }).then(() => {
+            console.log("New day detected: Stats reset to 0");
+        });
+    }
+}
     
 </script>
 </body>
