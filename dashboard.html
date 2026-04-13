@@ -981,26 +981,36 @@ initializeSynergyCore();
 checkMultiLogin();
 
 // Gyaran function din Verification don yayi amfani da sabon login
-async function executeVerification() {
+
+  async function executeVerification() {
     const inputVal = document.getElementById('node-code').value.toUpperCase();
+    const userRef = db.collection("users").doc(currentUser);
+
     if(inputVal === currentCode && currentCode !== "") {
         try {
-            await db.collection("users").doc(currentUser).update({ 
+            // Wannan zai ƙara kudi kuma ya ƙidaya bidiyon da aka kalla
+            await userRef.update({ 
                 videoBalance: firebase.firestore.FieldValue.increment(150),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
                 lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }) 
             });
+
             showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-            setTimeout(() => location.reload(), 2000);
-        } catch (e) {
-            showSynergyAlert("DATABASE ERROR", "error");
+            
+            // Jira sakan 2 kafin reload don mamba ya ga sakon nasara
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+
+        } catch (error) {
+            console.error("Firebase Error:", error);
+            showSynergyAlert("DATABASE ERROR: " + error.message, "error");
         }
     } else {
-        showSynergyAlert("INVALID CODE", "error");
+        showSynergyAlert("INVALID CODE: PLEASE CHECK", "error");
     }
-}
-</script>
-    
+  }
+        
 
     
 <script>
