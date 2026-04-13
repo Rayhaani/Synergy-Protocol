@@ -916,26 +916,28 @@ window.onclick = function(event) {
 
 
 
-        <script>
-// 1. Bayanan Mamba (Sau ɗaya kacal)
+     <script>
+// ==========================================
+// SYNERGY ULTIMATE SYNC ENGINE
+// ==========================================
 const currentUser = localStorage.getItem('synergy_user');
 
 if (!currentUser) {
     window.location.href = 'auth.html';
 }
 
-// 2. Babban Aikin Dashboard (Syncing)
-async function startSynergySync() {
+async function initializeSynergyCore() {
     const userRef = db.collection("users").doc(currentUser);
     
+    // Wannan Snapshot din zai kula da KOWANE update na kudi ko suna
     userRef.onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
             
-            // Sunan Mamba & Badge
+            // 1. IDENTITY SYNC (Suna & Badge)
             const nameDisplay = document.getElementById('display-name');
             if (nameDisplay) {
-                nameDisplay.innerText = data.fullName || data.username || "MEMBER_" + currentUser.substring(0, 4);
+                nameDisplay.innerText = data.username || data.fullName || "NODE_" + currentUser.substring(0, 5);
             }
             
             const badge = document.getElementById('verified-badge');
@@ -943,34 +945,66 @@ async function startSynergySync() {
                 badge.style.display = (data.isVerified === true) ? 'flex' : 'none';
             }
 
-            // Lissafin Kudade
-            const vBal = data.videoBalance || 0;
-            const sBal = data.shareBalance || 0;
+            // 2. FINANCIAL SYNC (Kudi)
+            const vBal = Number(data.videoBalance || 0);
+            const sBal = Number(data.shareBalance || 0);
             const total = vBal + sBal;
 
-            if(document.getElementById('total-balance-main')) {
-                document.getElementById('total-balance-main').innerText = total.toLocaleString();
+            // Update duka wuraren da kudi yake fita
+            const elements = {
+                'total-balance-main': total,
+                'video-balance-sub': vBal,
+                'share-balance-sub': sBal
+            };
+
+            for (const [id, val] of Object.entries(elements)) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val.toLocaleString();
             }
-            if(document.getElementById('video-balance-sub')) {
-                document.getElementById('video-balance-sub').innerText = vBal.toLocaleString();
-            }
-            if(document.getElementById('share-balance-sub')) {
-                document.getElementById('share-balance-sub').innerText = sBal.toLocaleString();
-            }
+
+            // 3. PROGRESS & HUD SYNC (Rank & Task)
+            const watched = data.videosWatchedToday || 0;
+            updateFuturisticHUD(watched);
             
-            // HUD & Rank Update
-            updateFuturisticHUD(data.videosWatchedToday || 0);
+            // 4. DAILY RESET CHECK
+            checkAndResetDailyStats(data, currentUser);
+        } else {
+            console.error("No such user found in database!");
         }
+    }, (error) => {
+        console.error("Snapshot error:", error);
     });
 }
 
-// 3. Fara Aiki
-startSynergySync();
+// Kira duka ayyukan tsaro da sync
+initializeSynergyCore();
 checkMultiLogin();
 
+// Gyaran function din Verification don yayi amfani da sabon login
+async function executeVerification() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    if(inputVal === currentCode && currentCode !== "") {
+        try {
+            await db.collection("users").doc(currentUser).update({ 
+                videoBalance: firebase.firestore.FieldValue.increment(150),
+                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }) 
+            });
+            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
+            setTimeout(() => location.reload(), 2000);
+        } catch (e) {
+            showSynergyAlert("DATABASE ERROR", "error");
+        }
+    } else {
+        showSynergyAlert("INVALID CODE", "error");
+    }
+}
+</script>
     
 
-
+    
+<script>
+    
 // 1. Function na lura da bayanan mamba gaba daya
 async function syncUserIdentity() {
     const userRef = db.collection("users").doc(currentUser);
