@@ -570,6 +570,49 @@ function checkAndResetDailyStats(userData) {
 }
 
 
+    // SYNERGY SECURITY MODULE - ANTI-SKIP
+(function() {
+    // Wadannan variables din suna cikin wannan box din ne kawai
+    let internalStrikes = 0;
+    let internalLastTime = 0;
+    window.synergyTicker = null; 
+
+    window.setupSecurityTracker = function(playerInstance) {
+        if (window.synergyTicker) clearInterval(window.synergyTicker);
+
+        window.synergyTicker = setInterval(() => {
+            try {
+                if (!playerInstance || typeof playerInstance.getPlayerState !== 'function') return;
+                if (playerInstance.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+                let currentTime = playerInstance.getCurrentTime();
+
+                // ANTI-SKIP LOGIC
+                if (currentTime > internalLastTime + 2.5) { 
+                    internalStrikes++;
+                    playerInstance.seekTo(internalLastTime); 
+                    
+                    if (internalStrikes >= 3) {
+                        clearInterval(window.synergyTicker);
+                        document.body.innerHTML = `
+                            <div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:20px;'>
+                                <h1 style="font-size: 25px; letter-spacing:5px;">PROTOCOL BREACH</h1>
+                                <p style='color:white; margin-top:20px;'>Access suspended: Multiple skip attempts.</p>
+                            </div>`;
+                    } else {
+                        if (window.showSynergyAlert) {
+                            window.showSynergyAlert("STRIKE " + internalStrikes + "/3: NO SKIPPING!", "error");
+                        }
+                    }
+                } else {
+                    internalLastTime = currentTime;
+                }
+            } catch (err) {
+                // Kar mu bar kuskure ya kashe shafin
+            }
+        }, 1000);
+    };
+})();
     
     
 </script>
