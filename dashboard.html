@@ -137,6 +137,21 @@
     border-color: #00f2fe !important;
     box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
 }
+
+
+      .badge-verified {
+    background: rgba(0, 255, 163, 0.1);
+    border: 1px solid rgba(0, 255, 163, 0.3);
+    color: #00ffa3;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    display: none; /* Zai fito ne kawai idan an yi nasara */
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+      }
       
     </style>
 </head>
@@ -921,9 +936,34 @@ window.onclick = function(event) {
           document.getElementById('share-balance-sub').innerText = (data.shareBalance || 0).toLocaleString();
       }
   });
+
+
+
+        async function checkVerificationStatus() {
+    const userRef = db.collection("users").doc(currentUser);
+    
+    try {
+        const doc = await userRef.get();
+        if (doc.exists && doc.data().isVerified === true) {
+            // Idan mamba ya riga ya yi activation
+            document.getElementById('verified-badge').style.display = 'flex';
+            
+            // Haka kuma zamu iya boye button din "Activate" idan har yana nan
+            const actBtn = document.getElementById('activation-link');
+            if(actBtn) actBtn.style.display = 'none';
+        }
+    } catch (error) {
+        console.log("Error checking verification:", error);
+    }
+}
+
+// Kira aikin nan take bayan shafin ya bude
+checkVerificationStatus();
+        
     </script>
     
-          
+       
+    
 
         <script src="app.js"></script>
 </body>
