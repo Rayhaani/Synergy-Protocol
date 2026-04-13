@@ -982,38 +982,41 @@ checkMultiLogin();
 
 // Gyaran function din Verification don yayi amfani da sabon login
 
-  async function executeVerification() {
-    const inputVal = document.getElementById('node-code').value.toUpperCase();
-    const userRef = db.collection("users").doc(currentUser);
-
-    if(inputVal === currentCode && currentCode !== "") {
-        try {
-            // Wannan zai ƙara kudi kuma ya ƙidaya bidiyon da aka kalla
-            await userRef.update({ 
-                videoBalance: firebase.firestore.FieldValue.increment(150),
-                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }) 
-            });
-
-            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-            
-            // Jira sakan 2 kafin reload don mamba ya ga sakon nasara
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-
-        } catch (error) {
-            console.error("Firebase Error:", error);
-            showSynergyAlert("DATABASE ERROR: " + error.message, "error");
-        }
-    } else {
-        showSynergyAlert("INVALID CODE: PLEASE CHECK", "error");
-    }
-  }
-        
+  
     </script>
     
+<script>
+    
+// 1. Function na lura da bayanan mamba gaba daya
+async function syncUserIdentity() {
+    const userRef = db.collection("users").doc(currentUser);
+    
+    userRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // 1. Sanya Sunan Mamba (Idan babu suna a DB, zai nuna ID dinsa)
+            const nameDisplay = document.getElementById('display-name');
+            if (nameDisplay) {
+                nameDisplay.innerText = data.username || "NODE_" + currentUser.substring(0, 5);
+            }
+            
+            // 2. Duba idan mamba Verified ne
+            const badge = document.getElementById('verified-badge');
+            if (badge) {
+                if (data.isVerified === true) {
+                    badge.style.display = 'flex'; // Nuna badge
+                } else {
+                    badge.style.display = 'none'; // Boye badge
+                }
+            }
+        }
+    });
+}
 
+// 2. Kira aikin
+syncUserIdentity();
+   </script>                     
 
         <script src="app.js"></script>
 </body>
