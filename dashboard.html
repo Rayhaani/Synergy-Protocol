@@ -372,9 +372,11 @@
     </main>
     
 
-    <script src="https://www.youtube.com/iframe_api"></script>
+
+
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    // 1. INITIALIZATION
+    // 1. INITIALIZATION & CONFIG
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
@@ -386,10 +388,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const currentUser = localStorage.getItem('synergy_user');
+    const currentSessionId = Math.random().toString(36).substring(7);
 
-    let player, currentCode = "", lastTime = 0;
+    let player, currentCode = "", lastTime = 0, skipStrikes = 0;
 
-    // 2. YOUTUBE API & PLAYER LOGIC
+    // 2. MULTI-LOGIN PROTECTION (Kari ne daga tsohon code)
+    async function checkMultiLogin() {
+        if(!currentUser) return;
+        const sessionRef = db.collection("active_sessions").doc(currentUser);
+        await sessionRef.set({ sessionId: currentSessionId, lastActive: firebase.firestore.FieldValue.serverTimestamp() });
+        sessionRef.onSnapshot((doc) => {
+            if (doc.exists && doc.data().sessionId !== currentSessionId) {
+                document.body.innerHTML = `<div style="background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:30px;"><h1 style="letter-spacing:5px;">SESSION TERMINATED</h1><p style="color:white; margin-top:20px;">Multiple logins detected.</p><button onclick="location.reload()" style="margin-top:30px; padding:15px 40px; background:#f87171; color:black; font-weight:bold; border-radius:10px;">RE-AUTHENTICATE</button></div>`;
+            }
+        });
+    }
+
+    // 3. YOUTUBE API
     function onYouTubeIframeAPIReady() { 
         player = new YT.Player('yt-player', { 
             height: '100%', width: '100%', videoId: 'dQw4w9WgXcQ', 
@@ -404,6 +419,7 @@
         player.playVideo(); 
     }
 
+    // 4. CORE SECURITY & ANTI-SKIP (Tare da Strikes 3/3)
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
             const tracker = setInterval(() => {
@@ -412,51 +428,49 @@
                 let duration = player.getDuration();
                 let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
                 
-                // Anti-skip logic
-                if (currentTime > lastTime + 2.5) { player.seekTo(lastTime); } else { lastTime = currentTime; }
+                if (currentTime > lastTime + 2.2) { 
+                    skipStrikes++;
+                    player.seekTo(lastTime);
+                    if(skipStrikes >= 3) {
+                        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:100px;'>PROTOCOL BREACH: ACCESS SUSPENDED</h1>";
+                        clearInterval(tracker);
+                    } else {
+                        showSynergyAlert("STRIKE " + skipStrikes + "/3: NO SKIPPING", "error");
+                    }
+                } else { lastTime = currentTime; }
 
                 document.getElementById("ring").innerText = progress + "%";
                 document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
 
-                if (progress >= 5) { 
+                if (progress >= 5 && currentCode === "") { 
                     const p = document.getElementById('verifier-panel'); 
                     p.classList.add('is-visible-now'); 
+                    p.style.display = "block";
                     setTimeout(() => { p.style.opacity = "1"; p.style.transform = "translateY(0)"; p.style.pointerEvents = "all"; }, 50);
-                    if(currentCode === "") generateCode();
+                    generateCode();
                 }
             }, 1000);
         }
     }
 
-    // 3. UI & INTERACTION FUNCTIONS
-    function generateCode() { 
-        currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
-        document.getElementById("generated-code-display").innerText = currentCode; 
-    }
+    // 5. TAB PROTECTION (Idan ya bar shafin, bidiyo ya tsaya)
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden && player) { player.pauseVideo(); showSynergyAlert("PAUSED: DON'T LEAVE", "info"); }
+    });
 
-    function toggleGoogleMenu(event) {
-        event.stopPropagation();
-        document.getElementById('google-nav').classList.toggle('active');
-    }
-
-    window.onclick = () => {
-        const menu = document.getElementById('google-nav');
-        if(menu) menu.classList.remove('active');
-    };
-
-    function showSynergyAlert(msg, type = 'info') {
-        let toast = document.getElementById('custom-toast') || document.createElement('div');
-        toast.id = 'custom-toast'; toast.className = 'synergy-toast show';
-        toast.innerHTML = `<span>${msg}</span>`;
-        if(!document.getElementById('custom-toast')) document.body.appendChild(toast);
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // 4. DATA SYNC (FIREBASE)
+    // 6. FIREBASE SYNC & DAILY RESET
     if (currentUser) {
         db.collection("users").doc(currentUser).onSnapshot(doc => {
             if (doc.exists) {
                 const data = doc.data();
+                const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+                
+                // Daily Reset Logic
+                if(data.lastActivityDate && data.lastActivityDate !== today) {
+                    db.collection("users").doc(currentUser).update({ videosWatchedToday: 0, lastActivityDate: today });
+                    return;
+                }
+
                 const vBal = data.videoBalance || 0;
                 const sBal = data.shareBalance || 0;
                 const watched = data.videosWatchedToday || 0;
@@ -467,14 +481,28 @@
                 document.getElementById('display-name').innerText = data.username || "MEMBER";
                 document.getElementById('verified-badge').style.display = data.isVerified ? 'flex' : 'none';
                 
-                // HUD Update
                 const percent = Math.min((watched / 10) * 100, 100);
                 document.getElementById('daily-count').innerText = `${watched} / 10 UNITS`;
                 document.getElementById('daily-progress-bar').style.width = percent + "%";
-                document.getElementById('est-earnings').innerText = "₦" + (watched * 150 * 30).toLocaleString();
                 document.getElementById('task-ring-outer').style.background = `conic-gradient(#00f2fe ${percent * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
             }
         });
+        checkMultiLogin();
+    }
+
+    // 7. UTILS
+    function generateCode() { 
+        currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+        document.getElementById("generated-code-display").innerText = currentCode; 
+    }
+
+    function showSynergyAlert(msg, type = 'info') {
+        let toast = document.getElementById('custom-toast') || document.createElement('div');
+        toast.id = 'custom-toast'; toast.className = 'synergy-toast show';
+        toast.style.borderColor = type === 'error' ? '#f87171' : '#00f2fe';
+        toast.innerHTML = `<span>${msg}</span>`;
+        if(!document.getElementById('custom-toast')) document.body.appendChild(toast);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     async function executeVerification() {
@@ -483,22 +511,15 @@
             await db.collection("users").doc(currentUser).update({
                 videoBalance: firebase.firestore.FieldValue.increment(150),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-                lastActivityDate: new Date().toLocaleDateString('en-GB')
+                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
             });
             showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
             setTimeout(() => location.reload(), 2000);
-        } else {
-            showSynergyAlert("INVALID CODE", "error");
-        }
+        } else { showSynergyAlert("INVALID CODE", "error"); }
     }
-
-    async function secureShareAndEarn(videoId) {
-        try {
-            await navigator.share({ title: 'Synergy Protocol', url: 'https://youtu.be/' + videoId });
-            await db.collection("users").doc(currentUser).update({ shareBalance: firebase.firestore.FieldValue.increment(50) });
-            showSynergyAlert("SHARE REWARD ADDED", "success");
-        } catch(e) {}
-    }
+                   
+    
+    
 </script>
 </body>
 </html>
