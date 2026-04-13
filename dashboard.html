@@ -44,19 +44,32 @@
         .node-input-clean { background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; color: white !important; font-size: 1.4rem !important; text-align: center; padding: 18px !important; width: 100%; outline: none; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .is-active-floating { animation: float 6s ease-in-out infinite; }
-    
-            .synergy-toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(15px);
-            border: 1px solid var(--aqua); border-top: 3px solid var(--aqua);
-            color: white; padding: 15px 30px; border-radius: 15px;
-            z-index: 9999; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2);
-        }
-        .synergy-toast.show { top: 30px; }
-        .toast-icon { color: var(--aqua); font-weight: bold; font-size: 20px; }
-                
+
+      .synergy-toast {
+    position: fixed; 
+    top: -100px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95); 
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--aqua); 
+    border-top: 3px solid var(--aqua);
+    color: white; 
+    padding: 18px 35px; 
+    border-radius: 20px;
+    z-index: 999999 !important; /* Dole ya fi header girma */
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+    min-width: 280px;
+    justify-content: center;
+}
+.synergy-toast.show { top: 120px; } /* Mun sauko da shi kasa kadan don kar header ta taba shi */
+      
+                         
     #task-ring-outer {
     transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
     mask-image: radial-gradient(transparent 65%, black 66%);
