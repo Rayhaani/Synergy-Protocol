@@ -9,6 +9,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     
 
     <style>
@@ -170,26 +172,30 @@
     const phone = document.getElementById('phone').value.trim();
     const password = "SynergyUser123"; 
 
-    // 1. Hana mutum danna button sau biyu (Debouncing)
     btn.disabled = true;
-    btn.innerText = "PROCESSING...";
+    btn.innerHTML = `<span class="animate-pulse">PROCESSING...</span>`;
 
     try {
         const userRef = db.collection("users").doc(user);
         const doc = await userRef.get();
 
         if (doc.exists) {
-            alert("Error: Username already exists.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Protocol Error',
+                text: 'Username already registered in node.',
+                confirmButtonColor: '#00f2fe'
+            });
             btn.disabled = false;
             btn.innerText = "ACTIVATE PROTOCOL";
             return;
         }
 
-        // 2. Kirkiri Account a Firebase Auth
+        // Kirkiri Account
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
         await userCredential.user.sendEmailVerification();
 
-        // 3. Adana bayanai a Firestore
+        // Adana bayanai
         await userRef.set({
             uid: userCredential.user.uid,
             fullName, email, state, phoneNumber: phone, username: user,
@@ -197,22 +203,36 @@
             rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 4. Simple & Professional Notification (Ba tare da kora zuwa wani shafi ba)
-        alert("Registration successful! Kindly verify your email and proceed to login.");
-        
-        // Cire shi daga current session
-        await firebase.auth().signOut();
-        
-        // Maimakon window.location, za mu iya barin shi a nan ko mu kira custom modal
-        // Idan kana so ya tafi login bayan ya danna OK:
-        // window.location.href = "login.html";
+        // Professional Overlay Success Message
+        Swal.fire({
+            title: 'Registration Successful',
+            text: 'Kindly verify your email and proceed to login.',
+            icon: 'success',
+            background: '#020617',
+            color: '#fff',
+            confirmButtonText: 'UNDERSTOOD',
+            confirmButtonColor: '#00f2fe',
+            allowOutsideClick: false // Wannan zai sa overlay din ya ki tafiya
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                await firebase.auth().signOut();
+                // Bayan ya danna OK, a nan ne zaka iya barin shi ko ka tura shi login
+                // Idan har yanzu shafin login baya nan, zai fi kyau ka bar shi a nan
+                console.log("User acknowledged. Waiting for verification.");
+            }
+        });
 
     } catch (e) {
         btn.disabled = false;
         btn.innerText = "ACTIVATE PROTOCOL";
-        alert("Registration failed: " + e.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Registration Failed',
+            text: e.message,
+            confirmButtonColor: '#7000ff'
+        });
     }
-        }
+                }
         
     </script>
 </body>
