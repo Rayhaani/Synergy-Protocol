@@ -128,32 +128,36 @@
             }
         }
 
-        
-        function showSuccessOverlay(fbUser, email) {
-    Swal.fire({
-        title: 'ACCESS PENDING',
-        html: `
-            <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3);">
-                <div class="orbitron" style="font-size: 7px; color: #00f2fe; margin-bottom: 5px;">Target Node:</div>
-                <div style="font-family: 'Roboto Mono'; font-size: 14px;">${email}</div>
-                <div class="orbitron" style="font-size: 7px; color: #00f2fe; margin-top: 15px; margin-bottom: 5px;">Status:</div>
-                <div style="font-size: 12px; color: #f87171;">AWAITING VERIFICATION...</div>
-            </div>`,
-        background: '#020617',
-        showConfirmButton: true,
-        confirmButtonText: 'RESEND LINK',
-        allowOutsideClick: false,
-        customClass: {
-            popup: 'rounded-[30px] border-b-4 border-cyan-500 shadow-2xl',
-            confirmButton: 'resend-btn-neon'
+         // WANNAN SHINE ZAI TSAYA A OVERLAY (Professional Notification)
+            Swal.fire({
+                title: 'Registration Successful',
+                text: 'Kindly verify your email and proceed to login.',
+                icon: 'success',
+                background: '#020617',
+                color: '#fff',
+                confirmButtonText: 'PROCEED',
+                confirmButtonColor: '#00f2fe',
+                allowOutsideClick: false 
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await firebase.auth().signOut();
+                    // Zai tsaya anan, ba zai tura mutum ko ina ba har sai ya duba email
+                    btn.innerText = "AWAITING VERIFICATION";
+                }
+            });
+
+        } catch (e) {
+            btn.disabled = false;
+            btn.innerText = "ACTIVATE PROTOCOL";
+            Swal.fire({
+                icon: 'error',
+                title: 'System Error',
+                text: e.message,
+                confirmButtonColor: '#7000ff'
+            });
         }
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            await fbUser.sendEmailVerification();
-            showSuccessOverlay(fbUser, email);
-        }
-    });
-        }
+    }
+
         
         
     </script>
