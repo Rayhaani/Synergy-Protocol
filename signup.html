@@ -128,24 +128,24 @@
             }
         }
 
+        
         function showSuccessOverlay(fbUser, email) {
     Swal.fire({
-        title: 'PROTOCOL DEPLOYED',
+        title: 'ACCESS PENDING',
         html: `
-            <div style="padding: 10px;">
-                <div style="font-size: 30px; margin-bottom: 15px;">📡</div>
-                <p style="font-family: 'Syncopate'; font-size: 9px; color: #00f2fe;">TRANSMISSION SENT TO:</p>
-                <p style="font-size: 18px; font-weight: bold; margin: 10px 0;">${email}</p>
-                <p style="font-size: 10px; color: #555; font-style: italic;">Check your secure vault (inbox/spam)</p>
+            <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3);">
+                <div class="orbitron" style="font-size: 7px; color: #00f2fe; margin-bottom: 5px;">Target Node:</div>
+                <div style="font-family: 'Roboto Mono'; font-size: 14px;">${email}</div>
+                <div class="orbitron" style="font-size: 7px; color: #00f2fe; margin-top: 15px; margin-bottom: 5px;">Status:</div>
+                <div style="font-size: 12px; color: #f87171;">AWAITING VERIFICATION...</div>
             </div>`,
-        background: '#000',
-        color: '#fff',
+        background: '#020617',
         showConfirmButton: true,
-        confirmButtonText: 'RE-TRIGGER SIGNAL',
+        confirmButtonText: 'RESEND LINK',
         allowOutsideClick: false,
         customClass: {
-            popup: 'border-2 border-cyan-500 rounded-[50px]',
-            confirmButton: 'bg-transparent border border-cyan-500 text-cyan-500 px-10 py-4 rounded-full orbitron hover:bg-cyan-500 hover:text-black transition-all'
+            popup: 'rounded-[30px] border-b-4 border-cyan-500 shadow-2xl',
+            confirmButton: 'resend-btn-neon'
         }
     }).then(async (result) => {
         if (result.isConfirmed) {
