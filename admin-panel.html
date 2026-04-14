@@ -158,54 +158,70 @@
     </div>
 
     <script>
-        function toggleSidebar() {
-            document.getElementById('mainSidebar').classList.toggle('show');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
-        }
+        
+                // 1. FIREBASE SETUP
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+      authDomain: "synergy-protocol.firebaseapp.com",
+      projectId: "synergy-protocol",
+      storageBucket: "synergy-protocol.firebasestorage.app",
+      messagingSenderId: "179647543031",
+      appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+    };
 
-            // 1. Wannan function din zai kwaso dukkan users daga Firestore
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    function toggleSidebar() {
+        document.getElementById('mainSidebar').classList.toggle('show');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    // 2. FETCH REAL USERS FROM DATABASE
     async function fetchUsers() {
         const body = document.getElementById('user-table-body');
         body.innerHTML = `<tr><td colspan="4" class="text-center py-10 orbitron text-[10px] text-cyan-400 animate-pulse">Scanning Network Database...</td></tr>`;
 
         try {
-            // Karanto dukkan documents daga "users" collection
             const snapshot = await db.collection("users").get();
             const usersList = [];
 
             snapshot.forEach(doc => {
                 const data = doc.data();
                 usersList.push({
-                    id: doc.id, // Username din da yake document ID
+                    id: doc.id, 
                     fullName: data.fullName || "N/A",
                     phone: data.phoneNumber || "N/A",
                     email: data.email || "N/A",
                     state: data.state || "N/A",
                     videoBalance: data.videoBalance || 0,
-                    status: data.isVerified ? "active" : "inactive", // Danganta status da isVerified
+                    status: data.isVerified ? "active" : "inactive", 
                     verified: data.isVerified || false,
                     payout: data.shareBalance || 0
                 });
             });
 
-            // Adana su a waje daya don ayi search dasu
             window.allUsers = usersList;
             render(usersList);
 
         } catch (error) {
-            console.error("Error fetching users:", error);
-            body.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500">FAILED TO CONNECT TO DATABASE.</td></tr>`;
+            console.error("Error:", error);
+            body.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold uppercase">Protocol Link Severed: Check Rules</td></tr>`;
         }
     }
 
-    // 2. Gyara render() function don ya dauki hoton bayanan na gaske
+    function toggleRow(id) {
+        const el = document.getElementById(`details-${id.replace(/\s+/g, '-')}`);
+        const isActive = el.classList.contains('active');
+        document.querySelectorAll('.details-row').forEach(row => row.classList.remove('active'));
+        if (!isActive) el.classList.add('active');
+    }
+
     function render(data) {
         const body = document.getElementById('user-table-body');
-        if (data.length === 0) {
-            body.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-gray-500">No nodes found in this sector.</td></tr>`;
-            return;
-        }
-
         body.innerHTML = data.map(u => `
             <tr onclick="toggleRow('${u.id}')">
                 <td class="pl-6 py-5">
@@ -232,12 +248,23 @@
                             <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Email</span><br><span class="text-white">${u.email}</span></div>
                             <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Location</span><br><span class="text-white">${u.state}</span></div>
                         </div>
+                        <div class="space-y-6 pt-6 border-t border-white/5">
+                            <div class="flex items-center gap-3">
+                                <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
+                                       class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
+                                <button onclick="event.stopPropagation();" class="btn-update">Update Balance</button>
+                            </div>
+                            <div class="flex flex-row gap-3 w-full max-w-2xl">
+                                <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
+                            </div>
+                        </div>
                     </div>
                 </td>
             </tr>
         `).join('');
         
-        // Update Stats Bar
         document.getElementById('total-members').innerText = data.length;
         document.getElementById('total-active').innerText = data.filter(u => u.status === 'active').length;
         document.getElementById('total-inactive').innerText = data.filter(u => u.status === 'inactive').length;
@@ -245,16 +272,15 @@
         document.getElementById('total-payout').innerText = `₦${data.reduce((s, u) => s + (u.payout || 0), 0).toLocaleString()}`;
     }
 
-    // Kira fetchUsers maimakon render(dummyUsers)
-    fetchUsers();
-
-    // Gyara Search shima
     function searchNetwork() {
         const q = document.getElementById('admin-search').value.toLowerCase();
         const f = window.allUsers.filter(u => u.id.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q));
         render(f);
-                }
-        
+    }
+
+    // Initialize Database Scan
+    fetchUsers();
+            
 
         
     </script>
