@@ -152,25 +152,36 @@ function closeNotif() {
 }
 
 
-        function showSuccessOverlay(email) {
-            Swal.fire({
-                html: `
-                    <div class="flex flex-col items-center">
-                        <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
-                        <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
-                        <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
-                            <p style="font-family: 'Quicksand', sans-serif; font-size: 15px; line-height: 1.6;">Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
-                        </div>
-                    </div>`,
-                background: '#020617', showConfirmButton: true, confirmButtonText: 'RESEND LINK', allowOutsideClick: false,
-                customClass: { popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', confirmButton: 'resend-btn-neon orbitron' }
-            }).then((result) => {
-                if (result.isConfirmed) { 
-                    resendVerification(); 
-                    showSuccessOverlay(email); // Sake nuna overlay din
-                }
-            });
+     function showSuccessOverlay(email) {
+    // 1. Mun fara duba email din a background
+    startVerificationListener(); 
+
+    Swal.fire({
+        html: `
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
+                <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
+                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
+                    <p style="font-family: 'Quicksand', sans-serif; font-size: 15px; line-height: 1.6;">Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
+                    <p class="animate-pulse" style="font-size: 11px; color: #3fb950; margin-top: 10px; font-family: 'Syncopate', sans-serif;">Waiting for verification...</p>
+                </div>
+            </div>`,
+        background: '#020617', 
+        showConfirmButton: true, 
+        confirmButtonText: 'RESEND LINK', 
+        allowOutsideClick: false,
+        customClass: { 
+            popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', 
+            confirmButton: 'resend-btn-neon orbitron' 
         }
+    }).then((result) => {
+        if (result.isConfirmed) { 
+            resendVerification(); 
+            showSuccessOverlay(email); 
+        }
+    });
+     }
+        
 
        // 1. GYARARREN RESEND FUNCTION (Don ya fito a bar)
 async function resendVerification() {
@@ -260,7 +271,47 @@ async function register() {
         btn.innerText = "RETRY ACTIVATION";
     }
 }
-    
+
+
+
+
+        let checkInterval;
+
+function startVerificationListener() {
+    // Tabbatar bamu da wani tsohon timer da yake aiki
+    if (checkInterval) clearInterval(checkInterval);
+
+    checkInterval = setInterval(async () => {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            // Tilasta wa Firebase ta sake duba status din user
+            await user.reload(); 
+            
+            if (user.emailVerified) {
+                clearInterval(checkInterval); // Tsayar da binciken
+                
+                // Nuna sakon nasara ta GitHub Bar
+                showTopNotif("Security Protocol Verified. Access Granted!", "success");
+
+                // Jira sakan 2 sannan mu tura shi shafin Login ko Dashboard
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'ACCESS GRANTED',
+                        text: 'Redirecting to your dashboard...',
+                        icon: 'success',
+                        background: '#020617',
+                        color: '#fff',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = "login.html"; // Ko sunan shafin dashboard dinka
+                    });
+                }, 1000);
+            }
+        }
+    }, 3000); // Yana dubawa duk bayan sakan 3
+}
+        
     </script>
 </body>
     </html>
