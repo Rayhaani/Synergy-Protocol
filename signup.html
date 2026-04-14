@@ -91,7 +91,7 @@
 
 async function register() {
     const btn = document.getElementById('reg-btn');
-    const mainCard = document.getElementById('main-register-card'); // Wannan shi ne babban container dinka
+    const mainCard = document.getElementById('main-register-card'); 
     const fullName = document.getElementById('full-name').value.trim();
     const email = document.getElementById('email').value.trim();
     const user = document.getElementById('username').value.toLowerCase().trim();
@@ -131,18 +131,18 @@ async function register() {
             rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 1. BOYAYYE: Boye shafin registration din gaba daya
+        // Boye dukkan registration form din
         mainCard.style.display = 'none'; 
 
-        // 2. OVERLAY: Daidai da hoton da ka turo (Exact Design)
+        // WANNAN SHINE EXACT OVERLAY DIN (Daidai da hoton 1000894460.jpg)
         Swal.fire({
-            title: 'REGISTRATION SUCCESSFUL',
-            html: `<div style="font-family:'Space Grotesk'; margin-top:15px;">
-                     <p style="font-size:14px; opacity:0.8;">Kindly verify your email to activate your node:</p>
-                     <b style="color:#00f2fe; font-size:16px;">${email}</b>
+            title: 'Registration Successful',
+            html: `<div style="font-family:'Space Grotesk'; margin-top:10px;">
+                     <p style="font-size:16px; line-height:1.6;">Kindly verify your email and proceed to login.</p>
                    </div>`,
             icon: 'success',
-            background: '#020617',
+            iconColor: '#a5dc86',
+            background: '#090e1a', // Dark theme kamar hoton
             color: '#fff',
             showCancelButton: true,
             confirmButtonText: 'UNDERSTOOD',
@@ -151,10 +151,10 @@ async function register() {
             cancelButtonColor: '#7000ff',
             allowOutsideClick: false,
             customClass: {
-                popup: 'glass-card',
-                title: 'orbitron', 
-                confirmButton: 'orbitron',
-                cancelButton: 'orbitron'
+                popup: 'rounded-[20px]',
+                title: 'font-bold text-2xl',
+                confirmButton: 'orbitron py-3 px-8',
+                cancelButton: 'orbitron py-3 px-8'
             }
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -165,15 +165,15 @@ async function register() {
                     await fbUser.sendEmailVerification();
                     Swal.fire({ 
                         icon: 'success', 
-                        title: 'RESENT', 
-                        text: 'Verification matrix redeployed.', 
+                        title: 'SENT', 
+                        text: 'Verification link resent successfully.', 
                         timer: 2000, 
                         showConfirmButton: false,
                         background: '#020617',
                         color: '#fff'
                     });
-                    // Maimaita babban overlay din bayan resending
-                    setTimeout(() => { location.reload(); }, 2000);
+                    // Maimaita babban overlay din
+                    setTimeout(() => register(), 2000);
                 } catch (err) {
                     Swal.fire({ icon: 'error', title: 'LIMIT', text: 'Please wait before requesting again.' });
                 }
@@ -188,12 +188,11 @@ async function register() {
             title: 'SYSTEM ERROR', 
             text: e.message, 
             background: '#020617', 
-            color: '#fff',
-            customClass: { title: 'orbitron' } 
+            color: '#fff'
         });
     }
         }
-                              
+        
 
 
         
