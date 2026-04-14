@@ -90,18 +90,9 @@
         }
 
 
-       
-      async function register() {
-    const btn = document.getElementById('reg-btn');
-    const mainCard = document.getElementById('main-register-card'); 
-    const email = document.getElementById('email').value.trim();
-    const user = document.getElementById('username').value.toLowerCase().trim();
-    
-    // 1. QUICK ACTION: Boye form din nan take don overlay ya fito sharp
-    mainCard.style.display = 'none';
-
-    // 2. IMMEDIATE OVERLAY: Nuna overlay nan take ba tare da jiran Firebase ba
-    const successPopup = Swal.fire({
+       // 1. WANNAN SHINE FUNCTION DIN OVERLAY DIN KAWAI (Yana magance Empty Page)
+function showSuccessOverlay(email) {
+    Swal.fire({
         html: `
             <div class="flex flex-col items-center">
                 <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
@@ -122,58 +113,67 @@
             popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl',
             confirmButton: 'resend-btn-neon' 
         }
-
-                    }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    // Muna duba idan akwai user din a nan take
-                    const fbUser = firebase.auth().currentUser;
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const fbUser = firebase.auth().currentUser;
+                if (fbUser) {
+                    await fbUser.sendEmailVerification();
                     
-                    if (fbUser) {
-                        await fbUser.sendEmailVerification();
-                        
-                        // Nuna karamin sako (Toast) maimakon babban overlay
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            background: '#020617',
-                            color: '#fff'
-                        });
-
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'Email resent successfully'
-                        });
-
-                        // Muhimmi: Maimaita nuna babban overlay din bayan 3 seconds
-                        // Domin tabbatar da cewa mai amfani bai fita ba har sai ya gama
-                        setTimeout(() => register(), 3100); 
-
-                    }
-                } catch (err) {
-                    // Wannan shine yake nuna LIMIT din idan an danna sau da yawa
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'LIMIT REACHED',
-                        text: 'Security protocol active. Please wait a moment before retrying.',
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
                         background: '#020617',
-                        color: '#fff',
-                        confirmButtonColor: '#7000ff'
+                        color: '#fff'
                     });
-                    
-                    // Koda an samu error, muna son babban overlay ya dawo
-                    setTimeout(() => register(), 3000);
-                }
-            }
-        });
-          
 
-    // 3. BACKGROUND PROCESSING: Firebase tana aiki a baya yayin da overlay yake a bude
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Email resent successfully'
+                    });
+
+                    // Muna dawo da overlay din maimakon refresh na register()
+                    setTimeout(() => showSuccessOverlay(email), 3100); 
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'LIMIT REACHED',
+                    text: 'Security protocol active. Please wait a moment before retrying.',
+                    background: '#020617',
+                    color: '#fff',
+                    confirmButtonColor: '#7000ff'
+                });
+                setTimeout(() => showSuccessOverlay(email), 3000);
+            }
+        }
+    });
+}
+
+// 2. WANNAN SHINE MAIN REGISTER FUNCTION DINKA
+async function register() {
+    const btn = document.getElementById('reg-btn');
+    const mainCard = document.getElementById('main-register-card'); 
+    const email = document.getElementById('email').value.trim();
+    const user = document.getElementById('username').value.toLowerCase().trim();
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
+
     try {
         const userRef = db.collection("users").doc(user);
+        const doc = await userRef.get();
+
+        if (doc.exists) {
+            Swal.fire({ icon: 'error', title: 'NODE ERROR', text: 'Username active.', background: '#020617', color: '#fff' });
+            btn.disabled = false;
+            btn.innerText = "ACTIVATE PROTOCOL";
+            return;
+        }
+
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, "SynergyUser123");
         const fbUser = userCredential.user;
         await fbUser.sendEmailVerification();
@@ -188,11 +188,23 @@
             videoBalance: 0, shareBalance: 0, videosWatchedToday: 0,
             rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        // Boye form din kawai idan aikin ya gama
+        mainCard.style.display = 'none';
+        // Kira overlay din daban don ya fito sharp
+        showSuccessOverlay(email);
+
     } catch (e) {
-        // Idan aka samu matsala bayan an riga an nuna overlay
-        console.error("Node Error:", e.message);
+        btn.disabled = false;
+        btn.innerText = "RETRY ACTIVATION";
+        Swal.fire({ icon: 'error', title: 'SYSTEM FAILURE', text: e.message, background: '#020617', color: '#fff' });
     }
-      }
+        }
+                
+
+                    
+
+
           
 
         
