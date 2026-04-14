@@ -89,10 +89,9 @@
             document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/5)*100)}%`;
         }
 
-
 async function register() {
     const btn = document.getElementById('reg-btn');
-    const formContainer = document.getElementById('form-container'); // Id na babban div din form dinka
+    const mainCard = document.getElementById('main-register-card'); // Wannan shi ne babban container dinka
     const fullName = document.getElementById('full-name').value.trim();
     const email = document.getElementById('email').value.trim();
     const user = document.getElementById('username').value.toLowerCase().trim();
@@ -101,14 +100,21 @@ async function register() {
     const password = "SynergyUser123"; 
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="animate-pulse">INITIALIZING...</span>`;
+    btn.innerHTML = `<span class="orbitron animate-pulse">INITIALIZING...</span>`;
 
     try {
         const userRef = db.collection("users").doc(user);
         const doc = await userRef.get();
 
         if (doc.exists) {
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Username already taken.', confirmButtonColor: '#00f2fe' });
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'NODE ERROR', 
+                text: 'Username already taken.', 
+                background: '#020617', 
+                color: '#fff',
+                customClass: { title: 'orbitron' } 
+            });
             btn.disabled = false;
             btn.innerText = "ACTIVATE PROTOCOL";
             return;
@@ -125,38 +131,51 @@ async function register() {
             rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 1. BOYAYYE: Boye dukkan sauran abubuwan dake shafin (Background)
-        formContainer.style.display = 'none'; 
-        document.getElementById('progress-text').style.opacity = '0';
+        // 1. BOYAYYE: Boye shafin registration din gaba daya
+        mainCard.style.display = 'none'; 
 
-        // 2. OVERLAY: Nuna sako tare da "Resend Verification"
+        // 2. OVERLAY: Daidai da hoton da ka turo (Exact Design)
         Swal.fire({
-            title: 'Registration Successful',
-            html: `A verification link has been sent to <b>${email}</b>.<br><br>Kindly verify your email to activate your account.`,
+            title: 'REGISTRATION SUCCESSFUL',
+            html: `<div style="font-family:'Space Grotesk'; margin-top:15px;">
+                     <p style="font-size:14px; opacity:0.8;">Kindly verify your email to activate your node:</p>
+                     <b style="color:#00f2fe; font-size:16px;">${email}</b>
+                   </div>`,
             icon: 'success',
             background: '#020617',
             color: '#fff',
             showCancelButton: true,
-            confirmButtonText: 'I UNDERSTAND',
+            confirmButtonText: 'UNDERSTOOD',
             cancelButtonText: 'RESEND EMAIL',
             confirmButtonColor: '#00f2fe',
             cancelButtonColor: '#7000ff',
-            allowOutsideClick: false
+            allowOutsideClick: false,
+            customClass: {
+                popup: 'glass-card',
+                title: 'orbitron', 
+                confirmButton: 'orbitron',
+                cancelButton: 'orbitron'
+            }
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // Idan ya danna Understand, muna so ya fita (Logout) sannan ya jira link
                 await firebase.auth().signOut();
-                // Zaka iya tura shi Login page anan tunda ya gama
                 window.location.href = 'login.html'; 
             } else if (result.dismiss === Swal.DismissReason.cancel) {
-                // Idan ya danna Resend Email
                 try {
                     await fbUser.sendEmailVerification();
-                    Swal.fire({ icon: 'success', title: 'Sent!', text: 'Verification email resent successfully.', timer: 2000, showConfirmButton: false });
-                    // Maimaita babban overlay din
-                    registerSuccessOverlay(email, fbUser);
+                    Swal.fire({ 
+                        icon: 'success', 
+                        title: 'RESENT', 
+                        text: 'Verification matrix redeployed.', 
+                        timer: 2000, 
+                        showConfirmButton: false,
+                        background: '#020617',
+                        color: '#fff'
+                    });
+                    // Maimaita babban overlay din bayan resending
+                    setTimeout(() => { location.reload(); }, 2000);
                 } catch (err) {
-                    Swal.fire({ icon: 'error', title: 'Limit Reached', text: 'Please wait a moment before requesting another email.' });
+                    Swal.fire({ icon: 'error', title: 'LIMIT', text: 'Please wait before requesting again.' });
                 }
             }
         });
@@ -164,9 +183,18 @@ async function register() {
     } catch (e) {
         btn.disabled = false;
         btn.innerText = "ACTIVATE PROTOCOL";
-        Swal.fire({ icon: 'error', title: 'System Error', text: e.message, confirmButtonColor: '#7000ff' });
+        Swal.fire({ 
+            icon: 'error', 
+            title: 'SYSTEM ERROR', 
+            text: e.message, 
+            background: '#020617', 
+            color: '#fff',
+            customClass: { title: 'orbitron' } 
+        });
     }
-}
+        }
+                              
+
 
         
         
