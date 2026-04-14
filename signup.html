@@ -140,21 +140,19 @@ function showSuccessOverlay(email) {
             } catch (err) {
                 // GYARA: Syncopate Heading da Quicksand Body anan
                 Swal.fire({
-                    title: 'LIMIT REACHED',
-                    html: `<p style="font-family: 'Quicksand', sans-serif; font-size: 14px;">Security protocol active. Please wait a moment before retrying.</p>`,
-                    icon: 'error',
-                    background: '#020617',
-                    color: '#fff',
-                    confirmButtonColor: '#7000ff',
-                    customClass: {
-                        title: 'orbitron', // Official Heading Font
-                        confirmButton: 'orbitron'
-                    }
-                });
-                setTimeout(() => showSuccessOverlay(email), 3000);
-            }
-        }
-    });
+    title: 'LIMIT REACHED',
+    html: `<p style="font-family: 'Quicksand', sans-serif; font-size: 15px;">Security protocol active. Please wait a moment before retrying.</p>`,
+    icon: 'info',
+    background: '#020617',
+    color: '#fff',
+    confirmButtonText: 'UNDERSTOOD',
+    customClass: {
+        title: 'orbitron',
+        confirmButton: 'orbitron resend-btn-neon',
+        popup: 'rounded-[25px] border border-cyan-500/30'
+    }
+});
+                
 }
 
 // Main Register Function
@@ -172,18 +170,20 @@ async function register() {
         const doc = await userRef.get();
 
         if (doc.exists) {
-            Swal.fire({ 
-                title: 'NODE ERROR', 
-                text: 'Username active.', 
-                icon: 'error',
-                background: '#020617', 
-                color: '#fff',
-                customClass: { title: 'orbitron' }
-            });
-            btn.disabled = false;
-            btn.innerText = "ACTIVATE PROTOCOL";
-            return;
-        }
+           Swal.fire({
+    title: 'NODE ERROR',
+    html: `<p style="font-family: 'Quicksand', sans-serif; font-size: 15px;">Username already active in the protocol.</p>`,
+    icon: 'error',
+    background: '#020617',
+    color: '#fff',
+    confirmButtonText: 'ACKNOWLEDGE',
+    customClass: {
+        title: 'orbitron', // Wannan zai sa Syncopate font
+        confirmButton: 'orbitron resend-btn-neon', // Standard Global Button
+        popup: 'rounded-[25px] border border-red-500/30 shadow-2xl'
+    }
+});
+            
 
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, "SynergyUser123");
         const fbUser = userCredential.user;
@@ -208,16 +208,20 @@ async function register() {
     } catch (e) {
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
-        Swal.fire({ 
-            title: 'SYSTEM FAILURE', 
-            html: `<p style="font-family: 'Quicksand', sans-serif;">${e.message}</p>`,
-            icon: 'error',
-            background: '#020617', 
-            color: '#fff',
-            customClass: { title: 'orbitron' }
-        });
+        Swal.fire({
+    title: 'SYSTEM FAILURE',
+    html: `<p style="font-family: 'Quicksand', sans-serif; font-size: 14px; line-height: 1.5;">${e.message}</p>`,
+    icon: 'warning',
+    background: '#020617',
+    color: '#fff',
+    confirmButtonText: 'RETRY SEQUENCE',
+    customClass: {
+        title: 'orbitron',
+        confirmButton: 'orbitron resend-btn-neon',
+        popup: 'rounded-[25px] border border-yellow-500/30'
     }
-}
+});
+        
     
 
 
