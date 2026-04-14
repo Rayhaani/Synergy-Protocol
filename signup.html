@@ -99,8 +99,10 @@ async function register() {
     const phone = document.getElementById('phone').value.trim();
     const password = "SynergyUser123"; 
 
+    // Don ya zama sharp, muna boye form din nan take
+    mainCard.style.opacity = '0.5';
     btn.disabled = true;
-    btn.innerHTML = `<span class="orbitron animate-pulse">INITIALIZING...</span>`;
+    btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
 
     try {
         const userRef = db.collection("users").doc(user);
@@ -110,11 +112,12 @@ async function register() {
             Swal.fire({ 
                 icon: 'error', 
                 title: 'NODE ERROR', 
-                text: 'Username already taken.', 
+                text: 'Username active.', 
                 background: '#020617', 
                 color: '#fff',
                 customClass: { title: 'orbitron' } 
             });
+            mainCard.style.opacity = '1';
             btn.disabled = false;
             btn.innerText = "ACTIVATE PROTOCOL";
             return;
@@ -125,73 +128,65 @@ async function register() {
         await fbUser.sendEmailVerification();
 
         await userRef.set({
-            uid: fbUser.uid,
-            fullName, email, state, phoneNumber: phone, username: user,
-            videoBalance: 0, shareBalance: 0, videosWatchedToday: 0,
-            rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            uid: fbUser.uid, fullName, email, username: user,
+            state, phoneNumber: phone, videoBalance: 0, shareBalance: 0, 
+            videosWatchedToday: 0, rank: "IRON", 
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Boye dukkan registration form din
-        mainCard.style.display = 'none'; 
+        // Cire background form din gaba daya don overlay ya fito sharp
+        mainCard.style.display = 'none';
 
-        // WANNAN SHINE EXACT OVERLAY DIN (Daidai da hoton 1000894460.jpg)
+        // EXACT OVERLAY (Circle + Font + Single Resend Button)
         Swal.fire({
-            title: 'Registration Successful',
-            html: `<div style="font-family:'Space Grotesk'; margin-top:10px;">
-                     <p style="font-size:16px; line-height:1.6;">Kindly verify your email and proceed to login.</p>
-                   </div>`,
-            icon: 'success',
-            iconColor: '#a5dc86',
-            background: '#090e1a', // Dark theme kamar hoton
-            color: '#fff',
-            showCancelButton: true,
-            confirmButtonText: 'UNDERSTOOD',
-            cancelButtonText: 'RESEND EMAIL',
-            confirmButtonColor: '#00f2fe',
-            cancelButtonColor: '#7000ff',
+            html: `
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
+                    <h2 class="orbitron text-white text-xl mb-4">REGISTRATION SUCCESSFUL</h2>
+                    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%;">
+                        <p class="orbitron" style="font-size: 8px; color: #00f2fe; margin-bottom: 10px;">Target Node:</p>
+                        <p style="font-family:'Space Grotesk'; font-size: 14px; color: #fff;">${email}</p>
+                        <p class="orbitron" style="font-size: 8px; color: #00f2fe; margin-top: 15px; margin-bottom: 5px;">Status:</p>
+                        <p style="font-family:'Space Grotesk'; font-size: 12px; color: #a5dc86;">AWAITING VERIFICATION...</p>
+                    </div>
+                </div>`,
+            background: '#020617',
+            showConfirmButton: true,
+            confirmButtonText: 'RESEND LINK',
             allowOutsideClick: false,
             customClass: {
-                popup: 'rounded-[20px]',
-                title: 'font-bold text-2xl',
-                confirmButton: 'orbitron py-3 px-8',
-                cancelButton: 'orbitron py-3 px-8'
+                popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl',
+                confirmButton: 'resend-btn-neon' 
             }
         }).then(async (result) => {
             if (result.isConfirmed) {
-                await firebase.auth().signOut();
-                window.location.href = 'login.html'; 
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
                 try {
                     await fbUser.sendEmailVerification();
                     Swal.fire({ 
                         icon: 'success', 
-                        title: 'SENT', 
-                        text: 'Verification link resent successfully.', 
+                        title: 'RE-DEPLOYED', 
+                        text: 'Link sent to your node.', 
                         timer: 2000, 
                         showConfirmButton: false,
                         background: '#020617',
                         color: '#fff'
                     });
-                    // Maimaita babban overlay din
-                    setTimeout(() => register(), 2000);
+                    setTimeout(() => register(), 2000); 
                 } catch (err) {
-                    Swal.fire({ icon: 'error', title: 'LIMIT', text: 'Please wait before requesting again.' });
+                    Swal.fire({ icon: 'error', title: 'LIMIT', text: 'Wait a moment.', background: '#020617', color: '#fff' });
                 }
             }
         });
 
     } catch (e) {
+        mainCard.style.opacity = '1';
         btn.disabled = false;
-        btn.innerText = "ACTIVATE PROTOCOL";
-        Swal.fire({ 
-            icon: 'error', 
-            title: 'SYSTEM ERROR', 
-            text: e.message, 
-            background: '#020617', 
-            color: '#fff'
-        });
+        btn.innerText = "RETRY ACTIVATION";
+        Swal.fire({ icon: 'error', title: 'SYSTEM FAILURE', text: e.message, background: '#020617', color: '#fff' });
     }
         }
+        
+        
         
 
 
