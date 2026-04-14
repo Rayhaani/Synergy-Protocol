@@ -90,106 +90,73 @@
         }
 
 
-       async function register() {
+       
+      async function register() {
     const btn = document.getElementById('reg-btn');
     const mainCard = document.getElementById('main-register-card'); 
-    const fullName = document.getElementById('full-name').value.trim();
     const email = document.getElementById('email').value.trim();
     const user = document.getElementById('username').value.toLowerCase().trim();
-    const state = document.getElementById('state').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const password = "SynergyUser123"; 
+    
+    // 1. QUICK ACTION: Boye form din nan take don overlay ya fito sharp
+    mainCard.style.display = 'none';
 
-    // Don ya zama sharp
-    mainCard.style.opacity = '0.5';
-    btn.disabled = true;
-    btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
+    // 2. IMMEDIATE OVERLAY: Nuna overlay nan take ba tare da jiran Firebase ba
+    const successPopup = Swal.fire({
+        html: `
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
+                <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
+                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff; text-align: center;">
+                    <p style="font-family: 'Quicksand', sans-serif; font-size: 15px; line-height: 1.6; font-weight: 500;">
+                        Email sent to <b style="color:#00f2fe;">${email}</b>, 
+                        please check your email to verify your account.
+                    </p>
+                    <p class="orbitron" style="font-size: 8px; color: #a5dc86; margin-top: 15px;">AWAITING VERIFICATION...</p>
+                </div>
+            </div>`,
+        background: '#020617',
+        showConfirmButton: true,
+        confirmButtonText: 'RESEND LINK',
+        allowOutsideClick: false,
+        customClass: {
+            popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl',
+            confirmButton: 'resend-btn-neon' 
+        }
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            // Functional Resend
+            const userAuth = firebase.auth().currentUser;
+            if(userAuth) {
+                await userAuth.sendEmailVerification();
+                Swal.fire({ icon: 'success', title: 'SENT', background: '#020617', color: '#fff', timer: 1500, showConfirmButton: false });
+                setTimeout(() => register(), 2000);
+            }
+        }
+    });
 
+    // 3. BACKGROUND PROCESSING: Firebase tana aiki a baya yayin da overlay yake a bude
     try {
         const userRef = db.collection("users").doc(user);
-        const doc = await userRef.get();
-
-        if (doc.exists) {
-            Swal.fire({ 
-                icon: 'error', 
-                title: 'NODE ERROR', 
-                text: 'Username active.', 
-                background: '#020617', 
-                color: '#fff',
-                customClass: { title: 'orbitron' } 
-            });
-            mainCard.style.opacity = '1';
-            btn.disabled = false;
-            btn.innerText = "ACTIVATE PROTOCOL";
-            return;
-        }
-
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, "SynergyUser123");
         const fbUser = userCredential.user;
         await fbUser.sendEmailVerification();
 
         await userRef.set({
-            uid: fbUser.uid, fullName, email, username: user,
-            state, phoneNumber: phone, videoBalance: 0, shareBalance: 0, 
-            videosWatchedToday: 0, rank: "IRON", 
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            uid: fbUser.uid,
+            fullName: document.getElementById('full-name').value.trim(),
+            email: email,
+            username: user,
+            state: document.getElementById('state').value.trim(),
+            phoneNumber: document.getElementById('phone').value.trim(),
+            videoBalance: 0, shareBalance: 0, videosWatchedToday: 0,
+            rank: "IRON", createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
-        mainCard.style.display = 'none';
-
-        // GYARARRAN OVERLAY (Official Text + Space Grotesk Font)
-        Swal.fire({
-            html: `
-                <div class="flex flex-col items-center" style="font-family:'Space Grotesk';">
-                    <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
-                    <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
-                    <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff; text-align: center;">
-                        <p style="font-size: 15px; line-height: 1.6;">
-                            Email sent to <b style="color:#00f2fe;">${email}</b>, 
-                            please check your email to verify your account.
-                        </p>
-                        <p class="orbitron" style="font-size: 8px; color: #a5dc86; margin-top: 15px;">AWAITING VERIFICATION...</p>
-                    </div>
-                </div>`,
-            background: '#020617',
-            showConfirmButton: true,
-            confirmButtonText: 'RESEND LINK',
-            allowOutsideClick: false,
-            customClass: {
-                popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl',
-                confirmButton: 'resend-btn-neon' 
-            }
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await fbUser.sendEmailVerification();
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: 'SENT', 
-                        text: 'Verification email resent successfully.', 
-                        timer: 2000, 
-                        showConfirmButton: false, 
-                        background: '#020617', 
-                        color: '#fff' 
-                    });
-                    setTimeout(() => register(), 2500); 
-                } catch (err) {
-                    Swal.fire({ icon: 'error', title: 'LIMIT', text: 'Wait a moment.', background: '#020617', color: '#fff' });
-                }
-            }
-        });
-
     } catch (e) {
-        mainCard.style.opacity = '1';
-        btn.disabled = false;
-        btn.innerText = "RETRY ACTIVATION";
-        Swal.fire({ icon: 'error', title: 'SYSTEM FAILURE', text: e.message, background: '#020617', color: '#fff' });
+        // Idan aka samu matsala bayan an riga an nuna overlay
+        console.error("Node Error:", e.message);
     }
-                                                                                                                                                                                                                                                                  }
-                                                                                         
-        
-        
-
+      }
+          
 
         
         
