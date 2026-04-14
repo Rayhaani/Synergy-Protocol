@@ -84,7 +84,7 @@
 
     <script>
         
-    const firebaseConfig = { 
+        const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
         projectId: "synergy-protocol" 
@@ -92,9 +92,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 1. ADD THE NOTIFICATION SYSTEM (Dole ne don sanarwa ta fito)
     function showTopNotif(message, type) {
-        // Idan babu bar din a shafin, mu samar da ita yanzu
         let bar = document.getElementById('notification-bar');
         if (!bar) {
             bar = document.createElement('div');
@@ -102,11 +100,9 @@
             bar.style = "position:fixed; top:-100px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; padding:12px; border-radius:8px; display:flex; justify-content:space-between; z-index:9999; transition:0.4s; font-size:12px; font-family:sans-serif; border:1px solid rgba(0,242,254,0.3);";
             document.body.appendChild(bar);
         }
-        
         bar.style.background = (type === 'success') ? '#0c2d21' : '#2d1616';
         bar.style.color = (type === 'success') ? '#3fb950' : '#f85149';
         bar.innerHTML = `<span>${message}</span><span style="cursor:pointer" onclick="this.parentElement.style.top='-100px'">×</span>`;
-        
         bar.style.top = '20px';
         setTimeout(() => { bar.style.top = '-100px'; }, 5000);
     }
@@ -115,9 +111,7 @@
         const loginID = document.getElementById('login-id').value.trim();
         const loginPass = document.getElementById('login-pass').value.trim();
         const btn = document.getElementById('login-btn');
-
         if (loginID.length >= 3) { show(2); } else { hide(2); }
-
         if (loginID.length >= 3 && loginPass.length >= 6) {
             btn.disabled = false;
             btn.classList.remove('btn-locked');
@@ -137,7 +131,6 @@
         if(el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
     }
 
-    // 2. FIXED LOGIN FUNCTION (Updated ID to match HTML)
     async function login() {
         const loginInput = document.getElementById('login-id').value.trim();
         const pass = document.getElementById('login-pass').value.trim();
@@ -147,11 +140,12 @@
         btn.disabled = true;
 
         try {
+            let userDocId = loginInput.toLowerCase();
             let email = loginInput;
 
-            // Idan username ne aka saka maimakon email, mu nemo email din a Firestore
+            // 1. Nemo Email idan username aka saka
             if (!loginInput.includes('@')) {
-                const userRef = db.collection("users").doc(loginInput.toLowerCase());
+                const userRef = db.collection("users").doc(userDocId);
                 const doc = await userRef.get();
                 if (doc.exists) {
                     email = doc.data().email;
@@ -163,9 +157,11 @@
                 }
             }
 
+            // 2. Firebase Authentication Check
             const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
             const user = userCredential.user;
 
+            // 3. Email Verification Check (Dole ya danna link a email)
             if (!user.emailVerified) {
                 showTopNotif("Access Denied: Verify your email first.", "error");
                 btn.innerText = "ACCESS PROTOCOL";
@@ -173,16 +169,31 @@
                 return;
             }
 
-            showTopNotif("Access Granted! Opening Dashboard...", "success");
-            setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
+            // 4. NODES ACTIVATION CHECK (Shin ya gama kallon bidiyo 5?)
+            const userDoc = await db.collection("users").where("email", "==", email).get();
+            const userData = userDoc.docs[0].data();
+            const actualUsername = userDoc.docs[0].id;
+
+            // Ajiye username a localStorage don activation.html ya yi amfani da shi
+            localStorage.setItem('synergy_user', actualUsername);
+
+            if (userData.isVerified === true) {
+                // Idan riga ya gama Activation Node
+                showTopNotif("Access Granted! Opening Dashboard...", "success");
+                setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
+            } else {
+                // Idan `isVerified` dinsa `false` ne a Firestore
+                showTopNotif("Activation Required. Redirecting to Nodes...", "success");
+                setTimeout(() => { window.location.href = "activation.html"; }, 1500);
+            }
 
         } catch (error) {
             showTopNotif("Invalid credentials. Try again.", "error");
             btn.innerText = "ACCESS PROTOCOL";
             btn.disabled = false;
         }
-    }
-
+        }
+        
     
     </script>
 </body>
