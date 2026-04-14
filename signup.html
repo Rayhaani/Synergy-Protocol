@@ -222,12 +222,13 @@ async function register() {
         }
 
         // C. Idan komai ya yi, sai a nuna success overlay
-        mainCard.style.display = 'none';
-        showSuccessOverlay(email);
-
+        
         // D. Create account a background
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, pass);
         await userCredential.user.sendEmailVerification();
+        mainCard.style.display = 'none';
+        showSuccessOverlay(email);
+        
 
         await userRef.set({
             uid: userCredential.user.uid,
