@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
 
     <style>
         :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
@@ -131,7 +133,7 @@
         if(el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
     }
 
-    async function login() {
+        async function login() {
         const loginInput = document.getElementById('login-id').value.trim();
         const pass = document.getElementById('login-pass').value.trim();
         const btn = document.getElementById('login-btn');
@@ -140,60 +142,65 @@
         btn.disabled = true;
 
         try {
-            let userDocId = loginInput.toLowerCase();
             let email = loginInput;
 
-            // 1. Nemo Email idan username aka saka
+            // 1. Nemo Email daga Username (Firestore Check)
             if (!loginInput.includes('@')) {
-                const userRef = db.collection("users").doc(userDocId);
+                const userRef = db.collection("users").doc(loginInput.toLowerCase());
                 const doc = await userRef.get();
                 if (doc.exists) {
                     email = doc.data().email;
                 } else {
-                    showTopNotif("Identity not found in the protocol.", "error");
+                    showTopNotif("Username not found in protocol.", "error");
                     btn.innerText = "ACCESS PROTOCOL";
                     btn.disabled = false;
                     return;
                 }
             }
 
-            // 2. Firebase Authentication Check
+            // 2. Tabbatar da Authentication (Firebase Auth)
             const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
             const user = userCredential.user;
 
-            // 3. Email Verification Check (Dole ya danna link a email)
+            // 3. Duba idan an yi verify na email
             if (!user.emailVerified) {
-                showTopNotif("Access Denied: Verify your email first.", "error");
+                showTopNotif("Please verify your email first.", "error");
                 btn.innerText = "ACCESS PROTOCOL";
                 btn.disabled = false;
                 return;
             }
 
-            // 4. NODES ACTIVATION CHECK (Shin ya gama kallon bidiyo 5?)
-            const userDoc = await db.collection("users").where("email", "==", email).get();
-            const userData = userDoc.docs[0].data();
-            const actualUsername = userDoc.docs[0].id;
+            // 4. Duba matsayin Activation (isVerified a Firestore)
+            const userDoc = await db.collection("users").doc(loginInput.toLowerCase()).get();
+            const userData = userDoc.data();
 
-            // Ajiye username a localStorage don activation.html ya yi amfani da shi
-            localStorage.setItem('synergy_user', actualUsername);
+            localStorage.setItem('synergy_user', loginInput.toLowerCase());
 
-            if (userData.isVerified === true) {
-                // Idan riga ya gama Activation Node
-                showTopNotif("Access Granted! Opening Dashboard...", "success");
+            if (userData && userData.isVerified === true) {
+                showTopNotif("Access Granted!", "success");
                 setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
             } else {
-                // Idan `isVerified` dinsa `false` ne a Firestore
-                showTopNotif("Activation Required. Redirecting to Nodes...", "success");
+                showTopNotif("Activation Required.", "success");
                 setTimeout(() => { window.location.href = "activation.html"; }, 1500);
             }
 
         } catch (error) {
-            showTopNotif("Invalid credentials. Try again.", "error");
+            // Wannan zai nuna maka ainihin error din a Inspect Element -> Console
+            console.error("Firebase Error:", error.code, error.message);
+            
+            if (error.code === "auth/user-not-found") {
+                showTopNotif("User not found in system.", "error");
+            } else if (error.code === "auth/wrong-password") {
+                showTopNotif("Incorrect password.", "error");
+            } else {
+                showTopNotif("Invalid credentials. Try again.", "error");
+            }
+            
             btn.innerText = "ACCESS PROTOCOL";
             btn.disabled = false;
         }
-        }
-        
+            }
+            
     
     </script>
 </body>
