@@ -79,6 +79,11 @@
             </button>
         </div>
 
+        <p class="text-[10px] text-center mt-4">
+    <a href="#" onclick="forgotPassword()" class="text-cyan-400 hover:underline">Forgot Password?</a>
+</p>
+
+
         <div class="mt-6 pt-4 border-t border-white/5 text-center">
             <p class="text-gray-500 text-[10px] orbitron">Unauthorized Access Prohibited</p>
         </div>
@@ -200,7 +205,21 @@
             btn.disabled = false;
         }
             }
-            
+
+        function forgotPassword() {
+    const email = prompt("Please enter your registered Email address:");
+    
+    if (email) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+                alert("Alhamdulillah! Password reset link has been sent to your email. Please check your inbox or spam folder.");
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+    }
+        }
+        
     
     </script>
 </body>
