@@ -212,7 +212,7 @@
     if (email) {
         firebase.auth().sendPasswordResetEmail(email)
             .then(() => {
-                alert("Alhamdulillah! Password reset link has been sent to your email. Please check your inbox or spam folder.");
+                alert("Password reset link has been sent to your email. Please check your inbox or spam folder.");
             })
             .catch((error) => {
                 alert("Error: " + error.message);
