@@ -145,70 +145,106 @@
     }
     checkSystemCapacity();
 
-    // 3. YOUTUBE API LOGIC
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('activation-player', {
-            height: '100%', width: '100%',
-            playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
-            events: { 'onStateChange': onPlayerStateChange }
-        });
-    }
+    // --- 3. HYBRID YOUTUBE VERIFICATION (API + WATCH TIME) ---
+const API_KEY = 'AIzaSyDqgyMq1NF4s0Q_-raMVdAOxBvCmeTxKYQ';
+const channels = {
+    1: { id: 'UC6NlJ4k7Jitn0Gj3o4R-x3A', handle: '@aiwealthacademy_global', vid: 'Daga_cikin_vidiyonka' }, // Saka Video ID anan
+    2: { id: 'UCmYv0pD4fH2kXz9vjU8BvXg', handle: '@globalwealthsecrethq', vid: 'Daga_cikin_vidiyonka' }  // Saka Video ID anan
+};
 
-    function launchActivation(num, vid) {
-        activeNode = num;
-        document.getElementById('nodes-list').classList.add('hidden');
-        document.getElementById('player-area').classList.remove('hidden');
-        player.loadVideoById(vid);
-        player.playVideo();
-    }
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('activation-player', {
+        height: '100%', width: '100%',
+        playerVars: { 'controls': 0, 'disablekb': 1, 'modestbranding': 1, 'rel': 0 },
+        events: { 'onStateChange': onPlayerStateChange }
+    });
+}
 
-    function onPlayerStateChange(event) {
-        if(event.data === YT.PlayerState.PLAYING) {
-            let timeLeft = 120; // 2 Minutes
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft/60), s = timeLeft%60;
-                document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
-                if(timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    currentCode = Math.random().toString(36).substring(2,8).toUpperCase();
-                    document.getElementById('hash-input').placeholder = "VERIFICATION CODE: " + currentCode;
-                    document.getElementById('verify-ui').classList.remove('hidden');
-                }
-            }, 1000);
-        }
-    }
+function launchActivation(num) {
+    activeNode = num;
+    const channel = channels[num];
+    if(!channel) return;
 
-    async function confirmNodeActivation() {
-        const val = document.getElementById('hash-input').value.toUpperCase();
-        if(val === currentCode && currentCode !== "") {
-            let countSpan = document.getElementById('nodes-count');
-            let currentNodes = parseInt(countSpan.innerText.split(' / ')[0]) + 1;
-            countSpan.innerText = currentNodes + " / 5";
-            document.getElementById('progress-bar').style.width = (currentNodes * 20) + "%";
+    document.getElementById('nodes-list').classList.add('hidden');
+    document.getElementById('player-area').classList.remove('hidden');
+    player.loadVideoById(channel.vid);
+    player.playVideo();
+}
 
-            if(currentNodes === 5) {
-                // UPDATE USER & INCREMENT DAILY COUNT
-                await db.collection("users").doc(currentUser).update({ isVerified: true });
-                await db.collection("system_stats").doc("daily_limit").update({
-                    count: firebase.firestore.FieldValue.increment(1)
-                });
-                alert("PROTOCOL ACTIVATED! Redirecting to Secure Vault...");
-                location.href = "dashboard.html";
-            } else {
-                // Reset UI for next node
-                document.getElementById('verify-ui').classList.add('hidden');
-                document.getElementById('player-area').classList.add('hidden');
-                document.getElementById('nodes-list').classList.remove('hidden');
-                document.getElementById('hash-input').value = "";
-                currentCode = "";
-                alert("Node " + currentNodes + " Secure. Next node unlocked.");
+function onPlayerStateChange(event) {
+    if(event.data === YT.PlayerState.PLAYING) {
+        let timeLeft = 120; // 2 Minutes Watch Time
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            let m = Math.floor(timeLeft/60), s = timeLeft%60;
+            document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
+            
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                showSubscribeStep();
             }
-        } else {
-            alert("INVALID HASH. Node security failed.");
-        }
+        }, 1000);
     }
+}
+
+function showSubscribeStep() {
+    const verifyUI = document.getElementById('verify-ui');
+    verifyUI.innerHTML = `
+        <div style="text-align:center; padding:20px;">
+            <p style="color:#00ffcc; font-weight:bold;">WATCH TIME COMPLETE!</p>
+            <p>Final Step: Subscribe to Secure Node ${activeNode}</p>
+            <button onclick="finalVerification()" class="btn-neon" style="padding:10px 20px; cursor:pointer;">SUBSCRIBE & GET CODE</button>
+        </div>
+    `;
+    verifyUI.classList.remove('hidden');
+}
+
+async function finalVerification() {
+    const channel = channels[activeNode];
+    // Kai mutum ya yi subscribe
+    window.open(`https://youtube.com/${channel.handle}?sub_confirmation=1`, '_blank');
+
+    // Bayan ya dawo, nuna masa Verification Code
+    setTimeout(() => {
+        currentCode = Math.random().toString(36).substring(2,8).toUpperCase();
+        const verifyUI = document.getElementById('verify-ui');
+        verifyUI.innerHTML = `
+            <input type="text" id="hash-input" placeholder="CODE: ${currentCode}" style="background:rgba(0,0,0,0.5); color:#fff; border:1px solid #00ffcc; padding:10px; text-align:center;">
+            <button onclick="confirmNodeActivation()" class="btn-neon" style="margin-top:10px; padding:10px 20px;">CONFIRM NODE</button>
+        `;
+    }, 3000);
+}
+
+async function confirmNodeActivation() {
+    const val = document.getElementById('hash-input').value.toUpperCase();
+    if(val === currentCode && currentCode !== "") {
+        let countSpan = document.getElementById('nodes-count');
+        let totalNodes = 2; // Canza zuwa 5 idan ka kara wasu channels din
+        let currentNodes = parseInt(countSpan.innerText.split(' / ')[0]) + 1;
+        
+        countSpan.innerText = currentNodes + " / " + totalNodes;
+        document.getElementById('progress-bar').style.width = (currentNodes * (100/totalNodes)) + "%";
+
+        if(currentNodes === totalNodes) {
+            await db.collection("users").doc(currentUser).update({ isVerified: true });
+            await db.collection("system_stats").doc("daily_limit").update({
+                count: firebase.firestore.FieldValue.increment(1)
+            });
+            alert("PROTOCOL ACTIVATED! Redirecting to Secure Vault...");
+            location.href = "dashboard.html";
+        } else {
+            document.getElementById('verify-ui').classList.add('hidden');
+            document.getElementById('player-area').classList.add('hidden');
+            document.getElementById('nodes-list').classList.remove('hidden');
+            currentCode = "";
+            alert("Node Secure. Proceed to next synchronization.");
+        }
+    } else {
+        alert("INVALID HASH. Node security failed.");
+    }
+    }
+                
 </script>
     
         
