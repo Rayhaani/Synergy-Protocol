@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY | ORBITAL SYSTEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: radial-gradient(circle at center, #050a15 0%, #000 100%);
+            color: #fff; font-family: 'Space Grotesk', sans-serif;
+            height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .orbitron { font-family: 'Syncopate', sans-serif; }
+
+        /* The Core */
+        .core-system {
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, #00f2fe 0%, transparent 70%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 50px rgba(0, 242, 254, 0.4);
+            position: relative; z-index: 10;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Orbiting Items */
+        .orbit-container {
+            position: absolute; width: 500px; height: 500px;
+            border: 1px solid rgba(0, 242, 254, 0.1);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+        .node-item {
+            position: absolute; width: 80px; height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            animation: counter-rotate 20s linear infinite;
+            cursor: pointer; transition: 0.3s;
+        }
+        .node-item:hover { border-color: #00f2fe; background: rgba(0, 242, 254, 0.1); transform: scale(1.1); }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes counter-rotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+        /* Positions */
+        .n1 { top: -40px; left: 50%; margin-left: -40px; }
+        .n2 { bottom: -40px; left: 50%; margin-left: -40px; }
+        .n3 { left: -40px; top: 50%; margin-top: -40px; }
+        .n4 { right: -40px; top: 50%; margin-top: -40px; }
+    </style>
+</head>
+<body>
+
+    <div class="relative flex items-center justify-center">
+        <div class="core-system">
+            <div class="text-black orbitron text-xs font-black text-center">SYNERGY<br>CORE</div>
+        </div>
+
+        <div class="orbit-container">
+            <div onclick="location.href='activation.html'" class="node-item n1">
+                <span class="text-lg">⚡</span>
+                <span class="text-[8px] orbitron mt-1">Activate</span>
+            </div>
+            <div class="node-item n2">
+                <span class="text-lg">📊</span>
+                <span class="text-[8px] orbitron mt-1">Stats</span>
+            </div>
+            <div class="node-item n3">
+                <span class="text-lg">🔒</span>
+                <span class="text-[8px] orbitron mt-1">Security</span>
+            </div>
+            <div class="node-item n4">
+                <span class="text-lg">💰</span>
+                <span class="text-[8px] orbitron mt-1">Yield</span>
+            </div>
+        </div>
+
+        <div class="absolute -bottom-40 text-center w-[600px] space-y-4">
+            <h2 class="orbitron text-2xl tracking-[10px] opacity-50">Global Infrastructure</h2>
+            <p class="text-xs text-gray-500 font-light tracking-widest leading-relaxed">
+                A multi-layered ecosystem designed for seamless YouTube automation. <br> Powered by Synergy Protocol Neural Nodes.
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
