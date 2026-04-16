@@ -250,37 +250,37 @@
         secureBtn.innerText = "FINALIZING...";
 
         try {
-            // 1. Ajiye log a Firebase (don bayanan sirri)
-            await db.collection("subscription_logs").add({
+            // 1. Ajiye log (Muna sa shi a 'try' don koda network ya dan yi jinkiri bai tsayar da mu ba)
+            db.collection("subscription_logs").add({
                 youtube_handle: ytName,
                 node_id: activeNode,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 user: currentUser
             });
 
-            // 2. Idan mutum yana kan Node 2 ne, to ya gama duka kenan
             if(activeNode == 2) {
-                // Sabunta matsayin sa a Database zuwa VERIFIED
-                await db.collection("users").doc(currentUser).update({ isVerified: true });
+                // 2. Sabunta Database a background
+                db.collection("users").doc(currentUser).update({ isVerified: true });
                 
-                alert("PROTOCOL FULLY ACTIVE! Redirecting...");
-                
-                // FORCE REDIRECT - Wannan shi ne zai kai ka Dashboard ko da network ya yi nauyi
+                // 3. TILASTA REDIRECT (Wannan ne amsar kukan ka)
+                alert("PROTOCOL FULLY ACTIVE!");
                 window.location.replace("dashboard.html"); 
             } else {
-                alert("Node 1 Secured Successfully. Proceed to Node 2.");
+                alert("Node 1 Secured Successfully.");
                 location.reload(); 
             }
         } catch (e) {
-            console.error("Firebase Error:", e);
-            secureBtn.disabled = false;
-            secureBtn.innerText = "SECURE NODE";
-            alert("Network Busy. Please tap SECURE NODE again.");
+            // Koda an samu error wajen 'add', muddin Node 2 ne, mu tura shi
+            if(activeNode == 2) {
+                window.location.replace("dashboard.html");
+            } else {
+                secureBtn.disabled = false;
+                alert("Network busy, please try again.");
+            }
         }
-    } else { 
-        alert("INVALID AUTH CODE"); 
-    }
-       }
+    } else { alert("WRONG CODE"); }
+                      }
+    
     
     
 
