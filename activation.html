@@ -110,6 +110,7 @@
         
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+    // 1. FIREBASE CONFIG (No changes made)
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
@@ -123,43 +124,34 @@
     const db = firebase.firestore();
     const currentUser = localStorage.getItem('synergy_user');
 
-    // 1. Wannan zai duba status dinka koda kayi refresh
+    // 2. PERMANENT SYNC (Daga Database yake duba koda an goge browser data)
     async function syncProgress() {
-    if (!currentUser) { location.href = "signin.html"; return; }
-    
-    // 1. Duba idan riga an gama duka activation
-    const userDoc = await db.collection("users").doc(currentUser).get();
-    if (userDoc.exists && userDoc.data().isVerified === true) {
-        location.href = "dashboard.html"; 
-        return;
+        if (!currentUser) { location.href = "signin.html"; return; }
+        
+        const userDoc = await db.collection("users").doc(currentUser).get();
+        if (userDoc.exists && userDoc.data().isVerified === true) {
+            location.href = "dashboard.html"; return;
+        }
+
+        // Tambayi Database adadin nodes din da aka riga aka yi nasara akai
+        const snapshot = await db.collection("subscription_logs").where("user", "==", currentUser).get();
+        let completedNodes = [];
+        snapshot.forEach(doc => { completedNodes.push(doc.data().node_id); });
+        
+        updateUI(completedNodes);
     }
 
-    // 2. Nemo logs din mutum daga database maimakon browser data
-    const snapshot = await db.collection("subscription_logs")
-                           .where("user", "==", currentUser)
-                           .get();
-    
-    let completedNodes = [];
-    snapshot.forEach(doc => {
-        completedNodes.push(doc.data().node_id);
-    });
-
-    updateUI(completedNodes);
-    }
-    
     function updateUI(completed) {
-        const count = completed.length;
+        const count = Math.min(completed.length, 2);
         document.getElementById('nodes-count').innerText = `${count} / 2`;
         document.getElementById('progress-bar').style.width = (count * 50) + "%";
 
-        // Canja launin button da status din Node din da aka gama
         completed.forEach(nodeId => {
             const btn = document.querySelector(`[onclick="launchActivation(${nodeId})"]`);
             if(btn) {
                 btn.innerText = "SYNCHRONIZED";
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
-                // Nemo text din status dinsa mu canja shi
                 btn.previousElementSibling.innerText = "Status: Protocol Active";
                 btn.previousElementSibling.classList.replace('text-gray-500', 'text-green-400');
             }
@@ -207,9 +199,9 @@
         const verifyUI = document.getElementById('verify-ui');
         const data = nodeData[activeNode];
         verifyUI.innerHTML = `
-            <div class="p-8 border-t-2 border-cyan-500 rounded-[30px] bg-black/80 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,242,254,0.2)]">
+            <div class="p-4 border-t border-cyan-500/50 rounded-t-[25px] bg-black/90 backdrop-blur-xl">
                 <button onclick="window.open('https://youtube.com/${data.handle}?sub_confirmation=1', '_blank'); startVerificationProcess();" 
-                        class="w-full py-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 text-black orbitron text-[11px] font-black">
+                        class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-black orbitron text-[10px] font-black">
                     INITIALIZE SUBSCRIPTION
                 </button>
             </div>
@@ -219,30 +211,33 @@
 
     function startVerificationProcess() {
         const verifyUI = document.getElementById('verify-ui');
-        verifyUI.innerHTML = `<div class="p-6 text-center animate-pulse orbitron text-[9px] text-cyan-400 font-bold">VERIFYING NEURAL LINK...</div>`;
+        verifyUI.innerHTML = `<div class="p-4 text-center animate-pulse orbitron text-[8px] text-cyan-400">CONNECTING...</div>`;
         setTimeout(() => {
             verifyUI.innerHTML = `
-                <div class="p-6 border border-white/10 rounded-[30px] bg-white/5 space-y-5">
-                    <input type="text" id="yt-username" class="w-full bg-black/40 border border-cyan-500/30 rounded-xl p-4 text-center text-white outline-none" placeholder="YOUTUBE USERNAME">
-                    <button id="gen-btn" onclick="revealFinalCode()" class="w-full py-4 glass-premium rounded-xl orbitron text-[10px] text-cyan-400 border border-cyan-500/50">GENERATE HASH</button>
+                <div class="p-4 border border-white/10 rounded-2xl bg-white/5 space-y-3">
+                    <input type="text" id="yt-username" class="w-full bg-black/40 border border-cyan-500/30 rounded-lg p-3 text-center text-white text-xs outline-none" placeholder="YOUTUBE NAME">
+                    <button id="gen-btn" onclick="revealFinalCode()" class="w-full py-3 glass-premium rounded-lg orbitron text-[9px] text-cyan-400 border border-cyan-500/30">GENERATE HASH</button>
                 </div>
             `;
         }, 4000);
     }
 
+    // 3. SMART BOX SIZE (An rage girman sa yadda zai bayyana duka a screen)
     function revealFinalCode() {
         const username = document.getElementById('yt-username').value;
-        if(username.length < 3) { alert("Invalid Username"); return; }
+        if(username.length < 2) { return; }
         
-        document.getElementById('gen-btn').disabled = true;
-        currentCode = "SYN-" + Math.floor(1000 + Math.random() * 9000);
+        currentCode = "SYN-" + Math.floor(1000 + Math.random() * 9999);
         const verifyUI = document.getElementById('verify-ui');
         
         verifyUI.innerHTML = `
-            <div class="p-6 border-2 border-green-500/30 rounded-[35px] bg-green-500/5 space-y-6">
-                <h2 class="digits-terminal text-4xl text-white text-center font-bold">${currentCode}</h2>
-                <input type="text" id="hash-input" class="w-full bg-black/50 border border-green-500/30 rounded-xl p-4 text-center text-white" placeholder="ENTER CODE">
-                <button id="secure-btn" onclick="confirmNodeActivation('${username}')" class="w-full py-5 btn-neon rounded-2xl orbitron text-[11px] font-black">SECURE NODE</button>
+            <div class="p-4 border border-green-500/30 rounded-2xl bg-black/90 space-y-3">
+                <div class="text-center">
+                    <p class="text-[8px] text-green-400 orbitron">AUTH CODE</p>
+                    <h2 class="text-2xl text-white font-bold tracking-widest">${currentCode}</h2>
+                </div>
+                <input type="text" id="hash-input" class="w-full bg-white/5 border border-green-500/20 rounded-lg p-2 text-center text-white text-sm" placeholder="PASTE CODE">
+                <button id="secure-btn" onclick="confirmNodeActivation('${username}')" class="w-full py-3 btn-neon rounded-lg orbitron text-[9px] font-black">SECURE NODE</button>
             </div>
         `;
     }
@@ -252,10 +247,10 @@
         if(val === currentCode) {
             const secureBtn = document.getElementById('secure-btn');
             secureBtn.disabled = true;
-            secureBtn.innerText = "SAVING PROGRESS...";
+            secureBtn.innerText = "SAVING...";
 
             try {
-                // 1. Ajiye Log a Firebase
+                // Ajiye log a Database (Wannan shine permanent fix din)
                 await db.collection("subscription_logs").add({
                     youtube_handle: ytName,
                     node_id: activeNode,
@@ -263,27 +258,23 @@
                     user: currentUser
                 });
 
-                // 2. Ajiye a LocalStorage don koda an yi refresh
-                let completed = JSON.parse(localStorage.getItem('completed_nodes') || "[]");
-                if(!completed.includes(activeNode)) { completed.push(activeNode); }
-                localStorage.setItem('completed_nodes', JSON.stringify(completed));
-
-                if(completed.length >= 2) {
+                // Duba idan an gama duka nodes guda 2
+                const checkLogs = await db.collection("subscription_logs").where("user", "==", currentUser).get();
+                if(checkLogs.size >= 2) {
                     await db.collection("users").doc(currentUser).update({ isVerified: true });
-                    localStorage.removeItem('completed_nodes'); // Share shi tunda an gama
-                    alert("PROTOCOL ACTIVE! Redirecting...");
+                    alert("PROTOCOL ACTIVE!");
                     location.href = "dashboard.html";
                 } else {
-                    alert("Node 1 Synchronized Successfully.");
-                    location.reload(); // Wannan zai sa system din ya sake duba "syncProgress"
+                    alert("Node Secured.");
+                    location.reload(); 
                 }
             } catch (e) {
-                alert("Database Error.");
+                alert("Database Busy.");
                 secureBtn.disabled = false;
             }
-        } else { alert("HASH ERROR"); }
+        } else { alert("WRONG CODE"); }
     }
-    
+
             
         </script>
     
