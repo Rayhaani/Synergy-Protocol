@@ -123,16 +123,40 @@
     const db = firebase.firestore();
     const currentUser = localStorage.getItem('synergy_user');
 
-    // MATAKI NA FARKO: Duba idan mutum ya riga ya gama
-    async function checkUserStatus() {
-        if (!currentUser) { location.href = "login.html"; return; }
+    // 1. Wannan zai duba status dinka koda kayi refresh
+    async function syncProgress() {
+        if (!currentUser) { location.href = "signin.html"; return; }
         
         const userDoc = await db.collection("users").doc(currentUser).get();
         if (userDoc.exists && userDoc.data().isVerified === true) {
-            location.href = "dashboard.html"; // Tura shi dashboard idan ya riga ya gama
+            location.href = "dashboard.html"; return;
         }
+
+        // Duba idan akwai Node din da aka riga aka gama a LocalStorage
+        let completedNodes = JSON.parse(localStorage.getItem('completed_nodes') || "[]");
+        updateUI(completedNodes);
     }
-    checkUserStatus();
+
+    function updateUI(completed) {
+        const count = completed.length;
+        document.getElementById('nodes-count').innerText = `${count} / 2`;
+        document.getElementById('progress-bar').style.width = (count * 50) + "%";
+
+        // Canja launin button da status din Node din da aka gama
+        completed.forEach(nodeId => {
+            const btn = document.querySelector(`[onclick="launchActivation(${nodeId})"]`);
+            if(btn) {
+                btn.innerText = "SYNCHRONIZED";
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                // Nemo text din status dinsa mu canja shi
+                btn.previousElementSibling.innerText = "Status: Protocol Active";
+                btn.previousElementSibling.classList.replace('text-gray-500', 'text-green-400');
+            }
+        });
+    }
+
+    syncProgress();
 
     let player, activeNode = 0, currentCode = "", timerInterval;
     const nodeData = {
@@ -173,7 +197,7 @@
         const verifyUI = document.getElementById('verify-ui');
         const data = nodeData[activeNode];
         verifyUI.innerHTML = `
-            <div class="p-8 border-t-2 border-cyan-500 rounded-[30px] bg-black/60 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,242,254,0.2)]">
+            <div class="p-8 border-t-2 border-cyan-500 rounded-[30px] bg-black/80 backdrop-blur-3xl shadow-[0_-20px_50px_rgba(0,242,254,0.2)]">
                 <button onclick="window.open('https://youtube.com/${data.handle}?sub_confirmation=1', '_blank'); startVerificationProcess();" 
                         class="w-full py-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 text-black orbitron text-[11px] font-black">
                     INITIALIZE SUBSCRIPTION
@@ -185,7 +209,7 @@
 
     function startVerificationProcess() {
         const verifyUI = document.getElementById('verify-ui');
-        verifyUI.innerHTML = `<div class="p-6 text-center animate-pulse orbitron text-[9px] text-cyan-400">Syncing...</div>`;
+        verifyUI.innerHTML = `<div class="p-6 text-center animate-pulse orbitron text-[9px] text-cyan-400 font-bold">VERIFYING NEURAL LINK...</div>`;
         setTimeout(() => {
             verifyUI.innerHTML = `
                 <div class="p-6 border border-white/10 rounded-[30px] bg-white/5 space-y-5">
@@ -193,14 +217,14 @@
                     <button id="gen-btn" onclick="revealFinalCode()" class="w-full py-4 glass-premium rounded-xl orbitron text-[10px] text-cyan-400 border border-cyan-500/50">GENERATE HASH</button>
                 </div>
             `;
-        }, 5000);
+        }, 4000);
     }
 
     function revealFinalCode() {
         const username = document.getElementById('yt-username').value;
         if(username.length < 3) { alert("Invalid Username"); return; }
         
-        document.getElementById('gen-btn').disabled = true; // Kashe maballin don hana double click
+        document.getElementById('gen-btn').disabled = true;
         currentCode = "SYN-" + Math.floor(1000 + Math.random() * 9000);
         const verifyUI = document.getElementById('verify-ui');
         
@@ -217,11 +241,11 @@
         const val = document.getElementById('hash-input').value.toUpperCase();
         if(val === currentCode) {
             const secureBtn = document.getElementById('secure-btn');
-            secureBtn.disabled = true; // KARIYAR DOUBLE CLICK
-            secureBtn.innerText = "SYNCHRONIZING...";
+            secureBtn.disabled = true;
+            secureBtn.innerText = "SAVING PROGRESS...";
 
             try {
-                // Adana Log a Firebase
+                // 1. Ajiye Log a Firebase
                 await db.collection("subscription_logs").add({
                     youtube_handle: ytName,
                     node_id: activeNode,
@@ -229,28 +253,27 @@
                     user: currentUser
                 });
 
-                let countSpan = document.getElementById('nodes-count');
-                let currentNodes = parseInt(countSpan.innerText.split(' / ')[0]) + 1;
-                
-                // KARIYA: Kar ya bar lissafi ya wuce 2
-                if (currentNodes > 2) currentNodes = 2;
+                // 2. Ajiye a LocalStorage don koda an yi refresh
+                let completed = JSON.parse(localStorage.getItem('completed_nodes') || "[]");
+                if(!completed.includes(activeNode)) { completed.push(activeNode); }
+                localStorage.setItem('completed_nodes', JSON.stringify(completed));
 
-                countSpan.innerText = currentNodes + " / 2";
-                document.getElementById('progress-bar').style.width = (currentNodes * 50) + "%";
-
-                if(currentNodes === 2) {
+                if(completed.length >= 2) {
                     await db.collection("users").doc(currentUser).update({ isVerified: true });
-                    setTimeout(() => { location.href = "dashboard.html"; }, 2000);
+                    localStorage.removeItem('completed_nodes'); // Share shi tunda an gama
+                    alert("PROTOCOL ACTIVE! Redirecting...");
+                    location.href = "dashboard.html";
                 } else {
-                    alert("Node 1 Secured.");
-                    location.reload(); // Wannan zai dawo da shi ya kalli na biyun cikin natsuwa
+                    alert("Node 1 Synchronized Successfully.");
+                    location.reload(); // Wannan zai sa system din ya sake duba "syncProgress"
                 }
             } catch (e) {
-                alert("Connection Error. Try again.");
+                alert("Database Error.");
                 secureBtn.disabled = false;
             }
         } else { alert("HASH ERROR"); }
     }
+    
             
         </script>
     
