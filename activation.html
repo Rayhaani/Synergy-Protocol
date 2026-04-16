@@ -242,15 +242,15 @@
         `;
     }
 
-    async function confirmNodeActivation(ytName) {
+        async function confirmNodeActivation(ytName) {
         const val = document.getElementById('hash-input').value.toUpperCase();
         if(val === currentCode) {
             const secureBtn = document.getElementById('secure-btn');
             secureBtn.disabled = true;
-            secureBtn.innerText = "SAVING...";
+            secureBtn.innerText = "SYNCHRONIZING...";
 
             try {
-                // Ajiye log a Database (Wannan shine permanent fix din)
+                // 1. Ajiye log a Database
                 await db.collection("subscription_logs").add({
                     youtube_handle: ytName,
                     node_id: activeNode,
@@ -258,22 +258,27 @@
                     user: currentUser
                 });
 
-                // Duba idan an gama duka nodes guda 2
-                const checkLogs = await db.collection("subscription_logs").where("user", "==", currentUser).get();
-                if(checkLogs.size >= 2) {
+                // 2. Duba nawa aka kammala
+                const snapshot = await db.collection("subscription_logs")
+                                       .where("user", "==", currentUser).get();
+                
+                // Idan wannan shi ne na biyu ko fiye, to an gama
+                if(snapshot.size >= 2) {
                     await db.collection("users").doc(currentUser).update({ isVerified: true });
-                    alert("PROTOCOL ACTIVE!");
-                    location.href = "dashboard.html";
+                    alert("PROTOCOL FULLY ACTIVE!");
+                    window.location.href = "dashboard.html"; // Tabbataccen redirect
                 } else {
-                    alert("Node Secured.");
+                    alert("Node 1 Secured. Proceed to next.");
                     location.reload(); 
                 }
             } catch (e) {
-                alert("Database Busy.");
+                console.error(e);
+                alert("Connection error. Try again.");
                 secureBtn.disabled = false;
             }
         } else { alert("WRONG CODE"); }
-    }
+                        }
+    
 
             
         </script>
