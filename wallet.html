@@ -64,6 +64,7 @@
                 <button id="withdraw-btn" class="w-full py-5 rounded-2xl bg-white text-black orbitron font-bold text-[11px] tracking-[2px] hover:bg-cyan-400 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.05)]">
                   Process Transaction
                 </button>
+                <p onclick="openWithdrawalModal()" class="text-center text-[9px] text-cyan-700 orbitron cursor-pointer mt-4 hover:text-cyan-400">Settlement Details</p>
             </div>
         </section>
 
@@ -89,6 +90,30 @@
         </section>
     </main>
 
+    <div id="withdrawal-modal" class="fixed inset-0 z-[20000] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeWithdrawalModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 master-card rounded-t-[40px] p-8 border-t border-cyan-500/30">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
+            <h3 class="orbitron text-center text-sm mb-8 tracking-[3px]">Settlement Details</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="orbitron text-[8px] text-gray-500 ml-2">Bank Name</label>
+                    <input type="text" id="bank-name" placeholder="e.g. Opay, Kuda, GTBank" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl input-normal text-white outline-none">
+                </div>
+                <div>
+                    <label class="orbitron text-[8px] text-gray-500 ml-2">Account Number</label>
+                    <input type="number" id="account-number" placeholder="0000000000" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl input-normal text-white outline-none">
+                </div>
+                <div>
+                    <label class="orbitron text-[8px] text-gray-500 ml-2">Account Name</label>
+                    <input type="text" id="account-name" placeholder="Full Legal Name" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl input-normal text-white outline-none">
+                </div>
+                <button onclick="saveWithdrawalDetails()" class="w-full py-5 rounded-2xl bg-cyan-500 text-black orbitron font-bold text-[11px] tracking-[2px]">Save & Lock Details</button>
+                <button onclick="closeWithdrawalModal()" class="w-full py-3 text-[10px] orbitron text-gray-600">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script>
@@ -107,7 +132,6 @@
 
     async function syncWalletData() {
         if (!currentActiveUser) { window.location.replace("signin.html"); return; }
-
         db.collection("users").doc(currentActiveUser).onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
@@ -121,10 +145,35 @@
                 document.getElementById('total-earned-display').innerText = `₦${totalEarned.toLocaleString()}`;
                 document.getElementById('withdrawn-display').innerText = `₦${withdrawn.toLocaleString()}`;
 
+                // Load bank details into fields if they exist
+                if (data.bankDetails) {
+                    document.getElementById('bank-name').value = data.bankDetails.bankName || '';
+                    document.getElementById('account-number').value = data.bankDetails.accountNumber || '';
+                    document.getElementById('account-name').value = data.bankDetails.accountName || '';
+                }
+
                 updateTransactionHistory(data);
                 controlWithdrawButton(data.isVerified, availableEquity);
             }
         });
+    }
+
+    function openWithdrawalModal() { document.getElementById('withdrawal-modal').classList.remove('hidden'); }
+    function closeWithdrawalModal() { document.getElementById('withdrawal-modal').classList.add('hidden'); }
+
+    async function saveWithdrawalDetails() {
+        const bank = document.getElementById('bank-name').value;
+        const accNum = document.getElementById('account-number').value;
+        const accName = document.getElementById('account-name').value;
+        if (!bank || !accNum || !accName) { alert("Please fill all settlement fields!"); return; }
+
+        try {
+            await db.collection("users").doc(currentActiveUser).update({
+                bankDetails: { bankName: bank, accountNumber: accNum, accountName: accName, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+            });
+            alert("SETTLEMENT DETAILS SECURED!");
+            closeWithdrawalModal();
+        } catch (error) { alert("System Error. Try again."); }
     }
 
     function updateTransactionHistory(data) {
@@ -132,46 +181,57 @@
         if (historyContainer) {
             let historyHTML = '';
             if (data.videoBalance > 0 || data.shareBalance > 0) {
-                historyHTML += `
-                    <div class="flex justify-between items-center py-3 border-b border-white/[0.03]">
-                        <div><p class="text-[12px] font-medium text-gray-200">Protocol Yield</p><p class="text-[9px] text-gray-500 uppercase">Live Earnings</p></div>
-                        <div class="text-right"><p class="digits-terminal text-[13px] text-green-400">+₦${(data.videoBalance + data.shareBalance).toLocaleString()}</p><p class="orbitron text-[6px] text-gray-600">Settled</p></div>
-                    </div>`;
+                historyHTML += `<div class="flex justify-between items-center py-3 border-b border-white/[0.03]"><div><p class="text-[12px] font-medium text-gray-200">Protocol Yield</p><p class="text-[9px] text-gray-500 uppercase">Live Earnings</p></div><div class="text-right"><p class="digits-terminal text-[13px] text-green-400">+₦${(data.videoBalance + data.shareBalance).toLocaleString()}</p><p class="orbitron text-[6px] text-gray-600">Settled</p></div></div>`;
             }
             if (data.totalWithdrawn > 0) {
-                historyHTML += `
-                    <div class="flex justify-between items-center py-3">
-                        <div><p class="text-[12px] font-medium text-gray-200">Asset Withdrawal</p><p class="text-[9px] text-gray-500 uppercase">Transfer Log</p></div>
-                        <div class="text-right"><p class="digits-terminal text-[13px] text-red-400">-₦${data.totalWithdrawn.toLocaleString()}</p><p class="orbitron text-[6px] text-green-500">Confirmed</p></div>
-                    </div>`;
+                historyHTML += `<div class="flex justify-between items-center py-3"><div><p class="text-[12px] font-medium text-gray-200">Asset Withdrawal</p><p class="text-[9px] text-gray-500 uppercase">Transfer Log</p></div><div class="text-right"><p class="digits-terminal text-[13px] text-red-400">-₦${data.totalWithdrawn.toLocaleString()}</p><p class="orbitron text-[6px] text-green-500">Confirmed</p></div></div>`;
             }
             historyContainer.innerHTML = historyHTML || '<p class="text-center text-[10px] text-gray-600 uppercase py-4">No recent activity</p>';
         }
     }
 
-    function controlWithdrawButton(isVerified, balance) {
-        const btn = document.getElementById('withdraw-btn');
-        if (!btn) return;
-        if (isVerified === true) {
-            btn.disabled = false; btn.style.opacity = "1"; btn.innerText = "Process Transaction";
-            btn.onclick = () => {
-                const amount = document.getElementById('withdraw-amount').value;
-                if (!amount || amount <= 0) { alert("PLEASE ENTER VALID AMOUNT"); }
-                else if (amount > balance) { alert("INSUFFICIENT EQUITY"); }
-                else if (amount < 2000) { alert("MINIMUM WITHDRAWAL: ₦2,000"); }
-                else { alert("TRANSACTION INITIALIZED: PROCESSING..."); }
-            };
-        } else {
-            btn.disabled = true; btn.style.opacity = "0.3"; btn.innerText = "LOCKED: ACTIVATE NODES";
-        }
+    function controlWithdrawButton(isVerified, balance, bankDetails) {
+    const btn = document.getElementById('withdraw-btn');
+    if (!btn) return;
+
+    if (isVerified === true) {
+        btn.disabled = false; 
+        btn.style.opacity = "1"; 
+        btn.innerText = "Process Transaction";
+        
+        btn.onclick = () => {
+            // 1. Check idan akwai Bank Details
+            if (!bankDetails || !bankDetails.accountNumber) {
+                alert("SETTLEMENT REQUIRED: Please provide your bank details first.");
+                openWithdrawalModal(); // Zai bude masa inda zai cike kai tsaye
+                return;
+            }
+
+            // 2. Duba Amount
+            const amount = document.getElementById('withdraw-amount').value;
+            if (!amount || amount <= 0) { 
+                alert("PLEASE ENTER VALID AMOUNT"); 
+            }
+            else if (amount > balance) { 
+                alert("INSUFFICIENT EQUITY"); 
+            }
+            else if (amount < 2000) { 
+                alert("MINIMUM WITHDRAWAL: ₦2,000"); 
+            }
+            else { 
+                // Nan ne zamu hada da Firebase nan gaba don yin withdrawal din
+                alert(`TRANSACTION INITIALIZED: ₦${amount} to ${bankDetails.bankName}`); 
+            }
+        };
+    } else {
+        btn.disabled = true; 
+        btn.style.opacity = "0.3"; 
+        btn.innerText = "LOCKED: ACTIVATE NODES";
     }
-
-    function toggleGoogleMenu(event) { event.stopPropagation(); document.getElementById('google-nav').classList.toggle('active'); }
-    window.onclick = () => { const nav = document.getElementById('google-nav'); if(nav) nav.classList.remove('active'); };
-
-    syncWalletData();
+    }
+        
     </script>
     <script src="app.js"></script>
 </body>
-                    </html>
-    
+                                                                                 </html>
+        
