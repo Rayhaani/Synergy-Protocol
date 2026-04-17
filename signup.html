@@ -234,25 +234,29 @@ async function register() {
 
         // C. Idan komai ya yi, sai a nuna success overlay
         
+    
         // D. Create account a background
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-        await userCredential.user.sendEmailVerification();
-        mainCard.style.display = 'none';
-        showSuccessOverlay(email);
-        
+const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+await userCredential.user.sendEmailVerification();
+mainCard.style.display = 'none';
+showSuccessOverlay(email);
 
-        await userRef.set({
-            uid: userCredential.user.uid,
-            fullName: document.getElementById('full-name').value.trim(),
-            email: email, 
-            username: user,
-            state: document.getElementById('state').value.trim(),
-            phoneNumber: document.getElementById('phone').value.trim(),
-            videoBalance: 0, 
-            shareBalance: 0, 
-            rank: "IRON", 
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+await userRef.set({
+    uid: userCredential.user.uid,
+    fullName: document.getElementById('full-name').value.trim(),
+    email: email, 
+    username: user,
+    state: document.getElementById('state').value.trim(),
+    phoneNumber: document.getElementById('phone').value.trim(),
+    videoBalance: 0, 
+    shareBalance: 0, 
+    isVerified: false, // WANNAN SHINE GYARAN: Domin kowa ya fara da false
+    rank: "IRON", 
+    videosWatchedToday: 0, // Domin resetting
+    lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+        
 
     } catch (e) {
         // Idan account creation ya gaza bayan overlay ya fito
