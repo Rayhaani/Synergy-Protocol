@@ -408,14 +408,14 @@
     const currentUser = localStorage.getItem('synergy_user');
 
     // 2. SECURITY GATE (Wannan zai fatattaki 'rayhaan' da sauran unverified users)
-    async function checkAccess() {
+        async function checkAccess() {
+        // 1. Idan babu user a localStorage, tura shi Sign-in
         if (!currentUser) {
             window.location.replace("signin.html");
             return;
         }
 
         try {
-            // Mu duba Firebase kai tsaye don gaskiyar magana
             const doc = await db.collection("users").doc(currentUser).get();
             
             if (doc.exists) {
@@ -424,28 +424,27 @@
                 if (data.isVerified === true) {
                     // IDAN VERIFIED NE:
                     localStorage.setItem('synergy_verified_status', 'true');
-                    document.body.style.display = 'block'; // BUDE SHAFIN YANZU TUNDA SHI VERIFIED NE
+                    document.body.style.display = 'block'; 
                 } else {
-                    // IDAN BA VERIFIED BA NE:
+                    // IDAN 'FALSE' NE KO BA A YI BA:
                     localStorage.removeItem('synergy_verified_status');
-                    window.location.replace("activation.html"); // KORA SHI KAI TSAYE
+                    // MU TABBATAR YANA TAFIA ACTIVATION BA SIGNIN BA
+                    window.location.replace("activation.html"); 
                 }
             } else {
+                // Idan babu user din a Database kwata-kwata
                 window.location.replace("signin.html");
             }
         } catch (err) {
             console.error("Database Error:", err);
-            // Idan an samu matsalar network, mu duba local status a matsayin backup
             if (localStorage.getItem('synergy_verified_status') === 'true') {
                 document.body.style.display = 'block';
             } else {
                 window.location.replace("activation.html");
             }
         }
-    }
-
-    // Kira tsaron nan take kafin sauran code su yi loading
-    checkAccess();
+        }
+    
 
     // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
     let player, currentCode = "", lastTime = 0;
