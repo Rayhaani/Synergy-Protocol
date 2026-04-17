@@ -387,6 +387,28 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+
+    async function checkAccess() {
+    const currentUser = localStorage.getItem('synergy_user');
+    if (!currentUser) { window.location.href = "signin.html"; return; }
+
+    // Duba matsayin activation daga Database
+    const userDoc = await db.collection("users").doc(currentUser).get();
+    
+    if (userDoc.exists) {
+        const userData = userDoc.data();
+        if (userData.isVerified !== true) {
+            // Idan bai gama activation ba, kora shi baya maza!
+            window.location.replace("activation.html");
+        }
+    } else {
+        window.location.href = "signin.html";
+    }
+}
+
+// Kira wannan function din nan take shafi ya bude
+checkAccess();
+    
     // 1. INITIALIZATION
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
