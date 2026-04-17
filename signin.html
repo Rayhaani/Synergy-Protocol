@@ -176,19 +176,18 @@
             }
 
             // 4. Duba matsayin Activation (isVerified a Firestore)
-            const userDoc = await db.collection("users").doc(loginInput.toLowerCase()).get();
-            const userData = userDoc.data();
+            
+localStorage.setItem('synergy_user', loginInput.toLowerCase());
 
-            localStorage.setItem('synergy_user', loginInput.toLowerCase());
+// 5. Tura shi Dashboard kai tsaye ba tare da jiran Database ba
+showTopNotif("Access Granted! Connecting...", "success");
+setTimeout(() => { 
+    window.location.href = "dashboard.html"; 
+}, 1200);
+            
 
-            if (userData && userData.isVerified === true) {
-                showTopNotif("Access Granted!", "success");
-                setTimeout(() => { window.location.href = "dashboard.html"; }, 1500);
-            } else {
-                showTopNotif("Activation Required.", "success");
-                setTimeout(() => { window.location.href = "activation.html"; }, 1500);
-            }
-
+        
+        
         } catch (error) {
             // Wannan zai nuna maka ainihin error din a Inspect Element -> Console
             console.error("Firebase Error:", error.code, error.message);
