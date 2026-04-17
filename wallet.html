@@ -190,48 +190,29 @@
         }
     }
 
-    function controlWithdrawButton(isVerified, balance, bankDetails) {
-    const btn = document.getElementById('withdraw-btn');
-    if (!btn) return;
-
-    if (isVerified === true) {
-        btn.disabled = false; 
-        btn.style.opacity = "1"; 
-        btn.innerText = "Process Transaction";
-        
-        btn.onclick = () => {
-            // 1. Check idan akwai Bank Details
-            if (!bankDetails || !bankDetails.accountNumber) {
-                alert("SETTLEMENT REQUIRED: Please provide your bank details first.");
-                openWithdrawalModal(); // Zai bude masa inda zai cike kai tsaye
-                return;
-            }
-
-            // 2. Duba Amount
-            const amount = document.getElementById('withdraw-amount').value;
-            if (!amount || amount <= 0) { 
-                alert("PLEASE ENTER VALID AMOUNT"); 
-            }
-            else if (amount > balance) { 
-                alert("INSUFFICIENT EQUITY"); 
-            }
-            else if (amount < 2000) { 
-                alert("MINIMUM WITHDRAWAL: ₦2,000"); 
-            }
-            else { 
-                // Nan ne zamu hada da Firebase nan gaba don yin withdrawal din
-                alert(`TRANSACTION INITIALIZED: ₦${amount} to ${bankDetails.bankName}`); 
-            }
-        };
-    } else {
-        btn.disabled = true; 
-        btn.style.opacity = "0.3"; 
-        btn.innerText = "LOCKED: ACTIVATE NODES";
+    function controlWithdrawButton(isVerified, balance) {
+        const btn = document.getElementById('withdraw-btn');
+        if (!btn) return;
+        if (isVerified === true) {
+            btn.disabled = false; btn.style.opacity = "1"; btn.innerText = "Process Transaction";
+            btn.onclick = () => {
+                const amount = document.getElementById('withdraw-amount').value;
+                if (!amount || amount <= 0) { alert("PLEASE ENTER VALID AMOUNT"); }
+                else if (amount > balance) { alert("INSUFFICIENT EQUITY"); }
+                else if (amount < 2000) { alert("MINIMUM WITHDRAWAL: ₦2,000"); }
+                else { alert("TRANSACTION INITIALIZED: PROCESSING..."); }
+            };
+        } else {
+            btn.disabled = true; btn.style.opacity = "0.3"; btn.innerText = "LOCKED: ACTIVATE NODES";
+        }
     }
-    }
-        
+
+    function toggleGoogleMenu(event) { event.stopPropagation(); document.getElementById('google-nav').classList.toggle('active'); }
+    window.onclick = () => { const nav = document.getElementById('google-nav'); if(nav) nav.classList.remove('active'); };
+
+    syncWalletData();
     </script>
     <script src="app.js"></script>
 </body>
-                                                                                 </html>
-               
+                                                                                                                                                                                                                                                                                                           </html>
+ 
