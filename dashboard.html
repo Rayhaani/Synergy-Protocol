@@ -389,7 +389,8 @@
     
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    // 1. INITIALIZATION (Tabbatar da wannan block din yana sama)
+    
+    // 1. INITIALIZATION
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
@@ -401,55 +402,54 @@ const firebaseConfig = {
 
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
-const auth = firebase.auth(); // Mun kara auth a nan
 
-// 2. THE ULTIMATE SECURITY GATE
-function checkAccess() {
-    // Wannan zai jira har sai Firebase ta gama "loading" asusun mutum
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            try {
-                // Nemo bayanai daga Firestore
-                const doc = await db.collection("users").doc(user.uid).get();
-                
-                if (doc.exists) {
-                    const data = doc.data();
-                    
-                    // Duba idan mutum verified ne (true) ko a'a (false)
-                    if (data.isVerified === true) {
-                        console.log("Verified User Detected.");
-                        localStorage.setItem('synergy_verified_status', 'true');
-                        // Bude shafin dashboard
-                        document.body.style.setProperty('display', 'block', 'important');
-                    } else {
-                        console.log("Unverified User: Sending to Activation.");
-                        localStorage.removeItem('synergy_verified_status');
-                        window.location.replace("activation.html"); // Wannan zai tura su nan take
-                    }
-                } else {
-                    // Idan babu bayanansu a Firestore
-                    window.location.replace("signin.html");
-                }
-            } catch (err) {
-                console.error("Database Error:", err);
-                // Idan an samu matsalar network, duba local storage
-                if (localStorage.getItem('synergy_verified_status') === 'true') {
-                    document.body.style.setProperty('display', 'block', 'important');
-                } else {
-                    window.location.replace("activation.html");
-                }
+// 2. THE CORRECT ACCESS GATE
+async function checkAccess() {
+    // Mu duba sunan mutum daga localStorage (Domin shi ne Document ID dinka)
+    const username = localStorage.getItem('synergy_user'); 
+
+    if (!username) {
+        window.location.replace("signin.html");
+        return;
+    }
+
+    try {
+        // MUHIMMI: Mun sauya user.uid zuwa 'username' domin ya dace da Firebase dinka
+        const doc = await db.collection("users").doc(username).get();
+        
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Duba isVerified (boolean false/true a Firebase)
+            if (data.isVerified === true) {
+                console.log("Access Granted!");
+                localStorage.setItem('synergy_verified_status', 'true');
+                // Bude shafi
+                document.body.style.setProperty('display', 'block', 'important');
+            } else {
+                console.log("Not Verified. Sending to Activation...");
+                localStorage.removeItem('synergy_verified_status');
+                window.location.replace("activation.html");
             }
         } else {
-            // Idan ma ba a yi Login ba kwata-kwata
+            // Idan bamu ga wannan sunan a Database ba
+            console.error("User document not found!");
             window.location.replace("signin.html");
         }
-    });
+    } catch (err) {
+        console.error("Database Error:", err);
+        // Backup idan babu network
+        if (localStorage.getItem('synergy_verified_status') === 'true') {
+            document.body.style.setProperty('display', 'block', 'important');
+        } else {
+            window.location.replace("activation.html");
+        }
+    }
 }
 
-// Kira function din
+// Kira tsaron nan take
 checkAccess();
                     
-    
 
     // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
     let player, currentCode = "", lastTime = 0;
