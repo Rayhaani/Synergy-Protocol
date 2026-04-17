@@ -178,63 +178,129 @@
     </main>
 
     <script>
-        function toggleGoogleMenu(event) {
-            event.stopPropagation();
-            document.getElementById('google-nav').classList.toggle('active');
-        }
-        window.onclick = () => document.getElementById('google-nav').classList.remove('active');
-    </script>
+        
+// 1. INITIALIZATION (Tabbatar wannan yana sama)
+const firebaseConfig = { 
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+    authDomain: "synergy-protocol.firebaseapp.com", 
+    projectId: "synergy-protocol", 
+    storageBucket: "synergy-protocol.firebasestorage.app", 
+    messagingSenderId: "179647543031", 
+    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
+};
 
-    <script>
-    // Lokacin da aka bude Wallet, nuna kudin dake ciki
-    window.onload = function() {
-        const balance = localStorage.getItem('synergy_balance') || "0.00";
-        const display = document.getElementById('wallet-balance'); 
-        if (display) {
-            display.innerText = "$" + balance;
-        }
-    };
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+const currentActiveUser = localStorage.getItem('synergy_user');
 
+// 2. MAIN SYNC ENGINE
+async function syncWalletData() {
+    if (!currentActiveUser) {
+        window.location.replace("signin.html");
+        return;
+    }
 
-        // Wannan logic din zai kare Withdrawal ba tare da an taba HTML din ba
-async function lockWithdrawalLogic() {
-    const userRef = db.collection("users").doc(currentUser);
-    
-    userRef.onSnapshot((doc) => {
+    db.collection("users").doc(currentActiveUser).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
-            // Nemo button din ta hanyar amfani da text dinsa tunda bashi da ID
-            const allButtons = document.querySelectorAll('button');
-            let withdrawBtn = Array.from(allButtons).find(b => b.textContent.includes('Process Transaction'));
+            
+            const vBal = data.videoBalance || 0;
+            const sBal = data.shareBalance || 0;
+            const totalEarned = vBal + sBal;
+            const withdrawn = data.totalWithdrawn || 0;
+            const availableEquity = totalEarned - withdrawn;
 
-            if (withdrawBtn) {
-                if (data.isVerified === true) {
-                    // IDAN SHI VERIFIED NE
-                    withdrawBtn.disabled = false;
-                    withdrawBtn.style.opacity = "1";
-                    withdrawBtn.style.cursor = "pointer";
-                    withdrawBtn.innerText = "Process Transaction";
-                } else {
-                    // IDAN BA VERIFIED BA
-                    withdrawBtn.disabled = true;
-                    withdrawBtn.style.opacity = "0.3";
-                    withdrawBtn.style.cursor = "not-allowed";
-                    withdrawBtn.innerText = "LOCKED: ACTIVATE NODES";
-                    
-                    // Idan ya yi kokarin dannawa
-                    withdrawBtn.onclick = (e) => {
-                        e.preventDefault();
-                        showSynergyAlert("SAI KA YI ACTIVATION TUKUNA", "error");
-                    };
-                }
+            // Update Main Display
+            const equityDisplay = document.querySelector('h1.digits-terminal');
+            if (equityDisplay) {
+                equityDisplay.innerHTML = `<span class="text-gray-500 text-2xl">₦</span>${availableEquity.toLocaleString()}<span class="text-gray-500 text-2xl">.00</span>`;
             }
+
+            // Update Metrics Grid
+            const metrics = document.querySelectorAll('h4.digits-terminal');
+            if (metrics.length >= 2) {
+                metrics[0].innerText = `₦${totalEarned.toLocaleString()}`;
+                metrics[1].innerText = `₦${withdrawn.toLocaleString()}`;
+            }
+
+            updateTransactionHistory(data);
+            controlWithdrawButton(data.isVerified, availableEquity);
         }
     });
 }
 
-// Kira logic din
-lockWithdrawalLogic();
+function updateTransactionHistory(data) {
+    const historyContainer = document.querySelector('.space-y-4');
+    if (historyContainer) {
+        let historyHTML = '';
         
+        if (data.videoBalance > 0) {
+            historyHTML += `
+                <div class="flex justify-between items-center py-3 border-b border-white/[0.03]">
+                    <div>
+                        <p class="text-[12px] font-medium text-gray-200">Protocol Yield</p>
+                        <p class="text-[9px] text-gray-500 uppercase">Latest Session</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="digits-terminal text-[13px] text-green-400">+₦150</p>
+                        <p class="orbitron text-[6px] text-gray-600">Settled</p>
+                    </div>
+                </div>`;
+        }
+        
+        if (data.totalWithdrawn > 0) {
+            historyHTML += `
+                <div class="flex justify-between items-center py-3">
+                    <div>
+                        <p class="text-[12px] font-medium text-gray-200">Asset Withdrawal</p>
+                        <p class="text-[9px] text-gray-500 uppercase">Transfer Log</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="digits-terminal text-[13px] text-red-400">-₦${data.totalWithdrawn.toLocaleString()}</p>
+                        <p class="orbitron text-[6px] text-green-500">Confirmed</p>
+                    </div>
+                </div>`;
+        }
+        historyContainer.innerHTML = historyHTML || '<p class="text-center text-[10px] text-gray-600 uppercase py-4">No recent activity</p>';
+    }
+}
+
+function controlWithdrawButton(isVerified, balance) {
+    const btn = document.querySelector('button');
+    if (!btn) return;
+
+    if (isVerified === true) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.innerText = "Process Transaction";
+        btn.onclick = () => {
+            const amount = document.getElementById('withdraw-amount').value;
+            if (!amount || amount <= 0) { alert("PLEASE ENTER VALID AMOUNT"); }
+            else if (amount > balance) { alert("INSUFFICIENT EQUITY"); }
+            else if (amount < 2000) { alert("MINIMUM WITHDRAWAL: ₦2,000"); }
+            else { alert("TRANSACTION INITIALIZED: PROCESSING..."); }
+        };
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = "0.3";
+        btn.innerText = "LOCKED: ACTIVATE NODES";
+    }
+}
+
+// 3. UTILITY FUNCTIONS
+function toggleGoogleMenu(event) {
+    event.stopPropagation();
+    document.getElementById('google-nav').classList.toggle('active');
+}
+window.onclick = () => {
+    const nav = document.getElementById('google-nav');
+    if(nav) nav.classList.remove('active');
+};
+
+// INITIALIZE
+syncWalletData();
+                                                                                
+
     </script>
     
     <script src="app.js"></script>
