@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ha">
 <head>
     <meta charset="UTF-8">
@@ -167,84 +167,36 @@
     }
 
     function controlWithdrawButton(isVerified, balance) {
-    const btn = document.getElementById('withdraw-btn');
-    if (!btn) return;
+        const btn = document.getElementById('withdraw-btn');
+        if (!btn) return;
 
-    if (isVerified === true) {
-        btn.disabled = false; 
-        btn.style.opacity = "1"; 
-        btn.innerText = "Process Transaction";
-        
-        btn.onclick = async () => {
-            // 1. Check if bank details are missing
-            if (!userBankData || !userBankData.accountNumber) {
-                alert("SETTLEMENT PROFILE INCOMPLETE: Please update your bank account details to proceed with the withdrawal.");
-                openWithdrawalModal();
-                return;
-            }
+        if (isVerified === true) {
+            btn.disabled = false; 
+            btn.style.opacity = "1"; 
+            btn.innerText = "Process Transaction";
+            
+            btn.onclick = () => {
+                // Duba idan akwai bayanan banki
+                if (!userBankData || !userBankData.accountNumber) {
+                    alert("SETTLEMENT REQUIRED: Please update your bank account details to proceed with the withdrawal.");
+                    openWithdrawalModal();
+                    return;
+                }
 
-            const amountInput = document.getElementById('withdraw-amount');
-            const amount = parseFloat(amountInput.value);
-
-            // 2. Validation Checks
-            if (!amount || amount <= 0) { 
-                alert("INVALID AMOUNT: Please enter a valid figure."); 
-                return;
-            }
-            if (amount > balance) { 
-                alert("INSUFFICIENT EQUITY: Your balance is lower than the requested amount."); 
-                return;
-            }
-            if (amount < 100) { 
-                alert("LIMIT RESTRICTION: Minimum withdrawal amount is ₦100."); 
-                return;
-            }
-
-                       // 3. Firebase Connection & Asset Deduction (Nan ne kudin zai ragu nan take)
-            try {
-                btn.disabled = true; 
-                btn.innerText = "Processing...";
-
-                const requestData = {
-                    userId: currentActiveUser,
-                    amount: amount,
-                    bankDetails: userBankData, 
-                    status: "pending",
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                // A. Rage kudin daga balance din mamba NAN TAKE
-                // Lura: Muna rage shi daga shareBalance ne ko kuma videoBalance dangane da yadda tsarin lissafinka yake
-                // Amma mafi sauki shine mu rage totalWithdrawn wanda shi zai sa Equity din ya ragu
-                await db.collection("users").doc(currentActiveUser).update({
-                    totalWithdrawn: firebase.firestore.FieldValue.increment(amount)
-                });
-
-                // B. Tura bayanan zuwa collection na Admin don dubawa
-                await db.collection("withdrawals").add(requestData);
-                
-                alert("TRANSACTION SUCCESSFUL: Funds deducted and request sent for admin approval.");
-                
-                amountInput.value = "";
-                btn.innerText = "Process Transaction";
-                btn.disabled = false;
-
-            } catch (error) {
-                console.error("Firebase Error:", error);
-                alert("CONNECTION ERROR: Failed to reach the server.");
-                btn.innerText = "Process Transaction";
-                btn.disabled = false;
-            }
-         
-   
-    
-    } else {
-        btn.disabled = true; 
-        btn.style.opacity = "0.3"; 
-        btn.innerText = "LOCKED: ACTIVATE NODES";
-    }
+                const amount = document.getElementById('withdraw-amount').value;
+                if (!amount || amount <= 0) { alert("PLEASE ENTER VALID AMOUNT"); }
+                else if (amount > balance) { alert("INSUFFICIENT EQUITY"); }
+                else if (amount < 100) { alert("MINIMUM WITHDRAWAL: ₦100"); }
+                else { 
+                    alert(`TRANSACTION INITIALIZED: ₦${amount} to ${userBankData.bankName}`); 
+                }
+            };
+        } else {
+            btn.disabled = true; 
+            btn.style.opacity = "0.3"; 
+            btn.innerText = "LOCKED: ACTIVATE NODES";
         }
-     
+    }
 
     function updateTransactionHistory(data) {
         const historyContainer = document.getElementById('history-list');
@@ -264,36 +216,19 @@
     function closeWithdrawalModal() { document.getElementById('withdrawal-modal').classList.add('hidden'); }
 
     async function saveWithdrawalDetails() {
-    const bank = document.getElementById('bank-name').value;
-    const accNum = document.getElementById('account-number').value;
-    const accName = document.getElementById('account-name').value;
+        const bank = document.getElementById('bank-name').value;
+        const accNum = document.getElementById('account-number').value;
+        const accName = document.getElementById('account-name').value;
+        if (!bank || !accNum || !accName) { alert("Please fill all settlement fields!"); return; }
 
-    if (!bank || !accNum || !accName) { 
-        alert("REQUIRED: All fields must be filled!"); 
-        return; 
+        try {
+            await db.collection("users").doc(currentActiveUser).update({
+                bankDetails: { bankName: bank, accountNumber: accNum, accountName: accName, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+            });
+            alert("SETTLEMENT DETAILS SECURED!");
+            closeWithdrawalModal();
+        } catch (error) { alert("System Error. Try again."); }
     }
-
-    try {
-        // Tabbatar da cewa muna da User ID
-        if(!currentActiveUser) throw new Error("No active user found");
-
-        await db.collection("users").doc(currentActiveUser).update({
-            bankDetails: {
-                bankName: bank,
-                accountNumber: accNum,
-                accountName: accName,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }
-        });
-        
-        alert("SUCCESS: Bank details secured in the cloud!");
-        closeWithdrawalModal();
-    } catch (error) {
-        console.error("Firebase Error:", error);
-        alert("CONNECTION ERROR: Failed to sync with database.");
-    }
-    }
-     
 
     function toggleGoogleMenu(event) {
         event.stopPropagation();
@@ -312,5 +247,4 @@
     <script src="app.js"></script>
 </body>
 </html>
-</html>
- 
+ </html>
