@@ -460,55 +460,131 @@ checkAccess();
     
 
 // ==========================================
-// SYNERGY ULTRA-STABLE ENGINE (V5.0) - FIXED
+// SYNERGY CORE ENGINE v6.0 (FINAL PATCH)
 // ==========================================
-const YOUTUBE_API_KEY = 'AIzaSyDqgyMq1NF4s0Q_-raMVdAOxBvCmeTxKYQ';
 
-// Wadannan sune IDs din bidiyoyin dake kan tasharka wadanda na gani a hoton
-const myVideos = [
-    'V07v_Y3e_XQ', // How to Start an AI Business...
-    'j7jOBQq0cpw', // Bidiyo na biyu daga tashar Rayhaan
-    'V07v_Y3e_XQ'  // Maimaitawa don lissafin ya cika
-];
+const firebaseConfig = { 
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+    authDomain: "synergy-protocol.firebaseapp.com", 
+    projectId: "synergy-protocol", 
+    storageBucket: "synergy-protocol.firebasestorage.app", 
+    messagingSenderId: "179647543031", 
+    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
+};
 
-async function onYouTubeIframeAPIReady() {
-    const user = localStorage.getItem('synergy_user');
-    let startVid = myVideos[0]; 
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
 
-    if (user) {
-        try {
-            const doc = await db.collection("users").doc(user).get();
-            if (doc.exists) {
-                const watched = doc.data().videosWatchedToday || 0;
-                // Zabo bidiyo na gaba dangane da nawa ya kalla
-                startVid = myVideos[watched % myVideos.length];
-            }
-        } catch(e) { 
-            console.log("Database Sync Error, using default."); 
-        }
+// Tabbatar muna amfani da suna daya ko'ina
+const currentActiveUser = localStorage.getItem('synergy_user'); 
+let player, currentCode = "", lastTime = 0;
+
+// 1. ACCESS GATEWAY (Gyara #1: Opacity Transition)
+async function checkAccess() {
+    if (!currentActiveUser) { window.location.replace("signin.html"); return; }
+    try {
+        const doc = await db.collection("users").doc(currentActiveUser).get();
+        if (doc.exists && doc.data().isVerified === true) {
+            // Bayyana shafin cikin sanyi
+            document.body.style.opacity = "1";
+        } else { window.location.replace("activation.html"); }
+    } catch (e) { 
+        document.body.style.opacity = "1"; 
     }
+}
+checkAccess();
 
+// 2. YOUTUBE ENGINE
+const myVideos = ['V07v_Y3e_XQ', 'j7jOBQq0cpw'];
+
+function onYouTubeIframeAPIReady() {
+    let startVid = myVideos[0];
+    
     player = new YT.Player('yt-player', {
-        height: '100%',
-        width: '100%',
+        height: '100%', width: '100%', 
         videoId: startVid,
         playerVars: { 
-            'controls': 0, 
-            'modestbranding': 1, 
-            'rel': 0, 
-            'autoplay': 0,
-            'origin': window.location.origin 
+            'controls': 0, 'modestbranding': 1, 'rel': 0, 
+            'origin': 'https://rayhaani.github.io' // Gyara #5
         },
         events: { 
-            'onStateChange': onPlayerStateChange,
-            'onReady': (event) => {
-                console.log("Synergy Node: Connection Established");
-                // Tabbatar an dora bidiyon daidai
-                event.target.cueVideoById(startVid);
-            }
+            'onStateChange': onPlayerStateChange // Gyara #3
         }
     });
+}
+
+// Gyara #2: Function din kunna video
+function startQuantumSession() {
+    if (player && typeof player.playVideo === 'function') {
+        player.playVideo();
+        document.getElementById("shutter").style.display = "none";
+    }
+}
+
+// Gyara #3: State change logic
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        // Anti-skip tracker
+        setInterval(() => {
+            let currentTime = player.getCurrentTime();
+            if (currentTime > lastTime + 2.5) { 
+                player.seekTo(lastTime); 
+            } else { 
+                lastTime = currentTime; 
             }
+        }, 1000);
+    }
+    if (event.data === YT.PlayerState.ENDED) {
+        document.getElementById('verifier-panel').classList.add('is-visible-now');
+        document.getElementById('verifier-panel').style.opacity = "1";
+        generateCode();
+    }
+}
+
+// 3. CORE LOGIC
+function generateCode() { 
+    currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+    document.getElementById("generated-code-display").innerText = currentCode; 
+}
+
+async function executeVerification() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    if(inputVal === currentCode && currentCode !== "") {
+        try {
+            await db.collection("users").doc(currentActiveUser).update({
+                videoBalance: firebase.firestore.FieldValue.increment(150),
+                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+                lastActivityDate: new Date().toLocaleDateString('en-GB')
+            });
+            alert("SUCCESS: ₦150 EARNED");
+            location.reload();
+        } catch(e) { alert("DATABASE ERROR"); }
+    } else { alert("INVALID CODE"); }
+}
+
+// UI HANDLERS
+function toggleGoogleMenu(e) { e.stopPropagation(); document.getElementById('google-nav').classList.toggle('active'); }
+window.onclick = () => {
+    const nav = document.getElementById('google-nav');
+    if(nav) nav.classList.remove('active');
+};
+
+// SNAPSHOT LISTENER
+if (currentActiveUser) {
+    db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            const total = (data.videoBalance || 0) + (data.shareBalance || 0);
+            document.getElementById('total-balance-main').innerText = total.toLocaleString();
+            document.getElementById('video-balance-sub').innerText = (data.videoBalance || 0).toLocaleString();
+            document.getElementById('share-balance-sub').innerText = (data.shareBalance || 0).toLocaleString();
+            document.getElementById('display-name').innerText = data.username || "MEMBER";
+            document.getElementById('daily-count').innerText = `${data.videosWatchedToday || 0} / 10 UNITS`;
+            document.getElementById('daily-progress-bar').style.width = ((data.videosWatchedToday || 0) / 10 * 100) + "%";
+        }
+    });
+                           }
+    
     
 
 
