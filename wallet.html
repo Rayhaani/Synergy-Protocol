@@ -200,36 +200,44 @@
                 return;
             }
 
-            // 3. Firebase Connection & Admin Monitor Integration
+                       // 3. Firebase Connection & Asset Deduction (Nan ne kudin zai ragu nan take)
             try {
-                btn.disabled = true; // To prevent double clicking
+                btn.disabled = true; 
                 btn.innerText = "Processing...";
 
                 const requestData = {
                     userId: currentActiveUser,
                     amount: amount,
-                    bankDetails: userBankData, // Dukkan bayanan bankin mutum
+                    bankDetails: userBankData, 
                     status: "pending",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // Tura bayanan zuwa collection na Admin
+                // A. Rage kudin daga balance din mamba NAN TAKE
+                // Lura: Muna rage shi daga shareBalance ne ko kuma videoBalance dangane da yadda tsarin lissafinka yake
+                // Amma mafi sauki shine mu rage totalWithdrawn wanda shi zai sa Equity din ya ragu
+                await db.collection("users").doc(currentActiveUser).update({
+                    totalWithdrawn: firebase.firestore.FieldValue.increment(amount)
+                });
+
+                // B. Tura bayanan zuwa collection na Admin don dubawa
                 await db.collection("withdrawals").add(requestData);
                 
-                alert("TRANSACTION SUCCESSFUL: Your withdrawal request has been sent and is awaiting admin approval.");
+                alert("TRANSACTION SUCCESSFUL: Funds deducted and request sent for admin approval.");
                 
-                // Clear the input field
                 amountInput.value = "";
                 btn.innerText = "Process Transaction";
                 btn.disabled = false;
 
             } catch (error) {
                 console.error("Firebase Error:", error);
-                alert("CONNECTION ERROR: Failed to reach the server. Please check your internet.");
+                alert("CONNECTION ERROR: Failed to reach the server.");
                 btn.innerText = "Process Transaction";
                 btn.disabled = false;
             }
-        };
+         
+   
+    
     } else {
         btn.disabled = true; 
         btn.style.opacity = "0.3"; 
