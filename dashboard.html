@@ -458,8 +458,8 @@ checkAccess();
 
     // 2. YOUTUBE API & PLAYER LOGIC
     
-   // ==========================================
-// 1. SABON YOUTUBE CORE (REPLACEMENT)
+// ==========================================
+// SYNERGY DYNAMIC API ENGINE + EARNING LOGIC
 // ==========================================
 const YOUTUBE_API_KEY = 'AIzaSyDqgyMq1NF4s0Q_-raMVdAOxBvCmeTxKYQ';
 const channelPlaylists = [
@@ -480,22 +480,26 @@ async function fetchLatestVideos() {
             const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
-            if (data.items && data.items.length > 0) fetchedVideos.push(data.items[0].snippet.resourceId.videoId);
-        } catch (e) { console.error("Error fetching: " + playlistId); }
+            if (data.items && data.items.length > 0) {
+                fetchedVideos.push(data.items[0].snippet.resourceId.videoId);
+            }
+        } catch (e) { console.error("API Error:", e); }
     }
     videoQueue = fetchedVideos;
+    return fetchedVideos;
 }
 
 async function onYouTubeIframeAPIReady() {
-    await fetchLatestVideos();
-    let initialVideo = videoQueue.length > 0 ? videoQueue[0] : 'dQw4w9WgXcQ';
+    const freshVideos = await fetchLatestVideos();
+    // Bamu saka komai a matsayin default don tilasta wa API aiki
+    let startVideo = freshVideos.length > 0 ? freshVideos[0] : "";
 
     player = new YT.Player('yt-player', {
-        height: '100%', width: '100%', videoId: initialVideo,
+        height: '100%', width: '100%', videoId: startVideo,
         playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 },
         events: { 
-            'onStateChange': onPlayerStateChange, // Mun bar wannan don lissafin kudi
-            'onReady': rotateVideoBasedOnProgress 
+            'onStateChange': onPlayerStateChange,
+            'onReady': onPlayerReady 
         }
     });
 }
@@ -506,20 +510,19 @@ function startQuantumSession() {
     player.playVideo();
 }
 
-async function rotateVideoBasedOnProgress() {
+async function onPlayerReady(event) {
     const username = localStorage.getItem('synergy_user');
     if(!username || videoQueue.length === 0) return;
+
     const doc = await db.collection("users").doc(username).get();
     if(doc.exists) {
-        const watchedCount = doc.data().videosWatchedToday || 0;
-        const nextVideoId = videoQueue[watchedCount % videoQueue.length];
-        if(player && player.cueVideoById) player.cueVideoById(nextVideoId);
+        const watchedToday = doc.data().videosWatchedToday || 0;
+        const targetVideoId = videoQueue[watchedToday % videoQueue.length];
+        event.target.cueVideoById(targetVideoId);
     }
 }
 
-// ==========================================
-// 2. WANNAN SHINE MAI LISSAFIN KUDI (KEEP THIS)
-// ==========================================
+// LISSAFIN PROGRESS DA KUDI
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
         if(window.setupSecurityTracker) window.setupSecurityTracker(event.target);
@@ -537,7 +540,6 @@ function onPlayerStateChange(event) {
             document.getElementById("ring").innerText = progress + "%";
             document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
 
-            // Nuna Verifier panel idan an kalli 5%
             if (progress >= 5) { 
                 const p = document.getElementById('verifier-panel'); 
                 if(p) {
@@ -552,8 +554,9 @@ function onPlayerStateChange(event) {
             }
         }, 1000);
     }
-    }
-                                                                                                                    
+                }
+    
+                                                                                                              
 
     // 3. UI & INTERACTION FUNCTIONS
     function generateCode() { 
