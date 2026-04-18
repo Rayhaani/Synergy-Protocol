@@ -134,37 +134,60 @@
     let userBankData = null;
 
     async function syncWalletData() {
-        if (!currentActiveUser) { window.location.replace("signin.html"); return; }
-        
-        db.collection("users").doc(currentActiveUser).onSnapshot((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                const vBal = data.videoBalance || 0;
-                const sBal = data.shareBalance || 0;
-                const totalEarned = vBal + sBal;
-                const withdrawn = data.totalWithdrawn || 0;
-                const availableEquity = totalEarned - withdrawn;
+    if (!currentActiveUser) { window.location.replace("signin.html"); return; }
+    
+    // Muna amfani da onSnapshot don updates su rika fitowa live
+    db.collection("users").doc(currentActiveUser).onSnapshot(async (doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            const vBal = data.videoBalance || 0;
+            const sBal = data.shareBalance || 0;
+            const totalEarned = vBal + sBal;
+            const totalWithdrawn = data.totalWithdrawn || 0; // Kudin da aka riga aka biya (Approved)
 
-                // Update displays
-                document.getElementById('main-equity-display').innerHTML = `<span class="text-gray-500 text-2xl">₦</span>${availableEquity.toLocaleString()}<span class="text-gray-500 text-2xl">.00</span>`;
+            try {
+                // 1. Nemo dukkan withdrawals da suke "pending" na wannan mamban
+                const pendingSnapshot = await db.collection("withdrawals")
+                    .where("userId", "==", currentActiveUser)
+                    .where("status", "==", "pending")
+                    .get();
+
+                let pendingAmount = 0;
+                pendingSnapshot.forEach(w => {
+                    pendingAmount += w.data().amount || 0;
+                });
+
+                // 2. Lissafin Equity (Professional Logic)
+                // Balance = Abinda ya samu - Abinda aka biya shi - Abinda yake jira (Pending)
+                const availableEquity = totalEarned - totalWithdrawn - pendingAmount;
+
+                // 3. Update displays
+                document.getElementById('main-equity-display').innerHTML = 
+                    `<span class="text-gray-500 text-2xl">₦</span>${availableEquity.toLocaleString()}<span class="text-gray-500 text-2xl">.00</span>`;
+                
                 document.getElementById('total-earned-display').innerText = `₦${totalEarned.toLocaleString()}`;
-                document.getElementById('withdrawn-display').innerText = `₦${withdrawn.toLocaleString()}`;
+                document.getElementById('withdrawn-display').innerText = `₦${totalWithdrawn.toLocaleString()}`;
 
-                // Ajiye bank details a global variable
+                // Ajiye bank details
                 userBankData = data.bankDetails || null;
 
-                // Saka bayanan banki a cikin inputs idan akwai su
                 if (userBankData) {
                     document.getElementById('bank-name').value = userBankData.bankName || '';
                     document.getElementById('account-number').value = userBankData.accountNumber || '';
                     document.getElementById('account-name').value = userBankData.accountName || '';
                 }
 
+                // Update sauran abubuwa
                 updateTransactionHistory(data);
                 controlWithdrawButton(data.isVerified, availableEquity);
+
+            } catch (error) {
+                console.error("Error calculating pending balance:", error);
             }
-        });
-    }
+        }
+    });
+                }
+                    
 
         function controlWithdrawButton(isVerified, balance) {
         const btn = document.getElementById('withdraw-btn');
