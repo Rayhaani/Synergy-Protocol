@@ -390,8 +390,8 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     
-   // ==========================================
-// SYNERGY CORE ENGINE v6.0 - DASHBOARD REPAIR
+// ==========================================
+// SYNERGY CORE ENGINE v6.1 - EMERGENCY FIX
 // ==========================================
 
 const firebaseConfig = { 
@@ -406,52 +406,52 @@ const firebaseConfig = {
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
-// Gyara #7: Amfani da Variable daya 'currentActiveUser'
+// Tabbatar muna amfani da sunan da kake sawa a Sign In
 const currentActiveUser = localStorage.getItem('synergy_user');
 let player, currentCode = "", lastTime = 0;
 
-// 1. ACCESS GATEWAY (Gyara #1: Transition fix)
+// EMERGENCY RENDER: Tabbatar shafi ya fito koda login ya gaza
+document.body.style.opacity = "1";
+document.body.style.display = "block";
+
 async function checkAccess() {
-    if (!currentActiveUser) { window.location.replace("signin.html"); return; }
+    if (!currentActiveUser) { 
+        console.log("No user found, redirecting...");
+        window.location.replace("signin.html"); 
+        return; 
+    }
     try {
         const doc = await db.collection("users").doc(currentActiveUser).get();
         if (doc.exists && doc.data().isVerified === true) {
-            document.body.style.opacity = "1"; // Bayyana shafin
-        } else { window.location.replace("activation.html"); }
+            console.log("Access Granted to: " + currentActiveUser);
+        } else { 
+            window.location.replace("activation.html"); 
+        }
     } catch (e) { 
-        document.body.style.opacity = "1"; // Fallback don kar ya tsaya a farin page
+        console.error("Access Check Error: ", e);
     }
 }
 checkAccess();
 
-// 2. YOUTUBE ENGINE
+// YOUTUBE ENGINE
 const myVideos = ['V07v_Y3e_XQ', 'j7jOBQq0cpw'];
 
-async function onYouTubeIframeAPIReady() {
+function onYouTubeIframeAPIReady() {
     let startVid = myVideos[0];
-    try {
-        const doc = await db.collection("users").doc(currentActiveUser).get();
-        if (doc.exists) {
-            const watched = doc.data().videosWatchedToday || 0;
-            startVid = myVideos[watched % myVideos.length];
-        }
-    } catch(e) {}
-
+    
     player = new YT.Player('yt-player', {
         height: '100%', width: '100%', 
         videoId: startVid,
         playerVars: { 
             'controls': 0, 'modestbranding': 1, 'rel': 0, 
-            'origin': 'https://rayhaani.github.io' // Gyara #5
+            'origin': window.location.origin 
         },
         events: { 
-            'onStateChange': onPlayerStateChange, // Gyara #3
-            'onReady': (event) => event.target.cueVideoById(startVid)
+            'onStateChange': onPlayerStateChange 
         }
     });
 }
 
-// Gyara #2: Function din startQuantumSession
 function startQuantumSession() {
     if (player && typeof player.playVideo === 'function') {
         player.playVideo();
@@ -459,31 +459,23 @@ function startQuantumSession() {
     }
 }
 
-// Gyara #3: State change logic
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        // Anti-skip logic
         setInterval(() => {
-            if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
-                let currentTime = player.getCurrentTime();
-                if (currentTime > lastTime + 2.5) { 
-                    player.seekTo(lastTime); 
-                } else { 
-                    lastTime = currentTime; 
-                }
-            }
+            let currentTime = player.getCurrentTime();
+            if (currentTime > lastTime + 2.5) { 
+                player.seekTo(lastTime); 
+            } else { lastTime = currentTime; }
         }, 1000);
     }
     if (event.data === YT.PlayerState.ENDED) {
         const panel = document.getElementById('verifier-panel');
         panel.classList.add('is-visible-now');
         panel.style.opacity = "1";
-        panel.style.pointerEvents = "auto";
         generateCode();
     }
 }
 
-// 3. CORE FUNCTIONS
 function generateCode() { 
     currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
     document.getElementById("generated-code-display").innerText = currentCode; 
@@ -492,52 +484,34 @@ function generateCode() {
 async function executeVerification() {
     const inputVal = document.getElementById('node-code').value.toUpperCase();
     if(inputVal === currentCode && currentCode !== "") {
-        try {
-            await db.collection("users").doc(currentActiveUser).update({
-                videoBalance: firebase.firestore.FieldValue.increment(150),
-                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-                lastActivityDate: new Date().toLocaleDateString('en-GB')
-            });
-            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-            setTimeout(() => location.reload(), 1500);
-        } catch(e) { showSynergyAlert("DATABASE ERROR", "error"); }
-    } else { showSynergyAlert("INVALID CODE", "error"); }
+        await db.collection("users").doc(currentActiveUser).update({
+            videoBalance: firebase.firestore.FieldValue.increment(150),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            lastActivityDate: new Date().toLocaleDateString('en-GB')
+        });
+        alert("SUCCESS: ₦150 EARNED");
+        location.reload();
+    } else { alert("INVALID CODE"); }
 }
 
-// UI LOGIC
-function toggleGoogleMenu(e) { e.stopPropagation(); document.getElementById('google-nav').classList.toggle('active'); }
-window.onclick = () => document.getElementById('google-nav').classList.remove('active');
-
-function showSynergyAlert(msg) {
-    let toast = document.getElementById('custom-toast') || document.createElement('div');
-    toast.id = 'custom-toast'; toast.className = 'synergy-toast show';
-    toast.innerHTML = `<span>${msg}</span>`;
-    if(!document.getElementById('custom-toast')) document.body.appendChild(toast);
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// 4. REALTIME DATA LISTENER
+// REALTIME DATA
 if (currentActiveUser) {
     db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
         if (doc.exists) {
             const data = doc.data();
-            const vBal = data.videoBalance || 0;
-            const sBal = data.shareBalance || 0;
-            const watched = data.videosWatchedToday || 0;
-
-            document.getElementById('total-balance-main').innerText = (vBal + sBal).toLocaleString();
-            document.getElementById('video-balance-sub').innerText = vBal.toLocaleString();
-            document.getElementById('share-balance-sub').innerText = sBal.toLocaleString();
+            const total = (data.videoBalance || 0) + (data.shareBalance || 0);
+            document.getElementById('total-balance-main').innerText = total.toLocaleString();
+            document.getElementById('video-balance-sub').innerText = (data.videoBalance || 0).toLocaleString();
+            document.getElementById('share-balance-sub').innerText = (data.shareBalance || 0).toLocaleString();
             document.getElementById('display-name').innerText = data.username || "MEMBER";
-            document.getElementById('daily-count').innerText = `${watched} / 10 UNITS`;
-            document.getElementById('daily-progress-bar').style.width = (watched / 10 * 100) + "%";
-            document.getElementById('est-earnings').innerText = "₦" + (watched * 150 * 30).toLocaleString();
-            
-            const badge = document.getElementById('verified-badge');
-            if(badge) badge.style.display = data.isVerified ? 'flex' : 'none';
+            document.getElementById('daily-count').innerText = `${data.videosWatchedToday || 0} / 10 UNITS`;
+            document.getElementById('daily-progress-bar').style.width = ((data.videosWatchedToday || 0) / 10 * 100) + "%";
         }
     });
-        }
+}
+
+function toggleGoogleMenu(e) { e.stopPropagation(); document.getElementById('google-nav').classList.toggle('active'); }
+window.onclick = () => document.getElementById('google-nav').classList.remove('active');
     
     
     
