@@ -152,11 +152,7 @@
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
         
-        const requests = [
-            { id: "sadiq", amount: 15000, lastActive: "2026-04-08", videos: 45, bank: "OPay - 8012345678", time: "2h ago" },
-            { id: "abdool", amount: 8000, lastActive: "2026-04-05", videos: 12, bank: "Palmpay - 7012345678", time: "5h ago" },
-            { id: "fatima", amount: 25000, lastActive: "2026-04-07", videos: 48, bank: "Kuda - 9012345678", time: "1d ago" }
-        ];
+        
 
         function checkStatus(date) {
             const diff = Math.ceil(Math.abs(new Date("2026-04-08") - new Date(date)) / (1000 * 60 * 60 * 24));
