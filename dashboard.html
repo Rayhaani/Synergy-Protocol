@@ -458,16 +458,16 @@ checkAccess();
 
     // 2. YOUTUBE API & PLAYER LOGIC
     
+
 // ==========================================
-// SYNERGY DYNAMIC API ENGINE + EARNING LOGIC
+// SYNERGY DYNAMIC API ENGINE - REPAIRED
 // ==========================================
 const YOUTUBE_API_KEY = 'AIzaSyDqgyMq1NF4s0Q_-raMVdAOxBvCmeTxKYQ';
+
+// Na bar guda biyu kacal wadanda ka bani IDs dinsu
 const channelPlaylists = [
     'UUj7jOBQq0cpwBp0j7XVikQQ', 
-    'UU_54whp80N3Lyl8tgLQf4Cw', 
-    'UU_SAKA_CHANNEL_ID_3_ANAN', 
-    'UU_SAKA_CHANNEL_ID_4_ANAN', 
-    'UU_SAKA_CHANNEL_ID_5_ANAN'
+    'UU_54whp80N3Lyl8tgLQf4Cw'
 ];
 
 let videoQueue = [];
@@ -475,28 +475,39 @@ let videoQueue = [];
 async function fetchLatestVideos() {
     let fetchedVideos = [];
     for (const playlistId of channelPlaylists) {
-        if(playlistId.includes('SAKA_CHANNEL_ID')) continue;
         try {
-            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=5&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
-            if (data.items && data.items.length > 0) {
-                fetchedVideos.push(data.items[0].snippet.resourceId.videoId);
+            
+            if (data.items) {
+                data.items.forEach(item => {
+                    fetchedVideos.push(item.snippet.resourceId.videoId);
+                });
             }
-        } catch (e) { console.error("API Error:", e); }
+        } catch (e) { 
+            console.error("API Error for " + playlistId, e); 
+        }
     }
+    // Idan duk sun gaza, mu saka bidiyo guda daya na tasha domin kar ya nuna baki
+    if (fetchedVideos.length === 0) fetchedVideos.push('dQw4w9WgXcQ'); 
+    
     videoQueue = fetchedVideos;
     return fetchedVideos;
 }
 
 async function onYouTubeIframeAPIReady() {
     const freshVideos = await fetchLatestVideos();
-    // Bamu saka komai a matsayin default don tilasta wa API aiki
-    let startVideo = freshVideos.length > 0 ? freshVideos[0] : "";
-
+    
     player = new YT.Player('yt-player', {
-        height: '100%', width: '100%', videoId: startVideo,
-        playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 },
+        height: '100%', width: '100%', 
+        videoId: freshVideos[0],
+        playerVars: { 
+            'controls': 0, 
+            'modestbranding': 1, 
+            'rel': 0, 
+            'origin': window.location.origin 
+        },
         events: { 
             'onStateChange': onPlayerStateChange,
             'onReady': onPlayerReady 
@@ -504,58 +515,22 @@ async function onYouTubeIframeAPIReady() {
     });
 }
 
-function startQuantumSession() {
-    document.getElementById('shutter').style.opacity = "0";
-    setTimeout(() => document.getElementById('shutter').style.display = "none", 1000);
-    player.playVideo();
-}
-
 async function onPlayerReady(event) {
     const username = localStorage.getItem('synergy_user');
     if(!username || videoQueue.length === 0) return;
 
-    const doc = await db.collection("users").doc(username).get();
-    if(doc.exists) {
-        const watchedToday = doc.data().videosWatchedToday || 0;
-        const targetVideoId = videoQueue[watchedToday % videoQueue.length];
-        event.target.cueVideoById(targetVideoId);
-    }
+    try {
+        const doc = await db.collection("users").doc(username).get();
+        if(doc.exists) {
+            const watchedToday = doc.data().videosWatchedToday || 0;
+            // Zabar bidiyo na gaba
+            const targetVideoId = videoQueue[watchedToday % videoQueue.length];
+            event.target.loadVideoById(targetVideoId);
+        }
+    } catch(e) { console.log("Database Error:", e); }
 }
-
-// LISSAFIN PROGRESS DA KUDI
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING) {
-        if(window.setupSecurityTracker) window.setupSecurityTracker(event.target);
-
-        const tracker = setInterval(() => {
-            if (player.getPlayerState() !== YT.PlayerState.PLAYING) { 
-                clearInterval(tracker); 
-                return; 
-            }
-
-            let currentTime = player.getCurrentTime();
-            let duration = player.getDuration();
-            let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
-            
-            document.getElementById("ring").innerText = progress + "%";
-            document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
-
-            if (progress >= 5) { 
-                const p = document.getElementById('verifier-panel'); 
-                if(p) {
-                    p.classList.add('is-visible-now'); 
-                    setTimeout(() => { 
-                        p.style.opacity = "1"; 
-                        p.style.transform = "translateY(0)"; 
-                        p.style.pointerEvents = "all"; 
-                    }, 50);
-                }
-                if(currentCode === "") generateCode();
-            }
-        }, 1000);
-    }
-                }
     
+
                                                                                                               
 
     // 3. UI & INTERACTION FUNCTIONS
