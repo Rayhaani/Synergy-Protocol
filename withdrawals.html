@@ -206,8 +206,11 @@
             let totalAll = 0; let totalToday = 0; const today = new Date().toDateString();
             snap.forEach(doc => {
                 const d = doc.data(); totalAll += Number(d.amount || 0);
-                if (d.timestamp && d.timestamp.toDate().toDateString() === today) totalToday += Number(d.amount || 0);
-            });
+                const actionDate = d.approvedAt || d.timestamp;
+if (actionDate && actionDate.toDate().toDateString() === today) {
+    totalToday += Number(d.amount || 0);
+}
+                
             const stats = document.querySelectorAll('.stat-card-slim p.text-lg');
             if(stats[1]) stats[1].innerText = "₦" + totalToday.toLocaleString(); 
             if(stats[2]) stats[2].innerText = "₦" + (totalAll >= 1000000 ? (totalAll/1000000).toFixed(1) + "M" : totalAll.toLocaleString());
