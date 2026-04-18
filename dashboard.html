@@ -497,7 +497,7 @@ async function onYouTubeIframeAPIReady() {
             'modestbranding': 1, 
             'rel': 0, 
             'autoplay': 0,
-            'origin': window.location.origin 
+            'origin': "https://rayhaani.github.io"
         },
         events: { 
             'onStateChange': onPlayerStateChange,
@@ -771,7 +771,13 @@ function checkAndResetDailyStats(userData) {
         generateCode();
     }
     }
-    
+
+
+    function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
+        setupSecurityTracker(player);
+    }
+    }
 </script>
 </body>
 </html>
