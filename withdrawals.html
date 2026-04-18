@@ -100,13 +100,19 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          
             <div class="lg:col-span-2 glass-panel p-6 rounded-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <p class="orbitron text-[10px] font-bold text-cyan-400">Recent Activity Logs</p>
-                    <span class="text-[9px] text-gray-500 uppercase tracking-widest">Live Updates</span>
-                </div>
-                <div class="space-y-4">  
+    <div class="flex justify-between items-center mb-6">
+        <p class="orbitron text-[10px] font-bold text-cyan-400">Recent Activity Logs</p>
+        <span class="text-[9px] text-gray-500 uppercase tracking-widest">Live Updates</span>
+    </div>
+    
+    <div id="activity-log-container" class="space-y-4">
+    </div> 
             </div>
+            
+
             
             <div class="glass-panel p-6 rounded-2xl flex flex-col justify-center border-dashed border-white/10">
                 <p class="text-center text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-2">Protocol Note</p>
@@ -229,27 +235,29 @@ if (d.timestamp && d.timestamp.toDate().toDateString() === today) totalToday += 
     }
 
     // 6. REAL ACTIVITY LOGS (The Unified Timeline)
-    function loadActivityLogs() {
-        db.collection("activity_logs").orderBy("timestamp", "desc").limit(6).onSnapshot(snap => {
-            const logContainer = document.querySelector('.space-y-4');
-            if(!logContainer) return;
-            let logHtml = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                let color = d.status === "approved" ? "green" : (d.status === "suspended" || d.status === "rejected" ? "red" : "orange");
-                logHtml += `
-                    <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border-l-2 border-${color}-500 transition-all hover:bg-white/10">
-                        <div class="flex items-center">
-                            <span class="activity-dot bg-${color}-500"></span>
-                            <p class="text-xs text-gray-300"><span class="username-style font-bold text-white">${d.userId}</span> ${d.message}</p>
-                        </div>
-                        <span class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">${d.status}</span>
-                    </div>`;
-            });
-            logContainer.innerHTML = logHtml || '<p class="text-center text-gray-600 text-xs py-4">No protocol activity...</p>';
+    
+ function loadActivityLogs() {
+    db.collection("activity_logs").orderBy("timestamp", "desc").limit(6).onSnapshot(snap => {
+        const logContainer = document.getElementById('activity-log-container');
+        if(!logContainer) return;
+        
+        let logHtml = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            let color = d.status === "approved" ? "green" : (d.status === "suspended" || d.status === "rejected" ? "red" : "orange");
+            logHtml += `
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border-l-2 border-${color}-500 transition-all hover:bg-white/10">
+                    <div class="flex items-center">
+                        <span class="activity-dot bg-${color}-500"></span>
+                        <p class="text-xs text-gray-300"><span class="username-style font-bold text-white">${d.userId}</span> ${d.message}</p>
+                    </div>
+                    <span class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">${d.status}</span>
+                </div>`;
         });
-    }
-
+        logContainer.innerHTML = logHtml || '<p class="text-center text-gray-600 text-xs py-4">No protocol activity...</p>';
+    });
+ }
+    
     // 7. ACTIONS (Approve / Reject)
     async function approvePayout(docId, userId, amount) {
         if(!confirm("Amince da biyan nan?")) return;
