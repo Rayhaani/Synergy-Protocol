@@ -153,6 +153,18 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
+        async function logActivity(userId, message, status) {
+    try {
+        await db.collection("activity_logs").add({
+            userId: userId,
+            message: message,
+            status: status, // e.g., 'pending', 'approved', 'suspended'
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (e) { console.error("Logging error:", e); }
+        }
+
+        
     // 1. Toggle Row Function
     function toggleRow(id) {
         const el = document.getElementById(`details-${id}`);
@@ -323,6 +335,40 @@
     // Start everything
     loadWithdrawals();
     loadGlobalStats();
+
+
+        function loadActivityLogs() {
+    db.collection("activity_logs")
+      .orderBy("timestamp", "desc")
+      .limit(6)
+      .onSnapshot(snap => {
+          const logContainer = document.querySelector('.space-y-4');
+          if(!logContainer) return;
+          
+          let logHtml = "";
+          snap.forEach(doc => {
+              const d = doc.data();
+              
+              // Saita kala dangane da irin abinda ya faru
+              let color = "orange"; // Default
+              if(d.status === "approved") color = "green";
+              if(d.status === "suspended" || d.status === "rejected") color = "red";
+
+              logHtml += `
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border-l-2 border-${color}-500 transition-all hover:bg-white/10">
+                    <div class="flex items-center">
+                        <span class="activity-dot bg-${color}-500"></span>
+                        <p class="text-xs text-gray-300">
+                            <span class="username-style font-bold text-white">${d.userId}</span> ${d.message}
+                        </p>
+                    </div>
+                    <span class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">${d.status}</span>
+                </div>`;
+          });
+          logContainer.innerHTML = logHtml || '<p class="text-center text-gray-600 text-xs py-4">Waiting for protocol activity...</p>';
+      });
+        }
+        
 </script>
     
         
