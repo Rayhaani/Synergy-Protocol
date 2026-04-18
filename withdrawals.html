@@ -261,15 +261,24 @@ if (d.timestamp && d.timestamp.toDate().toDateString() === today) totalToday += 
         } catch (e) { alert(e.message); }
     }
 
-    async function rejectPayout(docId, userId) {
-        if(!confirm("Hana wannan withdrawal din?")) return;
-        try {
-            await db.collection("withdrawals").doc(docId).update({ status: "rejected" });
-            await logActivity(userId, "withdrawal request rejected.", "rejected");
-            alert("REJECTED!");
-        } catch (e) { alert(e.message); }
-    }
+    async function rejectPayout(docId, userId, amount) {
+    if(!confirm("Hana wannan withdrawal din?")) return;
+    try {
+        // 1. Mayar masa da kudin tunda an hana (Refund)
+        await db.collection("users").doc(userId).update({
+            balance: firebase.firestore.FieldValue.increment(amount)
+        });
 
+        // 2. Saita status din zuwa rejected
+        await db.collection("withdrawals").doc(docId).update({ status: "rejected" });
+        
+        // 3. Rubuta a Log
+        await logActivity(userId, "withdrawal rejected - funds refunded.", "rejected");
+        
+        alert("REJECTED: Kudin sun koma balance din mamba.");
+    } catch (e) { alert(e.message); }
+    }
+    
     // 8. RUN EVERYTHING
     loadWithdrawals();
     loadGlobalStats();
