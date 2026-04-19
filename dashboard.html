@@ -390,7 +390,6 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     
-
 // 1. INITIALIZATION
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
@@ -414,12 +413,16 @@ async function checkAccess() {
         if (doc.exists && doc.data().isVerified === true) {
             document.body.style.opacity = "1";
             watchedCount = doc.data().videosWatchedToday || 0;
+            // Kawai idan mamba ne, za mu kira bidiyo
+            fetchLatestVideos();
         } else { window.location.replace("activation.html"); }
     } catch (err) { console.error("Access Error", err); }
 }
-checkAccess();
 
-// 3. YOUTUBE LOGIC
+// Kira checkAccess da zaran shafi ya gama loda kansa
+window.onload = checkAccess;
+
+// 3. YOUTUBE LOGIC (STRICT - NO BACKUP VIDEOS)
 const API_KEY = 'AIzaSyAv5i78UAOzJjNUp3EiUmRyUFz-9IQfFbU';
 const CHANNELS = ['UCj7jOBQq0cpwBp0j7XVikQQ', 'UC_54whp80N3Lyl8tgLQf4Cw'];
 
@@ -427,63 +430,97 @@ async function fetchLatestVideos() {
     try {
         let allVideos = [];
         for (const channelId of CHANNELS) {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=snippet,id&order=date&maxResults=10&type=video`);
+            // Mun kara part=snippet,id da kuma type=video don karfafawa
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=id&order=date&maxResults=15&type=video`);
             const data = await res.json();
-            if (data.items) allVideos.push(...data.items.map(i => i.id.videoId));
+            
+            // Debugging: duba console din wayarka ko browser ka ga me yake fitowa
+            console.log("YouTube Response for " + channelId, data);
+
+            if (data.items) {
+                data.items.forEach(item => {
+                    if(item.id && item.id.videoId) {
+                        allVideos.push(item.id.videoId);
+                    }
+                });
+            }
         }
-        dynamicVideos = allVideos.length > 0 ? allVideos.sort(() => Math.random() - 0.5) : ['ixe341U2mqA'];
-        initPlayer();
-    } catch (e) { dynamicVideos = ['ixe341U2mqA']; initPlayer(); }
+
+        // Tace bidiyo (Remove duplicates)
+        dynamicVideos = [...new Set(allVideos)];
+
+        if (dynamicVideos.length > 0) {
+            dynamicVideos.sort(() => Math.random() - 0.5);
+            initPlayer();
+        } else {
+            // Idan nan ya nuna, to API din ne bai kawo komai ba gaskiya
+            showSynergyAlert("FETCHING ERROR: ZERO VIDEOS FROM CHANNELS", "error");
+        }
+    } catch (e) { 
+        console.error("Critical Fetch Error:", e);
+        showSynergyAlert("API CONNECTION FAILED", "error");
+    }
+}
+
+function onYouTubeIframeAPIReady() {
+    // YouTube API ya loda, muna jiran fetchLatestVideos ya gama
 }
 
 function initPlayer() {
-    if (window.YT && YT.loaded) {
-        let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
-        player = new YT.Player('yt-player', {
-            height: '100%', width: '100%', videoId: startVid,
-            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'iv_load_policy': 3, 'disablekb': 1, 'origin': window.location.origin },
-            events: { 'onStateChange': onPlayerStateChange, 'onReady': () => document.getElementById('shutter').style.display = "flex" }
-        });
-    } else { setTimeout(initPlayer, 500); }
+    if (dynamicVideos.length === 0) return;
+
+    let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
+    
+    player = new YT.Player('yt-player', {
+        height: '100%',
+        width: '100%',
+        videoId: startVid,
+        playerVars: { 
+            'controls': 0, 
+            'modestbranding': 1, 
+            'rel': 0, 
+            'iv_load_policy': 3, 
+            'disablekb': 1,
+            'origin': window.location.origin 
+        },
+        events: { 
+            'onStateChange': onPlayerStateChange, 
+            'onReady': () => {
+                const shutter = document.getElementById('shutter');
+                if(shutter) shutter.style.display = "flex";
+            }
+        }
+    });
 }
 
-// 4. THE FIX: ME ZAI FARU IDAN BIDIYO YA KARE?
-// 4. GYARARREN LOGIC: TSAIDA BIDIYO IDAN YA KARE
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
         setupSecurityTracker(player);
     }
 
-    // Idan bidiyo ya kare (ENDED)
     if (event.data === YT.PlayerState.ENDED) {
         watchedCount++;
-        
-        // 1. Nemo bidiyo na gaba amma KAR A KIRA SHI TUKUNA
         let nextVid = dynamicVideos[watchedCount % dynamicVideos.length];
-        player.cueVideoById(nextVid); // 'cue' yana nufin loda shi amma kar a yi playing
+        player.cueVideoById(nextVid);
 
-        // 2. Rufe shafin da Shutter (Cover) domin mutum ya danna da kansa
         const shutter = document.getElementById('shutter');
         if (shutter) {
             shutter.style.display = "flex";
-            // Zaka iya canza rubutun shutter din don mamba ya gane
             const shutterText = shutter.querySelector('.orbitron');
             if(shutterText) shutterText.innerText = "NEXT UNIT READY";
         }
 
-        // 3. Sabunta code don sabon bidiyo
         generateCode();
-        
         showSynergyAlert("UNIT COMPLETED. START NEXT SESSION.", "success");
     }
 }
-    
 
-// 5. CORE FUNCTIONS
+// 4. CORE FUNCTIONS
 function startQuantumSession() {
     if (player && player.playVideo) {
         player.playVideo();
-        document.getElementById("shutter").style.display = "none";
+        const shutter = document.getElementById("shutter");
+        if(shutter) shutter.style.display = "none";
         generateCode();
     }
 }
@@ -494,12 +531,12 @@ function generateCode() {
     if(display) display.innerText = currentCode; 
 }
 
-// 6. SECURITY MODULE
+// 5. SECURITY MODULE
 (function() {
     let strikes = 0, lastTime = 0;
     window.setupSecurityTracker = function(p) {
         setInterval(() => {
-            if (!p || p.getPlayerState() !== 1) return;
+            if (!p || typeof p.getPlayerState !== 'function' || p.getPlayerState() !== 1) return;
             let curr = p.getCurrentTime();
             if (curr > lastTime + 2.5) {
                 strikes++; p.seekTo(lastTime);
@@ -510,7 +547,7 @@ function generateCode() {
     };
 })();
 
-// 7. UI & SYNC
+// 6. UI & FIREBASE SYNC
 function showSynergyAlert(m) {
     let t = document.getElementById('custom-toast') || document.createElement('div');
     t.id = 'custom-toast'; t.className = 'synergy-toast show'; t.innerHTML = `<span>${m}</span>`;
@@ -531,10 +568,6 @@ if (currentActiveUser) {
         if(document.getElementById('daily-progress-bar')) document.getElementById('daily-progress-bar').style.width = (w*10) + "%";
     });
 }
-
-fetchLatestVideos();
-            
-    
 
     
 </script>
