@@ -533,7 +533,18 @@ if (currentActiveUser) {
 
 fetchLatestVideos();
     
+function toggleGoogleMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('google-nav');
+    menu.classList.toggle('active');
+}
 
+// Rufe menu idan an taba ko ina a screen
+document.addEventListener('click', () => {
+    const menu = document.getElementById('google-nav');
+    if(menu) menu.classList.remove('active');
+});
+    
     
 </script>
 </body>
