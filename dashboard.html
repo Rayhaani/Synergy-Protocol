@@ -390,7 +390,8 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     
-  // 1. INITIALIZATION
+  
+// 1. INITIALIZATION
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
@@ -404,9 +405,9 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 const currentActiveUser = localStorage.getItem('synergy_user');
 let player, currentCode = "", dynamicVideos = [], watchedCount = 0;
-const currentSessionId = Math.random().toString(36).substring(7); // Don Multi-login logic
+const currentSessionId = Math.random().toString(36).substring(7);
 
-// 2. ACCESS CHECK (STRICTLY PRESERVED)
+// 2. ACCESS CHECK
 async function checkAccess() {
     if (!currentActiveUser) { window.location.replace("signin.html"); return; }
     try {
@@ -414,13 +415,13 @@ async function checkAccess() {
         if (doc.exists && doc.data().isVerified === true) {
             document.body.style.opacity = "1";
             watchedCount = doc.data().videosWatchedToday || 0;
-            syncSession(); // Kunna kariya daga multi-login
+            syncSession();
         } else { window.location.replace("activation.html"); }
     } catch (err) { console.error("Access Error", err); }
 }
 checkAccess();
 
-// 3. YOUTUBE LOGIC (STRICTLY PRESERVED)
+// 3. YOUTUBE LOGIC
 const API_KEY = 'AIzaSyAv5i78UAOzJjNUp3EiUmRyUFz-9IQfFbU';
 const CHANNELS = ['UCj7jOBQq0cpwBp0j7XVikQQ', 'UC_54whp80N3Lyl8tgLQf4Cw'];
 
@@ -448,12 +449,11 @@ function initPlayer() {
     } else { setTimeout(initPlayer, 500); }
 }
 
-// 4. IMPROVED STATE CHANGE (WITH THRESHOLD LOGIC)
+// 4. IMPROVED STATE CHANGE (AUTO-NEXT & DYNAMIC CIRCLE)
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
         setupSecurityTracker(player);
         
-        // LOGIC: Check for 95% threshold to show verification
         const progressInterval = setInterval(() => {
             if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
                 clearInterval(progressInterval);
@@ -481,7 +481,8 @@ function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.ENDED) {
         watchedCount++;
         let nextVid = dynamicVideos[watchedCount % dynamicVideos.length];
-        player.cueVideoById(nextVid);
+        player.loadVideoById(nextVid); // AUTO-NEXT LOAD
+        
         const shutter = document.getElementById('shutter');
         if (shutter) {
             shutter.style.display = "flex";
@@ -508,15 +509,39 @@ function generateCode() {
     if(display) display.innerText = currentCode; 
 }
 
-// 6. SECURITY & MULTI-LOGIN LOGIC
+// VERIFICATION LOGIC (WANNAN SHINE KA MANTA BAI SHIGA BA)
+async function executeVerification() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    if(!currentActiveUser) return;
+
+    if(inputVal === currentCode && currentCode !== "") {
+        try {
+            await db.collection("users").doc(currentActiveUser).update({
+                videoBalance: firebase.firestore.FieldValue.increment(150),
+                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
+            });
+            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
+            
+            // Boye panel din bayan an gama
+            const verifier = document.getElementById('verifier-panel');
+            if (verifier) {
+                verifier.classList.remove('is-visible-now');
+                verifier.style.opacity = "0";
+            }
+            document.getElementById('node-code').value = ""; // Clear input
+        } catch (error) { showSynergyAlert("DATABASE ERROR", "error"); }
+    } else { showSynergyAlert("INVALID CODE", "error"); }
+}
+
+// 6. SECURITY MODULES
 async function syncSession() {
     if(!currentActiveUser) return;
     const ref = db.collection("active_sessions").doc(currentActiveUser);
     await ref.set({ sessionId: currentSessionId, lastActive: firebase.firestore.FieldValue.serverTimestamp() });
-    
     ref.onSnapshot(doc => {
         if(doc.exists && doc.data().sessionId !== currentSessionId) {
-            document.body.innerHTML = "<div class='orbitron' style='color:red; text-align:center; padding:100px;'>SESSION TERMINATED: LOGIN DETECTED ON ANOTHER DEVICE</div>";
+            document.body.innerHTML = "<div class='orbitron' style='color:red; text-align:center; padding:100px;'>SESSION TERMINATED: MULTI-LOGIN DETECTED</div>";
             if(player) player.pauseVideo();
         }
     });
@@ -544,24 +569,21 @@ document.addEventListener("visibilitychange", () => {
     };
 })();
 
-// 7. UI SYNC & DAILY RESET ENGINE
+// 7. UI SYNC & CIRCLE LOGIC (5 UNITS = 100%)
 if (currentActiveUser) {
     db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
         if (!doc.exists) return;
         const d = doc.data();
         
-        // Sync Balances
         const total = (d.videoBalance || 0) + (d.shareBalance || 0);
         document.getElementById('total-balance-main').innerText = total.toLocaleString();
         document.getElementById('video-balance-sub').innerText = (d.videoBalance || 0).toLocaleString();
         document.getElementById('share-balance-sub').innerText = (d.shareBalance || 0).toLocaleString();
         
-        // Sync Profile & Verified Badge
         document.getElementById('display-name').innerText = d.username || "MEMBER";
         const badge = document.getElementById('verified-badge');
         if(badge) badge.style.display = d.isVerified ? 'flex' : 'none';
         
-        // Daily Reset Logic
         const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
         if (d.lastActivityDate && d.lastActivityDate !== today) {
             db.collection("users").doc(currentActiveUser).update({
@@ -571,8 +593,13 @@ if (currentActiveUser) {
         }
 
         const w = d.videosWatchedToday || 0;
-        document.getElementById('daily-count').innerText = `${w} / 10 UNITS`;
-        if(document.getElementById('daily-progress-bar')) document.getElementById('daily-progress-bar').style.width = (w*10) + "%";
+        document.getElementById('daily-count').innerText = `${w} / 5 UNITS`;
+        
+        // Circle progress calculation (20% per unit)
+        const circlePercent = Math.min((w / 5) * 100, 100);
+        if(document.getElementById('daily-progress-bar')) {
+            document.getElementById('daily-progress-bar').style.width = circlePercent + "%";
+        }
     });
 }
 
@@ -584,6 +611,7 @@ function showSynergyAlert(m) {
 }
 
 fetchLatestVideos();
+                                                                
                                                              
 </script>
 </body>
