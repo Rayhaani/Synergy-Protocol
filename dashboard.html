@@ -493,7 +493,7 @@ async function fetchLatestVideos() {
         initializeSynergyPlayer();
     } catch (error) {
         console.error("Critical Sync Error:", error);
-        dynamicVideos = ['ixe341U2mqA']; // Fallback
+        dynamicVideos = ['KwkQJey4FLE']; // Fallback
         initializeSynergyPlayer();
     }
 }
@@ -509,7 +509,7 @@ function initializeSynergyPlayer() {
 
 async function onYouTubeIframeAPIReady() {
     const user = localStorage.getItem('synergy_user');
-    let startVid = dynamicVideos[0] || 'ixe341U2mqA'; 
+    let startVid = dynamicVideos[0] || 'KwkQJey4FLE'; 
 
     if (user && dynamicVideos.length > 0) {
         try {
