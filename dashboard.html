@@ -430,9 +430,9 @@ async function fetchLatestVideos() {
             const data = await res.json();
             if (data.items) allVideos.push(...data.items.map(i => i.id.videoId));
         }
-        dynamicVideos = allVideos.length > 0 ? allVideos.sort(() => Math.random() - 0.5) : ['ixe341U2mqA'];
+        dynamicVideos = allVideos.length > 0 ? allVideos.sort(() => Math.random() - 0.5) : [''];
         initPlayer();
-    } catch (e) { dynamicVideos = ['ixe341U2mqA']; initPlayer(); }
+    } catch (e) { dynamicVideos = ['']; initPlayer(); }
 }
 
 function initPlayer() {
