@@ -426,25 +426,38 @@ async function fetchLatestVideos() {
     try {
         let allVideos = [];
         for (const channelId of CHANNELS) {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=snippet,id&order=date&maxResults=10&type=video`);
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=snippet,id&order=date&maxResults=15&type=video`);
             const data = await res.json();
-            if (data.items) allVideos.push(...data.items.map(i => i.id.videoId));
+            
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    if(item.id && item.id.videoId) {
+                        allVideos.push(item.id.videoId);
+                    }
+                });
+            }
         }
-        dynamicVideos = allVideos.length > 0 ? allVideos.sort(() => Math.random() - 0.5) : ['ixe341U2mqA'];
-        initPlayer();
-    } catch (e) { dynamicVideos = ['ixe341U2mqA']; initPlayer(); }
-}
 
-function initPlayer() {
-    if (window.YT && YT.loaded) {
-        let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
-        player = new YT.Player('yt-player', {
-            height: '100%', width: '100%', videoId: startVid,
-            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'iv_load_policy': 3, 'disablekb': 1, 'origin': window.location.origin },
-            events: { 'onStateChange': onPlayerStateChange, 'onReady': () => document.getElementById('shutter').style.display = "flex" }
-        });
-    } else { setTimeout(initPlayer, 500); }
+        // Cire duk wani bidiyo da ya maimaita kansa
+        let uniqueVideos = [...new Set(allVideos)];
+
+        if (uniqueVideos.length > 0) {
+            // Shuffle
+            dynamicVideos = uniqueVideos.sort(() => Math.random() - 0.5);
+        } else {
+            // Idan babu komai, bari mu bar shi empty don tsaro
+            dynamicVideos = []; 
+            showSynergyAlert("FETCHING FAILED: RELOAD PAGE", "error");
+        }
+        
+        initPlayer();
+    } catch (e) { 
+        dynamicVideos = []; 
+        initPlayer(); 
+    }
 }
+    
+    
 
 // 4. THE FIX: ME ZAI FARU IDAN BIDIYO YA KARE?
 // 4. GYARARREN LOGIC: TSAIDA BIDIYO IDAN YA KARE
