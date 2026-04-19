@@ -492,10 +492,13 @@ async function fetchLatestVideos() {
             // Shuffle videos don kar su dinga fito iri daya kullum
             dynamicVideos = allVideos.sort(() => Math.random() - 0.5);
             console.log("Synergy Node: System Online. " + dynamicVideos.length + " videos synced.");
+        
         } else {
-            // Fallback idan API bai samu komai ba
-            dynamicVideos = ['ixe341U2mqA']; 
+    // Idan babu sabon bidiyo a Channels, kar a nuna komai
+    dynamicVideos = []; 
+    showSynergyAlert("NO NEW VIDEOS SYNCED FOR TODAY", "error");
         }
+        
         
         initializeSynergyPlayer();
     } catch (error) {
@@ -515,8 +518,14 @@ async function fetchLatestVideos() {
 
 async function onYouTubeIframeAPIReady() {
     const user = localStorage.getItem('synergy_user');
-    let startVid = dynamicVideos[0] || 'ixe341U2mqA'; 
+    
+    let startVid = dynamicVideos[0]; 
 
+if (!startVid) {
+    document.getElementById("shutter").innerHTML = `<p class='orbitron text-red-500'>NO ACTIVE SESSIONS FOUND</p>`;
+    return;
+}
+    
     if (user && dynamicVideos.length > 0) {
         try {
             const doc = await db.collection("users").doc(user).get();
