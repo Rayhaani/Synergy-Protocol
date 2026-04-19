@@ -389,10 +389,8 @@
     
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-
-// =======================
-// 1. FIREBASE INIT
-// =======================
+    
+  // 1. INITIALIZATION
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
@@ -402,223 +400,141 @@ const firebaseConfig = {
     appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
 };
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
-
 const currentActiveUser = localStorage.getItem('synergy_user');
+let player, currentCode = "", dynamicVideos = [], watchedCount = 0;
 
-let player;
-let dynamicVideos = [];
-let watchedCount = 0;
-let currentCode = "";
-
-// =======================
 // 2. ACCESS CHECK
-// =======================
 async function checkAccess() {
-    if (!currentActiveUser) {
-        window.location.replace("signin.html");
-        return;
-    }
-
+    if (!currentActiveUser) { window.location.replace("signin.html"); return; }
     try {
         const doc = await db.collection("users").doc(currentActiveUser).get();
-
         if (doc.exists && doc.data().isVerified === true) {
             document.body.style.opacity = "1";
             watchedCount = doc.data().videosWatchedToday || 0;
-            fetchLatestVideos();
-        } else {
-            window.location.replace("activation.html");
-        }
-
-    } catch (err) {
-        console.error("Access Error:", err);
-        document.body.style.opacity = "1";
-    }
+        } else { window.location.replace("activation.html"); }
+    } catch (err) { console.error("Access Error", err); }
 }
+checkAccess();
 
-// =======================
-// 3. YOUTUBE CONFIG
-// =======================
-const API_KEY = "PUT_YOUR_REAL_API_KEY_HERE";
+// 3. YOUTUBE LOGIC
+const API_KEY = 'AIzaSyAv5i78UAOzJjNUp3EiUmRyUFz-9IQfFbU';
+const CHANNELS = ['UCj7jOBQq0cpwBp0j7XVikQQ', 'UC_54whp80N3Lyl8tgLQf4Cw'];
 
-// 👉 amfani da uploads playlist (MUHIMMI)
-const CHANNEL_UPLOADS = [
-    "UUj7jOBQq0cpwBp0j7XVikQQ",
-    "UU_54whp80N3Lyl8tgLQf4Cw"
-];
-
-// =======================
-// 4. FETCH VIDEOS (STABLE)
-// =======================
 async function fetchLatestVideos() {
     try {
-        let videos = [];
-
-        for (const playlistId of CHANNEL_UPLOADS) {
-            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${playlistId}&key=${API_KEY}`;
-            const res = await fetch(url);
+        let allVideos = [];
+        for (const channelId of CHANNELS) {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${channelId}&part=snippet,id&order=date&maxResults=10&type=video`);
             const data = await res.json();
-
-            if (data.items) {
-                data.items.forEach(item => {
-                    const vid = item.snippet?.resourceId?.videoId;
-                    if (vid) videos.push(vid);
-                });
-            }
+            if (data.items) allVideos.push(...data.items.map(i => i.id.videoId));
         }
-
-        dynamicVideos = [...new Set(videos)];
-
-        if (dynamicVideos.length === 0) {
-            showSynergyAlert("NO VIDEOS FOUND!", "error");
-            return;
-        }
-
-        dynamicVideos.sort(() => Math.random() - 0.5);
-
-        // ensure YT ready
-        if (window.YT && YT.Player) {
-            initPlayer();
-        }
-
-    } catch (err) {
-        console.error("FETCH ERROR:", err);
-    }
+        dynamicVideos = allVideos.length > 0 ? allVideos.sort(() => Math.random() - 0.5) : ['ixe341U2mqA'];
+        initPlayer();
+    } catch (e) { dynamicVideos = ['ixe341U2mqA']; initPlayer(); }
 }
 
-// =======================
-// 5. YT READY CALLBACK
-// =======================
-function onYouTubeIframeAPIReady() {
-    checkAccess();
-}
-
-// =======================
-// 6. INIT PLAYER
-// =======================
 function initPlayer() {
-    let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
-
-    player = new YT.Player('yt-player', {
-        height: '100%',
-        width: '100%',
-        videoId: startVid,
-        playerVars: {
-            controls: 0,
-            rel: 0,
-            modestbranding: 1,
-            disablekb: 1
-        },
-        events: {
-            onStateChange: onPlayerStateChange,
-            onReady: () => {
-                document.getElementById('shutter').style.display = "flex";
-            }
-        }
-    });
+    if (window.YT && YT.loaded) {
+        let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
+        player = new YT.Player('yt-player', {
+            height: '100%', width: '100%', videoId: startVid,
+            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'iv_load_policy': 3, 'disablekb': 1, 'origin': window.location.origin },
+            events: { 'onStateChange': onPlayerStateChange, 'onReady': () => document.getElementById('shutter').style.display = "flex" }
+        });
+    } else { setTimeout(initPlayer, 500); }
 }
 
-// =======================
-// 7. PLAYER EVENTS
-// =======================
-function onPlayerStateChange(e) {
-    if (e.data === YT.PlayerState.ENDED) {
-
-        watchedCount++;
-
-        let next = dynamicVideos[watchedCount % dynamicVideos.length];
-
-        player.loadVideoById(next);
-        player.pauseVideo();
-
-        document.getElementById('shutter').style.display = "flex";
-
-        generateCode();
-        showSynergyAlert("NEXT VIDEO READY");
-    }
-
-    if (e.data === YT.PlayerState.PLAYING) {
+// 4. THE FIX: ME ZAI FARU IDAN BIDIYO YA KARE?
+// 4. GYARARREN LOGIC: TSAIDA BIDIYO IDAN YA KARE
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING) {
         setupSecurityTracker(player);
     }
-}
 
-// =======================
-// 8. SESSION START
-// =======================
+    // Idan bidiyo ya kare (ENDED)
+    if (event.data === YT.PlayerState.ENDED) {
+        watchedCount++;
+        
+        // 1. Nemo bidiyo na gaba amma KAR A KIRA SHI TUKUNA
+        let nextVid = dynamicVideos[watchedCount % dynamicVideos.length];
+        player.cueVideoById(nextVid); // 'cue' yana nufin loda shi amma kar a yi playing
+
+        // 2. Rufe shafin da Shutter (Cover) domin mutum ya danna da kansa
+        const shutter = document.getElementById('shutter');
+        if (shutter) {
+            shutter.style.display = "flex";
+            // Zaka iya canza rubutun shutter din don mamba ya gane
+            const shutterText = shutter.querySelector('.orbitron');
+            if(shutterText) shutterText.innerText = "NEXT UNIT READY";
+        }
+
+        // 3. Sabunta code don sabon bidiyo
+        generateCode();
+        
+        showSynergyAlert("UNIT COMPLETED. START NEXT SESSION.", "success");
+    }
+}
+    
+
+// 5. CORE FUNCTIONS
 function startQuantumSession() {
-    player.playVideo();
-    document.getElementById('shutter').style.display = "none";
-    generateCode();
+    if (player && player.playVideo) {
+        player.playVideo();
+        document.getElementById("shutter").style.display = "none";
+        generateCode();
+    }
 }
 
-// =======================
-// 9. UTILITIES
-// =======================
-function generateCode() {
-    currentCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    document.getElementById("generated-code-display").innerText = currentCode;
+function generateCode() { 
+    currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+    const display = document.getElementById("generated-code-display");
+    if(display) display.innerText = currentCode; 
 }
 
-function showSynergyAlert(msg) {
-    let t = document.getElementById('custom-toast') || document.createElement('div');
-    t.id = 'custom-toast';
-    t.className = 'synergy-toast show';
-    t.innerHTML = `<span>${msg}</span>`;
-    document.body.appendChild(t);
-
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// =======================
-// 10. SECURITY SYSTEM
-// =======================
+// 6. SECURITY MODULE
 (function() {
-    let strikes = 0, last = 0;
-
+    let strikes = 0, lastTime = 0;
     window.setupSecurityTracker = function(p) {
-        const tracker = setInterval(() => {
-
+        setInterval(() => {
             if (!p || p.getPlayerState() !== 1) return;
-
             let curr = p.getCurrentTime();
-
-            if (curr > last + 2.5) {
-                strikes++;
-                p.seekTo(last);
-
-                if (strikes >= 3) {
-                    document.body.innerHTML = "<h1 style='color:red;text-align:center'>SECURITY BREACH</h1>";
-                }
-
-            } else {
-                last = curr;
-            }
-
+            if (curr > lastTime + 2.5) {
+                strikes++; p.seekTo(lastTime);
+                if (strikes >= 3) document.body.innerHTML = "<h1 style='color:red;text-align:center;padding:50px;'>SECURITY BREACH</h1>";
+                else showSynergyAlert("NO SKIPPING!", "error");
+            } else { lastTime = curr; }
         }, 1000);
     };
-
 })();
 
-// =======================
-// 11. REALTIME FIREBASE
-// =======================
+// 7. UI & SYNC
+function showSynergyAlert(m) {
+    let t = document.getElementById('custom-toast') || document.createElement('div');
+    t.id = 'custom-toast'; t.className = 'synergy-toast show'; t.innerHTML = `<span>${m}</span>`;
+    document.body.appendChild(t); setTimeout(() => t.classList.remove('show'), 3000);
+}
+
 if (currentActiveUser) {
     db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
         if (!doc.exists) return;
-
         const d = doc.data();
-
-        document.getElementById('display-name').innerText = d.username || "USER";
-
+        const total = (d.videoBalance || 0) + (d.shareBalance || 0);
+        document.getElementById('total-balance-main').innerText = total.toLocaleString();
+        document.getElementById('video-balance-sub').innerText = (d.videoBalance || 0).toLocaleString();
+        document.getElementById('share-balance-sub').innerText = (d.shareBalance || 0).toLocaleString();
+        document.getElementById('display-name').innerText = d.username || "MEMBER";
         const w = d.videosWatchedToday || 0;
-
-        document.getElementById('daily-count').innerText = `${w} / 10`;
-        document.getElementById('daily-progress-bar').style.width = (w * 10) + "%";
+        document.getElementById('daily-count').innerText = `${w} / 10 UNITS`;
+        if(document.getElementById('daily-progress-bar')) document.getElementById('daily-progress-bar').style.width = (w*10) + "%";
     });
 }
 
+fetchLatestVideos();
+    
+
+    
 </script>
 </body>
 </html>
