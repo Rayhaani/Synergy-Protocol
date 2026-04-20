@@ -236,6 +236,8 @@ async function resendVerification() {
     const user = document.getElementById('username').value.toLowerCase().trim();
     const pass = document.getElementById('password').value.trim();
     const rawPhone = document.getElementById('phone').value.trim();
+    const referrer = getReferrerFromURL(); // Wannan zai duba URL din ya gano referrer din
+          
 
     // Reset button don fara aiki
     btn.disabled = true;
@@ -288,14 +290,15 @@ async function resendVerification() {
             videosWatchedToday: 0,
             lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }),
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            referredBy: getReferrerFromURL() 
+            referredBy: referrer //
+        
         });
 
         // E. ADANA BAYANAN A REALTIME DATABASE
         await database.ref('users/' + user).set({
             whatsapp: formattedPhone,
             balance: 0,
-            referredBy: getReferrerFromURL(),
+            referredBy: referrer,
             last_update: new Date().toISOString()
         });
 
