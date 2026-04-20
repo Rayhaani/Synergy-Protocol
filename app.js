@@ -66,3 +66,31 @@ async function executeVerification() {
         alert("Ba a samu haduwa da Server ba.");
     }
                 }
+
+// --- SYNERGY MULTI-LEVEL ENGINE ---
+async function distributeCommissions(currentUser, earnedAmount) {
+    const commissionRates = [0.10, 0.05, 0.025]; 
+    let currentChild = currentUser;
+
+    for (let i = 0; i < commissionRates.length; i++) {
+        try {
+            const userDoc = await db.collection("users").doc(currentChild).get();
+            if (!userDoc.exists) break;
+            
+            const parentId = userDoc.data().referredBy;
+            if (!parentId || parentId === "admin" || parentId === "") break;
+
+            const commission = earnedAmount * commissionRates[i];
+
+            await db.collection("users").doc(parentId).update({
+                videoBalance: firebase.firestore.FieldValue.increment(commission),
+                referralEarnings: firebase.firestore.FieldValue.increment(commission)
+            });
+
+            currentChild = parentId;
+        } catch (error) {
+            console.error("Commission Error:", error);
+            break; 
+        }
+    }
+              }
