@@ -240,54 +240,56 @@
         }
     });
 
-    // 4. LOAD REFERRAL NETWORK
-    function loadReferralNetwork(currentUsername) {
-        const listBody = document.getElementById('referral-list-body');
-        const topActiveCount = document.getElementById('active-count-top');
-        const refCountHeader = document.getElementById('ref-count');
 
-        database.ref('users').on('value', (snapshot) => {
-            listBody.innerHTML = "";
-            let activeCount = 0;
-            let totalRefs = 0;
-            const allUsers = snapshot.val();
+    // 4. LOAD REFERRAL NETWORK (GYARARRE)
+function loadReferralNetwork(currentUsername) {
+    const listBody = document.getElementById('referral-list-body');
+    const topActiveCount = document.getElementById('active-count-top');
+    const refCountHeader = document.getElementById('ref-count');
+
+    // Muna amfani da FIRESTORE yanzu domin nan ne bayanan suke
+    db.collection("users").where("referredBy", "==", currentUsername)
+    .onSnapshot((querySnapshot) => {
+        listBody.innerHTML = "";
+        let activeCount = 0;
+        let totalRefs = 0;
+
+        if (querySnapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="3" class="text-center py-10 opacity-50">No nodes found.</td></tr>';
+            topActiveCount.innerText = "0";
+            refCountHeader.innerText = "0";
+            return;
+        }
+
+        const today = "20/04/2026"; // Kamar yadda na gani a hotonka
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            totalRefs++;
             
-            if (!allUsers) {
-                listBody.innerHTML = '<tr><td colspan="3" class="text-center py-10 opacity-50">No nodes found.</td></tr>';
-                return;
-            }
+            const lastDate = data.lastActivityDate || "N/A";
+            const isActive = (lastDate === today);
+            if(isActive) activeCount++;
 
-            const today = new Date().toLocaleDateString('en-GB');
-
-            Object.keys(allUsers).forEach(username => {
-                const data = allUsers[username];
-                
-                if (data.referredBy === currentUsername) {
-                    totalRefs++;
-                    const lastDate = data.last_update ? new Date(data.last_update).toLocaleDateString('en-GB') : "N/A";
-                    const isActive = (lastDate === today);
-                    if(isActive) activeCount++;
-
-                    listBody.innerHTML += `
-                        <tr class="text-[11px] border-b border-white/[0.03]">
-                            <td class="py-4 text-white">@${username}</td>
-                            <td class="py-4 text-center">
-                                <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
-                                    ${isActive ? 'ACTIVE' : 'INACTIVE'}
-                                </span>
-                            </td>
-                            <td class="py-4 text-right font-mono text-gray-400">
-                                ${lastDate === today ? 'Today' : lastDate}
-                            </td>
-                        </tr>`;
-                }
-            });
-            
-            topActiveCount.innerText = activeCount;
-            refCountHeader.innerText = totalRefs;
-            if (totalRefs === 0) listBody.innerHTML = '<tr><td colspan="3" class="text-center py-10 opacity-50">No nodes found.</td></tr>';
+            listBody.innerHTML += `
+                <tr class="text-[11px] border-b border-white/[0.03]">
+                    <td class="py-4 text-white">@${data.username}</td>
+                    <td class="py-4 text-center">
+                        <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
+                            ${isActive ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
+                    </td>
+                    <td class="py-4 text-right font-mono text-gray-400">
+                        ${lastDate === today ? 'Today' : lastDate}
+                    </td>
+                </tr>`;
         });
-    }
+        
+        topActiveCount.innerText = activeCount;
+        refCountHeader.innerText = totalRefs;
+    });
+}
+    
 
     // 5. COPY FUNCTION
     function copyRef() {
