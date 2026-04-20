@@ -106,17 +106,34 @@
     </div>
 
     <script>
-        const firebaseConfig = { 
+        // 1. Bayanan Hadin Gwiwa (Firebase Configuration)
+const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
     projectId: "synergy-protocol",
-    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" // Tabbatar ka saka naka URL din anan
+    // Tabbatar wannan URL din ya yi daidai da na Firebase Console dinka
+    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" 
 };
-firebase.initializeApp(firebaseConfig);
 
-const db = firebase.firestore();
-const database = firebase.database(); // KARA WANNAN: Domin adana WhatsApp number
-let checkInterval; // KARA WANNAN: Domin magance wancan Error din
+// 2. Tada Tsarin (Initialize Firebase)
+// Mun sanya shi a cikin variable 'app' domin komai ya zama standard
+const app = firebase.initializeApp(firebaseConfig);
+
+// 3. Saita Manhajoji (Initialize Services)
+const db = firebase.firestore();      // Domin Profile da Security
+const database = firebase.database(); // Domin Network da Realtime Data
+const auth = firebase.auth();           // Domin Shiga da Fita (Authentication)
+
+// 4. Saita Timer (Global Variables)
+// Wannan shi ne zai hana "checkInterval is not defined" error
+let checkInterval = null; 
+
+// 5. Neman Referrer (Helper Function)
+// Zai taimaka wajen gano wanda ya gayyaci mamba tun a farkon loda shafin
+function getReferrerFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ref') || "admin";
+}
         
         function validateForm() {
             const fullName = document.getElementById('full-name').value.trim();
@@ -210,18 +227,21 @@ async function resendVerification() {
 }
 
 // 2. GYARARREN REGISTER FUNCTION (Don magance duplicate Email/User)
-async function register() {
+
+
+      async function register() {
     const btn = document.getElementById('reg-btn');
     const mainCard = document.getElementById('main-register-card'); 
     const email = document.getElementById('email').value.trim();
     const user = document.getElementById('username').value.toLowerCase().trim();
     const pass = document.getElementById('password').value.trim();
-    const rawPhone = document.getElementById('phone').value.trim(); // Mun dauko phone anan
+    const rawPhone = document.getElementById('phone').value.trim();
 
+    // Reset button don fara aiki
     btn.disabled = true;
     btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
 
-    // 1. GYARA LAMBAR WHATSAPP TUN KAFIN MU FARA
+    // 1. GYARA LAMBAR WHATSAPP
     let formattedPhone = rawPhone;
     if (rawPhone.startsWith('0')) {
         formattedPhone = '234' + rawPhone.substring(1);
@@ -230,41 +250,37 @@ async function register() {
     }
 
     try {
-        // A. Duba idan Username yana nan a Firestore
+        // A. DUBA USERNAME (A Firestore)
         const userRef = db.collection("users").doc(user);
         const doc = await userRef.get();
-
         if (doc.exists) {
-            showTopNotif("Username is already taken.", "error");
-            btn.disabled = false;
-            btn.innerText = "ACTIVATE PROTOCOL";
-            return;
+            throw new Error("Username is already taken.");
         }
 
-        // B. Duba Email idan yana nan
+        // B. DUBA EMAIL (A Auth)
         const signInMethods = await firebase.auth().fetchSignInMethodsForEmail(email);
         if (signInMethods.length > 0) {
-            showTopNotif("Email address already registered.", "error");
-            btn.disabled = false;
-            btn.innerText = "ACTIVATE PROTOCOL";
-            return;
+            throw new Error("Email address already registered.");
         }
 
-        // C. CREATE ACCOUNT A BACKGROUND
+        // C. CREATE ACCOUNT & SEND VERIFICATION
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, pass);
         await userCredential.user.sendEmailVerification();
         
+        // --- MATAKI MAFI MUHIMMANCI ---
+        // Da zarar an tura email, mu boye tsohon shafin kafin mu nuna overlay
         mainCard.style.display = 'none';
-        showSuccessOverlay(email);
+        showSuccessOverlay(email); 
+        // ------------------------------
 
-        // D. ADANA BAYANAN A FIRESTORE (Domin Security da Profiles)
+        // D. ADANA BAYANAN A FIRESTORE
         await userRef.set({
             uid: userCredential.user.uid,
             fullName: document.getElementById('full-name').value.trim(),
             email: email, 
             username: user,
             state: document.getElementById('state').value.trim(),
-            whatsapp: formattedPhone, // MUN SAKA GYARARRIYAR LAMBAR ANAN
+            whatsapp: formattedPhone, 
             videoBalance: 0, 
             shareBalance: 0, 
             isVerified: false,
@@ -272,25 +288,27 @@ async function register() {
             videosWatchedToday: 0,
             lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }),
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            referredBy: getReferrerFromURL() || "admin" // Kar ka manta da wannan domin referrals suyi aiki!
+            referredBy: getReferrerFromURL() 
         });
 
-        // E. ADANA BAYANAN A REALTIME DATABASE (Domin Network Page dinka ya gani da sauri)
-        // Wannan shi ne zai sa loadReferralNetwork() dinka ya yi aiki
+        // E. ADANA BAYANAN A REALTIME DATABASE
         await database.ref('users/' + user).set({
             whatsapp: formattedPhone,
             balance: 0,
-            referredBy: getReferrerFromURL() || "admin",
+            referredBy: getReferrerFromURL(),
             last_update: new Date().toISOString()
         });
 
     } catch (e) {
+        // Idan aka samu error, nuna shi sannan dawo da shafin idan ya bace
+        console.error("Critical Error:", e);
         showTopNotif(e.message, "error");
-        if (mainCard.style.display === 'none') mainCard.style.display = 'block';
+        
+        mainCard.style.display = 'block'; 
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
     }
-                }
+      }
                 
 
         
