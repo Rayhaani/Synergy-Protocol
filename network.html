@@ -292,9 +292,46 @@
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
+
+       
+        firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        // Nemo username din wannan mamban a Firestore
+        db.collection("users").where("email", "==", user.email).get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const myUsername = doc.data().username;
+                const refInput = document.getElementById('ref-link');
+                
+                // Hadawa da asalin sunan shafinka na register
+                const baseUrl = "https://rayhaani.github.io/Synergy/signup.html";
+                refInput.value = `${baseUrl}?ref=${myUsername}`;
+            });
+        });
+    }
+});
+
+
+
+        function copyRef() {
+    const copyText = document.getElementById("ref-link");
+    
+    if (copyText.value === "Loading...") return; // Kar ya yi copy din "Loading"
+
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // Domin wayoyin hannu (Mobile)
+
+    navigator.clipboard.writeText(copyText.value).then(() => {
+        // Nuna sanarwa ta SweetAlert ko TopNotif
+        showTopNotif("Link Copied to Clipboard!", "success");
+    });
+        }
+
     </script>
 
 
+    
+    
+    
     <script src="app.js"></script>
 </body>
     </html>
