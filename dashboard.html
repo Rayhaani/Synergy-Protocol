@@ -166,7 +166,7 @@
     letter-spacing: 1px;
       }
 
-     body { opacity: 0; transition: opacity 0.5s ease; }
+     body { display: none !important; }
       
 </style>
     
@@ -390,7 +390,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
     
-// 1. INITIALIZATION
+    // 1. INITIALIZATION
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
@@ -402,175 +402,349 @@ const firebaseConfig = {
 
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
-const currentActiveUser = localStorage.getItem('synergy_user');
-let player, currentCode = "", dynamicVideos = [], watchedCount = 0;
 
-// 2. ACCESS CHECK
+// 2. THE CORRECT ACCESS GATE
 async function checkAccess() {
-    if (!currentActiveUser) { window.location.replace("signin.html"); return; }
+    // Mu duba sunan mutum daga localStorage (Domin shi ne Document ID dinka)
+    const username = localStorage.getItem('synergy_user'); 
+
+    if (!username) {
+        window.location.replace("signin.html");
+        return;
+    }
+
     try {
-        const doc = await db.collection("users").doc(currentActiveUser).get();
-        if (doc.exists && doc.data().isVerified === true) {
-            document.body.style.opacity = "1";
-            watchedCount = doc.data().videosWatchedToday || 0;
-            // Kawai idan mamba ne, za mu kira bidiyo
-            fetchLatestVideos();
-        } else { window.location.replace("activation.html"); }
-    } catch (err) { console.error("Access Error", err); }
-}
-
-// Kira checkAccess da zaran shafi ya gama loda kansa
-window.onload = checkAccess;
-
-// 3. YOUTUBE LOGIC (STRICT - NO BACKUP VIDEOS)
-const API_KEY = 'AIzaSyAv5i78UAOzJjNUp3EiUmRyUFz-9IQfFbU';
-const CHANNELS = ['UCj7jOBQq0cpwBp0j7XVikQQ', 'UC_54whp80N3Lyl8tgLQf4Cw'];
-
-async function fetchLatestVideos() {
-    try {
-        let allVideos = [];
-        for (const channelId of CHANNELS) {
-            // Mataki na 1: Nemo ainihin ID na babban folder din uploads
-            const channelUrl = `https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=contentDetails&key=${API_KEY}`;
-            const cRes = await fetch(channelUrl);
-            const cData = await cRes.json();
+        // MUHIMMI: Mun sauya user.uid zuwa 'username' domin ya dace da Firebase dinka
+        const doc = await db.collection("users").doc(username).get();
+        
+        if (doc.exists) {
+            const data = doc.data();
             
-            if (cData.items && cData.items.length > 0) {
-                const listId = cData.items[0].contentDetails.relatedPlaylists.uploads;
-
-                // Mataki na 2: Kwaso duk abinda ke ciki (koda Shorts guda daya ne)
-                const vRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${listId}&part=contentDetails&maxResults=5&key=${API_KEY}`);
-                const vData = await vRes.json();
-
-                if (vData.items && vData.items.length > 0) {
-                    vData.items.forEach(v => {
-                        allVideos.push(v.contentDetails.videoId);
-                    });
-                }
+            // Duba isVerified (boolean false/true a Firebase)
+            if (data.isVerified === true) {
+                console.log("Access Granted!");
+                localStorage.setItem('synergy_verified_status', 'true');
+                // Bude shafi
+                document.body.style.setProperty('display', 'block', 'important');
+            } else {
+                console.log("Not Verified. Sending to Activation...");
+                localStorage.removeItem('synergy_verified_status');
+                window.location.replace("activation.html");
             }
-        }
-
-        dynamicVideos = [...new Set(allVideos)];
-
-        if (dynamicVideos.length > 0) {
-            console.log("Synergy Found: " + dynamicVideos.length + " items.");
-            initPlayer();
         } else {
-            // Idan har yanzu babu komai, to ka tabbatar bidiyon yana "Public"
-            showSynergyAlert("STILL EMPTY: ENSURE SHORTS ARE PUBLIC", "error");
+            // Idan bamu ga wannan sunan a Database ba
+            console.error("User document not found!");
+            window.location.replace("signin.html");
         }
-    } catch (e) {
-        showSynergyAlert("CONNECTION ERROR", "error");
+    } catch (err) {
+        console.error("Database Error:", err);
+        // Backup idan babu network
+        if (localStorage.getItem('synergy_verified_status') === 'true') {
+            document.body.style.setProperty('display', 'block', 'important');
+        } else {
+            window.location.replace("activation.html");
+        }
     }
 }
+
+// Kira tsaron nan take
+checkAccess();
+                    
+
+    // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
+    let player, currentCode = "", lastTime = 0;
+    // ... sauran functions na dashboard su biyo baya a nan ...
     
-function onYouTubeIframeAPIReady() {
-    // YouTube API ya loda, muna jiran fetchLatestVideos ya gama
-}
 
-function initPlayer() {
-    if (dynamicVideos.length === 0) return;
-
-    let startVid = dynamicVideos[watchedCount % dynamicVideos.length];
+    // 2. YOUTUBE API & PLAYER LOGIC
+    function onYouTubeIframeAPIReady() { 
+        player = new YT.Player('yt-player', { 
+            height: '100%', width: '100%', videoId: 'dQw4w9WgXcQ', 
+            playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0, 'disablekb': 1 }, 
+            events: { 'onStateChange': onPlayerStateChange } 
+        }); 
+    }
     
-    player = new YT.Player('yt-player', {
-        height: '100%',
-        width: '100%',
-        videoId: startVid,
-        playerVars: { 
-            'controls': 0, 
-            'modestbranding': 1, 
-            'rel': 0, 
-            'iv_load_policy': 3, 
-            'disablekb': 1,
-            'origin': window.location.origin 
-        },
-        events: { 
-            'onStateChange': onPlayerStateChange, 
-            'onReady': () => {
-                const shutter = document.getElementById('shutter');
-                if(shutter) shutter.style.display = "flex";
-            }
-        }
-    });
-}
+    function startQuantumSession() { 
+        document.getElementById('shutter').style.opacity = "0"; 
+        setTimeout(() => document.getElementById('shutter').style.display = "none", 1000); 
+        player.playVideo(); 
+    }
 
-function onPlayerStateChange(event) {
+   function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        setupSecurityTracker(player);
-    }
+        // 1. Kira sabon garkuwar tsaro (Strikes)
+        if(window.setupSecurityTracker) window.setupSecurityTracker(event.target);
 
-    if (event.data === YT.PlayerState.ENDED) {
-        watchedCount++;
-        let nextVid = dynamicVideos[watchedCount % dynamicVideos.length];
-        player.cueVideoById(nextVid);
+        // 2. Fara lissafin progress da nuna verifier panel
+        const tracker = setInterval(() => {
+            if (player.getPlayerState() !== YT.PlayerState.PLAYING) { 
+                clearInterval(tracker); 
+                return; 
+            }
 
-        const shutter = document.getElementById('shutter');
-        if (shutter) {
-            shutter.style.display = "flex";
-            const shutterText = shutter.querySelector('.orbitron');
-            if(shutterText) shutterText.innerText = "NEXT UNIT READY";
-        }
+            let currentTime = player.getCurrentTime();
+            let duration = player.getDuration();
+            let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
 
-        generateCode();
-        showSynergyAlert("UNIT COMPLETED. START NEXT SESSION.", "success");
-    }
-}
+            // Mun cire tsohon Anti-skip din a nan domin kar ya yi fada da sabon Module din
+            
+            document.getElementById("ring").innerText = progress + "%";
+            document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
 
-// 4. CORE FUNCTIONS
-function startQuantumSession() {
-    if (player && player.playVideo) {
-        player.playVideo();
-        const shutter = document.getElementById("shutter");
-        if(shutter) shutter.style.display = "none";
-        generateCode();
-    }
-}
-
-function generateCode() { 
-    currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
-    const display = document.getElementById("generated-code-display");
-    if(display) display.innerText = currentCode; 
-}
-
-// 5. SECURITY MODULE
-(function() {
-    let strikes = 0, lastTime = 0;
-    window.setupSecurityTracker = function(p) {
-        setInterval(() => {
-            if (!p || typeof p.getPlayerState !== 'function' || p.getPlayerState() !== 1) return;
-            let curr = p.getCurrentTime();
-            if (curr > lastTime + 2.5) {
-                strikes++; p.seekTo(lastTime);
-                if (strikes >= 3) document.body.innerHTML = "<h1 style='color:red;text-align:center;padding:50px;'>SECURITY BREACH</h1>";
-                else showSynergyAlert("NO SKIPPING!", "error");
-            } else { lastTime = curr; }
+            if (progress >= 5) { 
+                const p = document.getElementById('verifier-panel'); 
+                if(p) {
+                    p.classList.add('is-visible-now'); 
+                    setTimeout(() => { 
+                        p.style.opacity = "1"; 
+                        p.style.transform = "translateY(0)"; 
+                        p.style.pointerEvents = "all"; 
+                    }, 50);
+                }
+                if(currentCode === "") generateCode();
+            }
         }, 1000);
-    };
-})();
+    }
+                        }
+    
 
-// 6. UI & FIREBASE SYNC
-function showSynergyAlert(m) {
-    let t = document.getElementById('custom-toast') || document.createElement('div');
-    t.id = 'custom-toast'; t.className = 'synergy-toast show'; t.innerHTML = `<span>${m}</span>`;
-    document.body.appendChild(t); setTimeout(() => t.classList.remove('show'), 3000);
-}
+    // 3. UI & INTERACTION FUNCTIONS
+    function generateCode() { 
+        currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+        document.getElementById("generated-code-display").innerText = currentCode; 
+    }
+
+    function toggleGoogleMenu(event) {
+        event.stopPropagation();
+        document.getElementById('google-nav').classList.toggle('active');
+    }
+
+    window.onclick = () => {
+        const menu = document.getElementById('google-nav');
+        if(menu) menu.classList.remove('active');
+    };
+
+    function showSynergyAlert(msg, type = 'info') {
+        let toast = document.getElementById('custom-toast') || document.createElement('div');
+        toast.id = 'custom-toast'; toast.className = 'synergy-toast show';
+        toast.innerHTML = `<span>${msg}</span>`;
+        if(!document.getElementById('custom-toast')) document.body.appendChild(toast);
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    
+    // 4. DATA SYNC (FIREBASE) - Sabon Gyara
+const currentActiveUser = localStorage.getItem('synergy_user'); // Tabbatar muna da sunan mutum
 
 if (currentActiveUser) {
     db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
-        if (!doc.exists) return;
-        const d = doc.data();
-        const total = (d.videoBalance || 0) + (d.shareBalance || 0);
-        document.getElementById('total-balance-main').innerText = total.toLocaleString();
-        document.getElementById('video-balance-sub').innerText = (d.videoBalance || 0).toLocaleString();
-        document.getElementById('share-balance-sub').innerText = (d.shareBalance || 0).toLocaleString();
-        document.getElementById('display-name').innerText = d.username || "MEMBER";
-        const w = d.videosWatchedToday || 0;
-        document.getElementById('daily-count').innerText = `${w} / 10 UNITS`;
-        if(document.getElementById('daily-progress-bar')) document.getElementById('daily-progress-bar').style.width = (w*10) + "%";
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // 1. Lissafin kudi
+            const vBal = data.videoBalance || 0;
+            const sBal = data.shareBalance || 0;
+            const total = vBal + sBal;
+            const watched = data.videosWatchedToday || 0;
+            
+            // 2. Nuna kudin a babban Balance (da commas)
+            document.getElementById('total-balance-main').innerText = total.toLocaleString();
+            
+            // 3. Nuna kudin a kananan Vaults
+            document.getElementById('video-balance-sub').innerText = vBal.toLocaleString();
+            document.getElementById('share-balance-sub').innerText = sBal.toLocaleString();
+            
+            // 4. Bayanan Profile
+            document.getElementById('display-name').innerText = data.username || "MEMBER";
+            
+            // Tabbatar an nuna Verified badge idan isVerified = true
+            const badge = document.getElementById('verified-badge');
+            if(badge) badge.style.display = data.isVerified ? 'flex' : 'none';
+            
+            // 5. Daily Progress HUD
+            const percent = Math.min((watched / 10) * 100, 100);
+            document.getElementById('daily-count').innerText = `${watched} / 10 UNITS`;
+            
+            const progressBar = document.getElementById('daily-progress-bar');
+            if(progressBar) progressBar.style.width = percent + "%";
+            
+            // 6. Est. Monthly Yield
+            document.getElementById('est-earnings').innerText = "₦" + (watched * 150 * 30).toLocaleString();
+            
+            // 7. Outer Ring Animation
+            const outerRing = document.getElementById('task-ring-outer');
+            if(outerRing) {
+                outerRing.style.background = `conic-gradient(#00f2fe ${percent * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
+            }
+
+            // Check if stats need resetting (Idan sabon rana ne)
+            checkAndResetDailyStats(data);
+        }
+    }, (error) => {
+        console.error("Snapshot Listener Error:", error);
+    });
+} else {
+    console.error("No active user found in storage.");
+}
+    
+
+    async function executeVerification() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    // Tabbatar inputVal da currentCode sun yi daidai
+    if(inputVal === currentCode && currentCode !== "") {
+        try {
+
+            // Maimakon dogara ga variable na waje, mu fada masa ya duba sunan yanzu
+const currentActiveUser = localStorage.getItem('synergy_user');
+if(!currentActiveUser) { showSynergyAlert("SESSION EXPIRED", "error"); return; }
+
+            await db.collection("users").doc(currentActiveUser).update({
+            
+                videoBalance: firebase.firestore.FieldValue.increment(150),
+                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
+            });
+            
+            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
+            
+            // Kar a yi reload nan take, bari alert din ya nuna
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+            
+        } catch (error) {
+            console.error("Firebase Error:", error);
+            showSynergyAlert("DATABASE ERROR", "error");
+        }
+    } else {
+        showSynergyAlert("INVALID CODE", "error");
+    }
+    }
+        
+
+    async function secureShareAndEarn(videoId) {
+        try {
+            await navigator.share({ title: 'Synergy Protocol', url: 'https://youtu.be/' + videoId });
+            await db.collection("users").doc(currentUser).update({ shareBalance: firebase.firestore.FieldValue.increment(50) });
+            showSynergyAlert("SHARE REWARD ADDED", "success");
+        } catch(e) {}
+    }
+
+    // SYNERGY TAB PROTECTION ENGINE
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        // Idan mamba ya fita daga shafin
+        if (player && typeof player.pauseVideo === 'function') {
+            player.pauseVideo(); 
+            showSynergyAlert("SECURITY: SESSION PAUSED (DON'T LEAVE THE PAGE)", "info");
+        }
+    } else {
+        // Idan ya dawo shafin
+        showSynergyAlert("SESSION RESUMED", "success");
+    }
+});
+
+
+    // MULTI-LOGIN & CONSOLE PROTECTION
+const currentSessionId = Math.random().toString(36).substring(7);
+
+async function checkMultiLogin() {
+    if(!currentUser) return;
+    const sessionRef = db.collection("active_sessions").doc(currentUser);
+    
+    // Saita zaman yanzu
+    await sessionRef.set({
+        sessionId: currentSessionId,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Lura da wasu login daban
+    sessionRef.onSnapshot((doc) => {
+        if (doc.exists && doc.data().sessionId !== currentSessionId) {
+            document.body.innerHTML = `
+                <div style="background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:30px;">
+                    <h1 style="letter-spacing:5px;">PROTOCOL TERMINATED</h1>
+                    <p style="color:white; margin-top:20px;">Multiple logins detected on this account.</p>
+                    <button onclick="location.reload()" style="margin-top:30px; padding:15px 40px; background:#f87171; color:black; font-weight:bold; border-radius:10px;">RE-AUTHENTICATE</button>
+                </div>`;
+            if(player) player.pauseVideo();
+        }
     });
 }
 
+// Kari: Kare shafin daga 'Right Click' da 'Inspect Element'
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.onkeydown = function(e) {
+    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0))) {
+        return false;
+    }
+};
+
+checkMultiLogin();
+
+
+    // DAILY RESET ENGINE
+function checkAndResetDailyStats(userData) {
+    // Saita lokacin Nigeria (Lagos)
+    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
+    const lastActivityDate = userData.lastActivityDate || "";
+
+    if (today !== lastActivityDate && lastActivityDate !== "") {
+        db.collection("users").doc(currentUser).update({
+            videosWatchedToday: 0,
+            lastActivityDate: today
+        }).then(() => {
+            console.log("New day detected: Stats reset to 0");
+        });
+    }
+}
+
+
+    // SYNERGY SECURITY MODULE - ANTI-SKIP
+(function() {
+    // Wadannan variables din suna cikin wannan box din ne kawai
+    let internalStrikes = 0;
+    let internalLastTime = 0;
+    window.synergyTicker = null; 
+
+    window.setupSecurityTracker = function(playerInstance) {
+        if (window.synergyTicker) clearInterval(window.synergyTicker);
+
+        window.synergyTicker = setInterval(() => {
+            try {
+                if (!playerInstance || typeof playerInstance.getPlayerState !== 'function') return;
+                if (playerInstance.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+                let currentTime = playerInstance.getCurrentTime();
+
+                // ANTI-SKIP LOGIC
+                if (currentTime > internalLastTime + 2.5) { 
+                    internalStrikes++;
+                    playerInstance.seekTo(internalLastTime); 
+                    
+                    if (internalStrikes >= 3) {
+                        clearInterval(window.synergyTicker);
+                        document.body.innerHTML = `
+                            <div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:20px;'>
+                                <h1 style="font-size: 25px; letter-spacing:5px;">PROTOCOL BREACH</h1>
+                                <p style='color:white; margin-top:20px;'>Access suspended: Multiple skip attempts.</p>
+                            </div>`;
+                    } else {
+                        if (window.showSynergyAlert) {
+                            window.showSynergyAlert("STRIKE " + internalStrikes + "/3: NO SKIPPING!", "error");
+                        }
+                    }
+                } else {
+                    internalLastTime = currentTime;
+                }
+            } catch (err) {
+                // Kar mu bar kuskure ya kashe shafin
+            }
+        }, 1000);
+    };
+})();
+    
     
 </script>
 </body>
