@@ -11,12 +11,20 @@
         .orbitron { font-family: 'Syncopate', sans-serif; }
 
         /* NAV LOGO & MENU */
-        .header-nav { width: 100%; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; z-index: 100; margin-top: 10px; margin-bottom: 30px; position: relative; }
-        .nav-logo { font-weight: 800; letter-spacing: -1px; font-size: 24px; }
-        .menu-icon { width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 1001; }
-        .menu-bar { width: 100%; height: 2px; background: #fff; border-radius: 2px; transition: 0.3s; }
-        .menu-bar.short { width: 60%; align-self: flex-end; }
-
+        .header-nav { 
+    width: 100%; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    max-width: 1200px; 
+    z-index: 100; 
+    margin-top: 10px; 
+    margin-bottom: 30px; 
+    position: relative; 
+    /* Karawa: Wannan zai ba da sarari daga hagu da dama */
+    padding: 0 25px; 
+        }
+        
         /* PASSIONATE SMALL MENU */
         #side-menu { position: absolute; top: 40px; right: 0; width: 180px; background: rgba(10, 15, 25, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; z-index: 1000; display: none; flex-direction: column; padding: 15px 0; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         #side-menu.active { display: flex; }
@@ -266,7 +274,7 @@ body {
         <h2 class="section-title orbitron">Intelligence Base (FAQ)</h2>
         <div class="faq-list">
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">What is Synergy? <span>+</span></div>
+                <div class="faq-header" onclick="toggleFaq(this)">What is Zynta? <span>+</span></div>
                 <div class="faq-body">Zynta is a decentralized task protocol powered by neural verification.</div>
             </div>
             <div class="faq-item">
