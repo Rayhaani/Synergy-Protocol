@@ -25,28 +25,40 @@
         }
         
         
-        .menu-link { 
+      #side-menu { 
+    position: fixed; /* Ya dace da mobile fiye da absolute */
+    top: 70px; 
+    right: 20px; 
+    width: 220px; 
+    background: rgba(10, 15, 25, 0.9); 
+    backdrop-filter: blur(25px); 
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(0, 242, 254, 0.2); 
+    border-radius: 15px; 
+    z-index: 1000; 
+    display: none; 
+    flex-direction: column; 
+    padding: 10px 0;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+}
+
+#side-menu.active { display: flex; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.menu-link { 
     padding: 15px 25px; 
     font-size: 11px; 
     font-weight: 700; 
-    color: #ffffff; /* Fari radau */
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Wannan zai raba rubutun da background */
+    color: #fff; 
     text-decoration: none; 
-    transition: all 0.3s ease; 
     text-transform: uppercase; 
-    letter-spacing: 2px; 
-    display: block;
-    border-bottom: 1px solid rgba(255,255,255,0.05); /* Layi siriri tsakanin items */
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .menu-link:last-child { border-bottom: none; }
-
-.menu-link:hover { 
-    color: #00f2fe; 
-    background: rgba(0, 242, 254, 0.1); 
-    padding-left: 30px; 
-}
-        
+.menu-link:hover { background: rgba(0, 242, 254, 0.1); color: #00f2fe; }
         
         
 
