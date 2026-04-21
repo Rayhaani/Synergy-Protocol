@@ -25,24 +25,27 @@
         }
         
         
-        #side-menu { 
-    position: absolute; 
-    top: 60px; 
-    right: 20px; 
-    width: 220px; /* Mun dan kara fadin sa kadan */
-    background: rgba(255, 255, 255, 0.05); 
-    backdrop-filter: blur(20px) saturate(180%); 
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    border-top: 1px solid rgba(0, 242, 254, 0.4); 
-    border-radius: 20px; 
-    z-index: 1000; 
-    display: none; 
-    flex-direction: column; 
-    padding: 15px 0; /* Mun daidaita sararin sama da kasa */
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); 
-    text-align: left; /* Don rubutun ya fara daga gefe daya */
-        }
+        .menu-link { 
+    padding: 15px 25px; 
+    font-size: 11px; 
+    font-weight: 700; 
+    color: #ffffff; /* Fari radau */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Wannan zai raba rubutun da background */
+    text-decoration: none; 
+    transition: all 0.3s ease; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    display: block;
+    border-bottom: 1px solid rgba(255,255,255,0.05); /* Layi siriri tsakanin items */
+}
+
+.menu-link:last-child { border-bottom: none; }
+
+.menu-link:hover { 
+    color: #00f2fe; 
+    background: rgba(0, 242, 254, 0.1); 
+    padding-left: 30px; 
+}
         
         
         
