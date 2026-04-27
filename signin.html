@@ -127,24 +127,21 @@ body {
             </div>
 
             <div id="step-2" class="step-hidden">
-                <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Access Password</label>
-                <input type="password" id="login-pass" oninput="validateLogin()" placeholder="••••••••" 
-                       class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+    <div class="flex justify-between items-center ml-2 mb-1">
+        <label class="text-[9px] orbitron text-gray-400 block">Access Password</label>
+        <a href="#" onclick="forgotPassword()" class="text-[10px] text-cyan-400 font-bold hover:underline">Forgot?</a>
+    </div>
+    <input type="password" id="login-pass" oninput="validateLogin()" placeholder="••••••••" 
+           class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
             </div>
 
+        
             <button id="login-btn" onclick="login()" disabled 
                     class="btn-locked w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black py-4 rounded-xl font-bold orbitron text-[11px] mt-2 transition-all duration-500">
                 ACCESS PROTOCOL
             </button>
         </div>
 
-    <p class="text-center mt-6">
-    <a href="#" onclick="forgotPassword()" 
-       style="font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: -0.01em;"
-       class="text-[13px] text-cyan-400 font-bold hover:underline">
-       Forgot password?
-    </a>
-</p>
 
 <div class="border-t border-white/5 my-6"></div>
 
