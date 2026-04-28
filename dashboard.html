@@ -490,14 +490,9 @@ checkAccess();
 
     
     
-    let tracker; 
-let panelTriggered = false; // WANNAN SHINE MAKULLIN (THE LOCK)
-
-function onPlayerStateChange(event) {
+    function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        // Tabbatar bamu da wani tsohon tracker dake gudu
         if (tracker) clearInterval(tracker);
-
         if(window.setupSecurityTracker) window.setupSecurityTracker(event.target);
 
         tracker = setInterval(() => {
@@ -513,29 +508,29 @@ function onPlayerStateChange(event) {
             document.getElementById("ring").innerText = progress + "%";
             document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
 
-            // GYARA MAI MUHIMMI:
-            // 1. progress >= 5
-            // 2. !panelTriggered (Wato panel din bai riga ya fito ba tukuna)
+            // GYARAN ANAN YAKE:
+            // Idan progress ya kai 5 kuma ba'a riga an yi nasara ba (panelTriggered = false)
             if (progress >= 5 && !panelTriggered) { 
                 const p = document.getElementById('verifier-panel'); 
                 if(p) {
-                    panelTriggered = true; // Mun kulle kofa anan take!
+                    panelTriggered = true; 
                     p.classList.add('is-visible-now'); 
-                    setTimeout(() => { 
-                        p.style.opacity = "1"; 
-                        p.style.transform = "translateY(0)"; 
-                        p.style.pointerEvents = "all"; 
-                    }, 50);
+                    p.style.opacity = "1"; 
+                    p.style.transform = "translateY(0)"; 
+                    p.style.pointerEvents = "all"; 
                     if(currentCode === "") generateCode();
                 }
+            } else if (panelTriggered === false) {
+                // Idan an riga an yi verification, a tabbatar panel din ya boye
+                const p = document.getElementById('verifier-panel');
+                if(p) p.classList.remove('is-visible-now');
             }
         }, 1000);
     } else {
-        // Idan an yi pause ko bidiyo ya kare, mu tsayar da lissafin
         if (tracker) clearInterval(tracker);
     }
-                }
-
+    }
+    
 
     
 
@@ -621,33 +616,21 @@ if (currentActiveUser) {
     });
 }
     
-  
-
-async function executeVerification() {
+ async function executeVerification() {
     const inputVal = document.getElementById('node-code').value.toUpperCase();
     
     if(inputVal === currentCode && currentCode !== "") {
         try {
             const currentActiveUser = localStorage.getItem('synergy_user');
-            if(!currentActiveUser) return;
-
-            // 1. DAUKO BAYANAN USER DAGA FIREBASE DON DUBA LIMIT
             const userRef = db.collection("users").doc(currentActiveUser);
             const doc = await userRef.get();
             const userData = doc.data();
-            const watchedToday = userData.videosWatchedToday || 0;
-
-            // 2. MAI GADI (The Gatekeeper): Idan ya kai 5, tsayar da shi
-            if (watchedToday >= 5) {
-                showSynergyAlert("DAILY LIMIT REACHED (5/5). NO MORE YIELD TODAY!", "info");
-                
-                // Kulle panel din tunda ya riga ya gama
-                const p = document.getElementById('verifier-panel');
-                if(p) p.classList.remove('is-visible-now');
-                return; // Wannan zai hana code din dake kasa guduwa
+            
+            if ((userData.videosWatchedToday || 0) >= 5) {
+                showSynergyAlert("DAILY LIMIT REACHED", "info");
+                return;
             }
 
-            // 3. IDAN BAI KAI 5 BA, TO AIKA KUDIN
             await userRef.update({
                 videoBalance: firebase.firestore.FieldValue.increment(150),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
@@ -655,32 +638,36 @@ async function executeVerification() {
             });
             
             showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-            panelTriggered = false; // Bude makullin don bidiyo na gaba
-            
 
-            // UI Reset
+            // --- MATAKIN BACAR DA PANEL ---
+            panelTriggered = false; // Wannan zai sa Interval din dake sama ya gane an gama
+            currentCode = ""; 
+            document.getElementById('node-code').value = ""; // Share tsohon code din da mutum ya saka
+
             const p = document.getElementById('verifier-panel');
             if(p) {
                 p.style.opacity = "0";
-                setTimeout(() => p.classList.remove('is-visible-now'), 500);
+                p.style.transform = "translateY(40px)";
+                p.style.pointerEvents = "none";
+                setTimeout(() => {
+                    p.classList.remove('is-visible-now'); // Cire shi daga allon gaba daya
+                }, 500);
             }
-            document.getElementById("ring").innerText = "0%";
-            document.getElementById("ring").style.background = `conic-gradient(var(--aqua) 0deg, #111 0deg)`;
-            currentCode = ""; 
 
             if (player && typeof player.cueVideoById === 'function') {
                 loadNextVideoWithoutPlaying(); 
             }
 
         } catch (error) {
-            console.error("Firebase Error:", error);
             showSynergyAlert("DATABASE ERROR", "error");
         }
     } else {
         showSynergyAlert("INVALID CODE", "error");
     }
-        }
-        
+ }
+    
+
+
     
 
 // Wannan sabon function din zai loda bidiyo ba tare da ya yi Play ba
