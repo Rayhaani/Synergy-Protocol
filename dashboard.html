@@ -609,7 +609,7 @@ if (currentActiveUser) {
     
   
 
-  async function executeVerification() {
+async function executeVerification() {
     const inputVal = document.getElementById('node-code').value.toUpperCase();
     
     if(inputVal === currentCode && currentCode !== "") {
@@ -617,7 +617,9 @@ if (currentActiveUser) {
             const currentActiveUser = localStorage.getItem('synergy_user');
             if(!currentActiveUser) { showSynergyAlert("SESSION EXPIRED", "error"); return; }
 
-            // 1. Aika sakamakon zuwa Firebase
+            // 1. TARE LOOP DIN: Kashe currentCode nan take don kar onSnapshot ya sake tayar da shi
+            currentCode = ""; 
+
             await db.collection("users").doc(currentActiveUser).update({
                 videoBalance: firebase.firestore.FieldValue.increment(150),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
@@ -626,24 +628,26 @@ if (currentActiveUser) {
             
             showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
 
-            // 2. MAFITA: Maimakon Reload, sai mu loda sabon bidiyo amma mu tsayar da shi (Pause)
-            if (player && typeof player.cueVideoById === 'function') {
-                // Dauko sabon bidiyo daga Firebase (Wanda mamban bai gani ba tukuna)
-                loadNextVideoWithoutPlaying(); 
-            }
-
-            // 3. Reset UI - Kulle panel din verification
+            // 2. KULLE PANEL DIN: Dole ne mu cire class din dake nuna shi
             const p = document.getElementById('verifier-panel');
             if(p) {
                 p.style.opacity = "0";
-                setTimeout(() => p.classList.remove('is-visible-now'), 500);
+                p.style.transform = "translateY(40px)"; // Maida shi kasa
+                p.style.pointerEvents = "none"; // Hana danna komai
+                setTimeout(() => {
+                    p.classList.remove('is-visible-now'); // Wannan zai sa shi display: none
+                }, 500);
             }
-            
-            // Dawo da Progress Ring zuwa 0%
+
+            // 3. DAWO DA PROGRESS RING: Maida komai 0%
             document.getElementById("ring").innerText = "0%";
             document.getElementById("ring").style.background = `conic-gradient(var(--aqua) 0deg, #111 0deg)`;
-            currentCode = ""; // Share tsohon code
-            document.getElementById('node-code').value = ""; // Share input box
+            document.getElementById('node-code').value = ""; 
+
+            // 4. Loda sabon bidiyo
+            if (player && typeof player.cueVideoById === 'function') {
+                loadNextVideoWithoutPlaying(); 
+            }
 
         } catch (error) {
             console.error("Firebase Error:", error);
@@ -653,6 +657,7 @@ if (currentActiveUser) {
         showSynergyAlert("INVALID CODE", "error");
     }
 }
+    
 
 // Wannan sabon function din zai loda bidiyo ba tare da ya yi Play ba
 async function loadNextVideoWithoutPlaying() {
