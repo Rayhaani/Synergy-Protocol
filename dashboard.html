@@ -467,7 +467,8 @@ checkAccess();
 
     // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
     let player, currentCode = "", lastTime = 0;
-    // ... sauran functions na dashboard su biyo baya a nan ...
+let tracker; // Wannan ne zai rike lissafin circle din
+let panelTriggered = false; // Wannan zai hana panel din hauka
     
 
     // 2. YOUTUBE API & PLAYER LOGIC
@@ -492,11 +493,11 @@ checkAccess();
     
    function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
-        // Share tsohon tracker idan akwai
+        // Share tsohon tracker idan akwai don gudun rikicewa
         if (tracker) clearInterval(tracker);
 
         tracker = setInterval(() => {
-            // Idan an tsayar da bidiyo, tsayar da lissafin
+            // Idan an tsayar da bidiyo (Pause), tsayar da lissafin
             if (player.getPlayerState() !== YT.PlayerState.PLAYING) { 
                 clearInterval(tracker); 
                 return; 
@@ -508,18 +509,19 @@ checkAccess();
             if (duration > 0) {
                 let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
                 
-                // Update circle (Wannan ne zai sa ya fara reading)
+                // --- UPDATE CIRCLE (Reading) ---
                 const ring = document.getElementById("ring");
                 if(ring) {
                     ring.innerText = progress + "%";
                     ring.style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
                 }
 
-                // Nuna panel idan ya kai 5%
+                // --- NUNA PANEL (Verifier) ---
+                // Lokacin da ya kai 5% kuma ba a taba nuna panel din ba
                 if (progress >= 5 && !panelTriggered) { 
                     const p = document.getElementById('verifier-panel'); 
                     if(p) {
-                        panelTriggered = true; 
+                        panelTriggered = true; // Saita shi zuwa true don kar ya sake fitowa
                         p.classList.add('is-visible-now'); 
                         p.style.opacity = "1"; 
                         p.style.transform = "translateY(0)"; 
@@ -533,14 +535,19 @@ checkAccess();
                     }
                 }
             }
-        }, 1000);
+        }, 1000); // Kowane bayan sakan daya
+
+        // Kunna Anti-Skip Security (Domin kiyaye kudi)
+        if (window.setupSecurityTracker) {
+            window.setupSecurityTracker(player);
+        }
+
     } else {
+        // Idan an yi Pause ko bidiyo ya kare, tsayar da tracker
         if (tracker) clearInterval(tracker);
     }
    }
     
-    
-
     
 
     // 3. UI & INTERACTION FUNCTIONS
