@@ -490,12 +490,13 @@ checkAccess();
 
     
     
-    function onPlayerStateChange(event) {
+   function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
+        // Share tsohon tracker idan akwai
         if (tracker) clearInterval(tracker);
-        if(window.setupSecurityTracker) window.setupSecurityTracker(event.target);
 
         tracker = setInterval(() => {
+            // Idan an tsayar da bidiyo, tsayar da lissafin
             if (player.getPlayerState() !== YT.PlayerState.PLAYING) { 
                 clearInterval(tracker); 
                 return; 
@@ -503,33 +504,41 @@ checkAccess();
 
             let currentTime = player.getCurrentTime();
             let duration = player.getDuration();
-            let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
             
-            document.getElementById("ring").innerText = progress + "%";
-            document.getElementById("ring").style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
-
-            // GYARAN ANAN YAKE:
-            // Idan progress ya kai 5 kuma ba'a riga an yi nasara ba (panelTriggered = false)
-            if (progress >= 5 && !panelTriggered) { 
-                const p = document.getElementById('verifier-panel'); 
-                if(p) {
-                    panelTriggered = true; 
-                    p.classList.add('is-visible-now'); 
-                    p.style.opacity = "1"; 
-                    p.style.transform = "translateY(0)"; 
-                    p.style.pointerEvents = "all"; 
-                    if(currentCode === "") generateCode();
+            if (duration > 0) {
+                let progress = Math.min(Math.floor((currentTime / duration) * 100), 100);
+                
+                // Update circle (Wannan ne zai sa ya fara reading)
+                const ring = document.getElementById("ring");
+                if(ring) {
+                    ring.innerText = progress + "%";
+                    ring.style.background = `conic-gradient(var(--aqua) ${progress * 3.6}deg, #111 0deg)`;
                 }
-            } else if (panelTriggered === false) {
-                // Idan an riga an yi verification, a tabbatar panel din ya boye
-                const p = document.getElementById('verifier-panel');
-                if(p) p.classList.remove('is-visible-now');
+
+                // Nuna panel idan ya kai 5%
+                if (progress >= 5 && !panelTriggered) { 
+                    const p = document.getElementById('verifier-panel'); 
+                    if(p) {
+                        panelTriggered = true; 
+                        p.classList.add('is-visible-now'); 
+                        p.style.opacity = "1"; 
+                        p.style.transform = "translateY(0)"; 
+                        p.style.pointerEvents = "all"; 
+                        
+                        // Generate code idan babu shi
+                        if(currentCode === "") {
+                            currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+                            document.getElementById("generated-code-display").innerText = currentCode;
+                        }
+                    }
+                }
             }
         }, 1000);
     } else {
         if (tracker) clearInterval(tracker);
     }
-    }
+   }
+    
     
 
     
@@ -623,14 +632,7 @@ if (currentActiveUser) {
         try {
             const currentActiveUser = localStorage.getItem('synergy_user');
             const userRef = db.collection("users").doc(currentActiveUser);
-            const doc = await userRef.get();
-            const userData = doc.data();
             
-            if ((userData.videosWatchedToday || 0) >= 5) {
-                showSynergyAlert("DAILY LIMIT REACHED", "info");
-                return;
-            }
-
             await userRef.update({
                 videoBalance: firebase.firestore.FieldValue.increment(150),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
@@ -639,18 +641,17 @@ if (currentActiveUser) {
             
             showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
 
-            // --- MATAKIN BACAR DA PANEL ---
-            panelTriggered = false; // Wannan zai sa Interval din dake sama ya gane an gama
-            currentCode = ""; 
-            document.getElementById('node-code').value = ""; // Share tsohon code din da mutum ya saka
-
+            // --- BOYAR DA PANEL ---
             const p = document.getElementById('verifier-panel');
             if(p) {
                 p.style.opacity = "0";
                 p.style.transform = "translateY(40px)";
-                p.style.pointerEvents = "none";
                 setTimeout(() => {
-                    p.classList.remove('is-visible-now'); // Cire shi daga allon gaba daya
+                    p.classList.remove('is-visible-now');
+                    // RESET DON BIDIYO NA GABA
+                    panelTriggered = false; 
+                    currentCode = ""; 
+                    document.getElementById('node-code').value = "";
                 }, 500);
             }
 
@@ -666,7 +667,6 @@ if (currentActiveUser) {
     }
  }
     
-
 
     
 
