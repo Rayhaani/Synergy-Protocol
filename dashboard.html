@@ -520,12 +520,6 @@ let panelTriggered = false; // Wannan zai hana panel din hauka
                 // Lokacin da ya kai 5% kuma ba a taba nuna panel din ba
                 if (progress >= 5 && !panelTriggered) { 
 
-                    
-    const currentWatched = parseInt(document.getElementById('daily-count').innerText) || 0;
-    if(currentWatched < 5) { 
-        // Sai idan bai kai 5 ba panel din zai fito
-        p.classList.add('is-visible-now');
-                          
                     const p = document.getElementById('verifier-panel'); 
                     if(p) {
                         panelTriggered = true; // Saita shi zuwa true don kar ya sake fitowa
