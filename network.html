@@ -301,7 +301,7 @@ function loadReferralNetwork(currentUsername) {
             // Wannan bangaren ne referrals din suke fita
             listBody.innerHTML += `
     <tr class="text-[13px] font-space border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" 
-        onclick="openNodeVault('${data.username}', '${data.phone || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
+        onclick="openNodeVault('${data.fullName || 'N/A'}', '${data.username}', '${data.phoneNumber || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
         <td class="py-5 text-white">
             <div class="flex flex-col">
                 <span class="font-medium text-cyan-400">@${data.username.charAt(0).toUpperCase() + data.username.slice(1).toLowerCase()}</span>
@@ -318,6 +318,7 @@ function loadReferralNetwork(currentUsername) {
         </td>
     </tr>`;
             
+            
         });
         
         topActiveCount.innerText = activeCount;
@@ -326,35 +327,40 @@ function loadReferralNetwork(currentUsername) {
 }
     
 
-function openNodeVault(username, phone, email, balance) {
+function openNodeVault(fullName, username, phone, email, balance) {
+    // Gyara lambar waya daga field din phoneNumber
     let cleanPhone = phone.replace(/\D/g, '');
-    if(cleanPhone.startsWith('0')) cleanPhone = '234' + cleanPhone.substring(1);
+    if(cleanPhone.startsWith('0')) {
+        cleanPhone = '234' + cleanPhone.substring(1);
+    }
 
     const modal = document.getElementById('customNodeModal');
     const modalBody = document.getElementById('modalBody');
     const waBtn = document.getElementById('waBtn');
 
     modalBody.innerHTML = `
-        <p><span class="text-gray-500">User:</span> <span class="text-white font-bold">@${username}</span></p>
-        <p><span class="text-gray-500">Email:</span> <span class="text-white">${email}</span></p>
-        <p><span class="text-gray-500">Yield:</span> <span class="text-green-400 font-bold">₦${parseInt(balance).toLocaleString()}</span></p>
-        <p class="pt-4 text-[11px] text-cyan-500/70">Tap below to initiate communication.</p>
+        <div class="space-y-3">
+            <p><span class="text-gray-500 font-space">Name:</span> <span class="text-white font-bold font-space text-[15px]">${fullName}</span></p>
+            <p><span class="text-gray-500 font-space">User:</span> <span class="text-cyan-400 font-medium font-space">@${username}</span></p>
+            <p><span class="text-gray-500 font-space">Email:</span> <span class="text-white font-space text-[12px]">${email}</span></p>
+            <p><span class="text-gray-500 font-space">Yield:</span> <span class="text-green-400 font-bold font-space">₦${parseInt(balance).toLocaleString()}</span></p>
+            <div class="h-[1px] bg-white/5 my-4"></div>
+            <p class="text-[11px] text-cyan-500/70 font-space">Tap WhatsApp to message this node.</p>
+        </div>
     `;
 
-    waBtn.onclick = () => {
-        if(cleanPhone) {
-            window.open(`https://wa.me/${cleanPhone}?text=Hello%20@${username},%20this%20is%20from%20Synergy%20Protocol`, '_blank');
+    waBtn.onclick = function() {
+        if(cleanPhone && cleanPhone.length > 5) {
+            const waUrl = `https://wa.me/${cleanPhone}?text=Hello%20${fullName}%20(@${username}),%20this%20is%20from%20Synergy%20Protocol`;
+            window.open(waUrl, '_blank');
         } else {
-            showToast("NO WHATSAPP NUMBER");
+            showToast("NO PHONE NUMBER FOUND");
         }
         closeModal();
     };
+
     modal.style.display = 'flex';
 }
-
-function closeModal() {
-    document.getElementById('customNodeModal').style.display = 'none';
-        }
     
 
     
