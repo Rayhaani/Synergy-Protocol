@@ -300,45 +300,24 @@ function loadReferralNetwork(currentUsername) {
             const isActive = (lastDate === today);
             if(isActive) activeCount++;
 
-           // Wannan yana cikin querySnapshot.forEach((doc) => {
-const data = doc.data();
-
-// 1. Kwaso bayanai cikin sauki
-const mambaPhone = data.phoneNumber || ''; 
-const mambaName = data.fullName || 'N/A';
-const mambaUser = data.username || 'user';
-const mambaMail = data.email || 'N/A';
-const mambaBalance = (Number(data.videoBalance) || 0) + (Number(data.shareBalance) || 0);
-
-// 2. Jera Table Row (TR) ba tare da 'onclick' a ciki ba don gudun kuskure
-const row = `
-    <tr class="text-[13px] font-space border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" id="row-${doc.id}">
+           listBody.innerHTML += `
+    <tr class="text-[13px] font-space border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" 
+        onclick="openNodeVault('${data.fullName || 'N/A'}', '${data.username}', '${data.phoneNumber || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
         <td class="py-5 text-white">
-            <div class="flex flex-col text-left font-space">
-                <span class="font-medium text-cyan-400 font-space">@${mambaUser}</span>
-                <span class="text-[9px] text-gray-500 tracking-wide uppercase font-space">View details</span>
+            <div class="flex flex-col">
+                <span class="font-medium text-cyan-400">@${data.username.charAt(0).toUpperCase() + data.username.slice(1).toLowerCase()}</span>
+                <span class="text-[9px] text-gray-500 tracking-wide">View details</span>
             </div>
         </td>
         <td class="py-5 text-center">
-            <span class="${data.isVerified ? 'text-green-400' : 'text-red-400'} font-medium font-space">
-                ${data.isVerified ? 'Active' : 'Inactive'}
+            <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-medium">
+                ${isActive ? 'Active' : 'Inactive'}
             </span>
         </td>
-        <td class="py-5 text-right text-gray-400 font-light font-space">
-            ${data.lastActivityDate || 'Today'}
+        <td class="py-5 text-right text-gray-400 font-light">
+            ${lastDate === today ? 'Today' : lastDate}
         </td>
     </tr>`;
-
-listBody.innerHTML += row;
-
-// 3. Saka aikin danna row din a waje don kar referrals su boye
-setTimeout(() => {
-    const clickableRow = document.getElementById(`row-${doc.id}`);
-    if(clickableRow) {
-        clickableRow.onclick = () => openNodeVault(mambaName, mambaUser, mambaPhone, mambaMail, mambaBalance);
-    }
-}, 100);
-            
             
         });
         
