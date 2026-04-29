@@ -242,33 +242,36 @@
     window.onclick = () => document.getElementById('google-nav').classList.remove('active');
 
     // 3. AUTH & LINK GENERATION (Wannan bangaren ne baya aiki)
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            console.log("Mamba ya shigo:", user.email);
-            // Nemo mamban ta Email
-            db.collection("users").where("email", "==", user.email).get().then((querySnapshot) => {
-                if (querySnapshot.empty) {
-                    console.error("Ba a samu bayanan wannan email din a Firestore ba!");
-                    document.getElementById('ref-link').value = "Profile Not Found";
-                    return;
-                }
+   Firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        console.log("Mamba ya shigo:", user.email);
+        db.collection("users").where("email", "==", user.email).get().then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                console.error("Ba a samu bayanan wannan email din a Firestore ba!");
+                document.getElementById('ref-link').value = "Profile Not Found";
+                return;
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const myUsername = doc.data().username;
+                const refInput = document.getElementById('ref-link');
                 
-                querySnapshot.forEach((doc) => {
-                    const myUsername = doc.data().username;
-                    const refInput = document.getElementById('ref-link');
-                    const baseUrl = "https://rayhaani.github.io/Synergy/signup.html";
-                    
-                    // Saita Referral Link
-                    refInput.value = `${baseUrl}?ref=${myUsername}`;
-                    
-                    // MUHIMMI: Loda network din mamban nan take
-                    loadReferralNetwork(myUsername);
-                });
-            }).catch(err => console.error("Error fetching user:", err));
-        } else {
-            window.location.href = "signin.html";
-        }
-    });
+                // NAN NE ZA KA GYARA:
+                // Mun sauya rayhaani.github.io zuwa zynta.org
+                const baseUrl = "https://zynta.org/signup.html";
+                
+                // Saita Referral Link
+                refInput.value = `${baseUrl}?ref=${myUsername}`;
+                
+                // MUHIMMI: Loda network din mamban nan take
+                loadReferralNetwork(myUsername);
+            });
+        }).catch(err => console.error("Error fetching user:", err));
+    } else {
+        window.location.href = "signin.html";
+    }
+});
+    
 
 
     // 4. LOAD REFERRAL NETWORK (GYARARRE)
