@@ -274,18 +274,25 @@ function loadReferralNetwork(currentUsername) {
             const isActive = (lastDate === today);
             if(isActive) activeCount++;
 
-            listBody.innerHTML += `
-                <tr class="text-[11px] border-b border-white/[0.03]">
-                    <td class="py-4 text-white">@${data.username}</td>
-                    <td class="py-4 text-center">
-                        <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
-                            ${isActive ? 'ACTIVE' : 'INACTIVE'}
-                        </span>
-                    </td>
-                    <td class="py-4 text-right font-mono text-gray-400">
-                        ${lastDate === today ? 'Today' : lastDate}
-                    </td>
-                </tr>`;
+            
+    <tr class="text-[11px] border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer" 
+        onclick="showNodeDetails('${data.username}', '${data.phone || 'No Number'}', '${data.email || 'N/A'}')">
+        <td class="py-4 text-white">
+            <div class="flex flex-col">
+                <span class="font-bold text-cyan-400">@${data.username}</span>
+                <span class="text-[8px] text-gray-500 uppercase tracking-tighter">Tap to view contact</span>
+            </div>
+        </td>
+        <td class="py-4 text-center">
+            <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
+                ${isActive ? 'ACTIVE' : 'INACTIVE'}
+            </span>
+        </td>
+        <td class="py-4 text-right font-mono text-gray-400">
+            ${lastDate === today ? 'Today' : lastDate}
+        </td>
+    </tr>`;
+            
         });
         
         topActiveCount.innerText = activeCount;
@@ -312,6 +319,21 @@ function loadReferralNetwork(currentUsername) {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+
+
+    // Wannan function din zai rika fito da popup na lambar waya
+function showNodeDetails(user, phone, email) {
+    // Zaka iya amfani da showSynergyAlert dinka na da, 
+    // amma bari mu yi amfani da 'window.confirm' ko 'alert' a matsayin gaggawa
+    // Ko kuma mu yi amfani da wani 'Synergy Style' alert
+    
+    const details = `NODE DETAILS\n\nUsername: @${user}\nPhone: ${phone}\nEmail: ${email}`;
+    
+    // Idan kana so mutum ya iya kira kai tsaye:
+    if (confirm(details + "\n\nDo you want to call this node?")) {
+        window.location.href = "tel:" + phone;
+    }
+}
     
 </script>
     
