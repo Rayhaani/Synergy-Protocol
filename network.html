@@ -316,9 +316,10 @@ function loadReferralNetwork(currentUsername) {
             </span>
         </td>
         <td class="py-5 text-right text-gray-400 font-light">
-            ${lastDate === today ? 'Today' : lastDate}
+            ${data.lastActivityDate || 'Never'}
         </td>
     </tr>`;
+                                                                                                                
              
    });
         topActiveCount.innerText = activeCount;
