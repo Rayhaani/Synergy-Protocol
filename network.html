@@ -270,28 +270,61 @@
 
 
     // 4. LOAD REFERRAL NETWORK (GYARARRE)
+function loadReferralNetwork(currentUsername) {
+    const listBody = document.getElementById('referral-list-body');
+    const topActiveCount = document.getElementById('active-count-top');
+    const refCountHeader = document.getElementById('ref-count');
 
-// A cikin querySnapshot.forEach, canza table row dinka zuwa wannan:
-listBody.innerHTML += `
-    <tr class="text-[12px] font-space border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" 
-        onclick="openNodeVault('${data.username}', '${data.phone || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
-        <td class="py-5 text-white">
-            <div class="flex flex-col">
-                <span class="font-bold text-cyan-400">@${data.username}</span>
-                <span class="text-[9px] text-gray-500 uppercase tracking-tight">View Contact</span>
-            </div>
-        </td>
-        <td class="py-5 text-center">
-            <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold uppercase tracking-wider">
-                ${isActive ? 'ACTIVE' : 'INACTIVE'}
-            </span>
-        </td>
-        <td class="py-5 text-right text-gray-400">
-            ${lastDate === today ? 'Today' : lastDate}
-        </td>
-    </tr>`;
+    db.collection("users").where("referredBy", "==", currentUsername)
+    .onSnapshot((querySnapshot) => {
+        listBody.innerHTML = "";
+        let activeCount = 0;
+        let totalRefs = 0;
 
-// Sabon Function don Modal (Zai cire "zynta.org says")
+        if (querySnapshot.empty) {
+            listBody.innerHTML = '<tr><td colspan="3" class="text-center py-10 opacity-50 font-space text-[11px]">No nodes found.</td></tr>';
+            topActiveCount.innerText = "0";
+            refCountHeader.innerText = "0";
+            return;
+        }
+
+        const today = new Date().toLocaleDateString('en-GB'); // Zai dauki kwanan yau kai tsaye
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            totalRefs++;
+            
+            const lastDate = data.lastActivityDate || "N/A";
+            const isActive = (lastDate === today);
+            if(isActive) activeCount++;
+
+            // Wannan bangaren ne referrals din suke fita
+            listBody.innerHTML += `
+                <tr class="text-[12px] font-space border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" 
+                    onclick="openNodeVault('${data.username}', '${data.phone || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
+                    <td class="py-5 text-white">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-cyan-400">@${data.username}</span>
+                            <span class="text-[9px] text-gray-500 uppercase tracking-tight">View Contact</span>
+                        </div>
+                    </td>
+                    <td class="py-5 text-center">
+                        <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold uppercase tracking-wider">
+                            ${isActive ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
+                    </td>
+                    <td class="py-5 text-right text-gray-400">
+                        ${lastDate === today ? 'Today' : lastDate}
+                    </td>
+                </tr>`;
+        });
+        
+        topActiveCount.innerText = activeCount;
+        refCountHeader.innerText = totalRefs;
+    });
+}
+    
+
 function openNodeVault(username, phone, email, balance) {
     let cleanPhone = phone.replace(/\D/g, '');
     if(cleanPhone.startsWith('0')) cleanPhone = '234' + cleanPhone.substring(1);
@@ -315,13 +348,14 @@ function openNodeVault(username, phone, email, balance) {
         }
         closeModal();
     };
-
     modal.style.display = 'flex';
 }
 
 function closeModal() {
     document.getElementById('customNodeModal').style.display = 'none';
-}
+        }
+    
+
     
     // 5. COPY FUNCTION
     function copyRef() {
