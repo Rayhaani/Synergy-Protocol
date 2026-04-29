@@ -351,15 +351,11 @@ function openNodeVault(fullName, username, phone, email, balance) {
     `;
 
     // 3. Aikin WhatsApp Button
-    waBtn.onclick = function() {
-        if(cleanPhone && cleanPhone.length > 5) {
-            const waUrl = `https://wa.me/${cleanPhone}?text=Hello%20${fullName}%20(@${username}),%20this%20is%20from%20Synergy%20Protocol`;
-          window.open(waUrl, '_blank');
-        } else {
-          alert("NO PHONE NUMBER FOUND");
-        }  
-        closeModal();
-    };  
+    waBtn.onclick = function(e) {
+        e.preventDefault(); // Wannan zai hana button din yin komai
+        // closeModal(); // Idan kana so idan an danna ya rufe popup din kawai, cire // a farkon nan
+    };
+    
 
     // 4. GYARAN DA KAKE SO (Cancel Button Action)
     closeBtn.onclick = function() {
