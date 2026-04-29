@@ -276,17 +276,24 @@ function loadReferralNetwork(currentUsername) {
 
             
     listBody.innerHTML += `
-                <tr class="text-[11px] border-b border-white/[0.03]">
-                    <td class="py-4 text-white">@${data.username}</td>
-                    <td class="py-4 text-center">
-                        <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
-                            ${isActive ? 'ACTIVE' : 'INACTIVE'}
-                        </span>
-                    </td>
-                    <td class="py-4 text-right font-mono text-gray-400">
-                        ${lastDate === today ? 'Today' : lastDate}
-                    </td>
-                </tr>`;
+    <tr class="text-[11px] border-b border-white/[0.03] hover:bg-white/[0.01] cursor-pointer" 
+        onclick="openNodeVault('${data.username}', '${data.phone || ''}', '${data.email || 'N/A'}', '${(data.videoBalance || 0) + (data.shareBalance || 0)}')">
+        <td class="py-4 text-white">
+            <div class="flex flex-col">
+                <span class="font-bold text-cyan-400">@${data.username}</span>
+                <span class="text-[7px] text-gray-600 uppercase tracking-tighter">View Contact</span>
+            </div>
+        </td>
+        <td class="py-4 text-center">
+            <span class="${isActive ? 'text-green-400' : 'text-red-400'} font-bold">
+                ${isActive ? 'ACTIVE' : 'INACTIVE'}
+            </span>
+        </td>
+        <td class="py-4 text-right font-mono text-gray-400">
+            ${lastDate === today ? 'Today' : lastDate}
+        </td>
+    </tr>`;
+            
             
         });
         
@@ -314,21 +321,37 @@ function loadReferralNetwork(currentUsername) {
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-// Wannan function din zai rika fito da popup na lambar waya
-function showNodeDetails(user, phone, email) {
-    // Zaka iya amfani da showSynergyAlert dinka na da, 
-    // amma bari mu yi amfani da 'window.confirm' ko 'alert' a matsayin gaggawa
-    // Ko kuma mu yi amfani da wani 'Synergy Style' alert
-    
-    const details = `NODE DETAILS\n\nUsername: @${user}\nPhone: ${phone}\nEmail: ${email}`;
-    
-    // Idan kana so mutum ya iya kira kai tsaye:
-    if (confirm(details + "\n\nDo you want to call this node?")) {
-        window.location.href = "tel:" + phone;
-    }
-}
+
     
 
+    function openNodeVault(username, phone, email, balance) {
+    // Shirya lambar WhatsApp (Cire duk wani harafi da ba lamba ba)
+    let cleanPhone = phone.replace(/\D/g, '');
+    
+    // Idan lambar bata da +234, mu kara mata (Optional, ya danganta da yadda kake save)
+    if(cleanPhone.startsWith('0')) {
+        cleanPhone = '234' + cleanPhone.substring(1);
+    }
+
+    const details = `
+        NODE PROTOCOL DETAILS
+        ----------------------
+        User: @${username}
+        Email: ${email}
+        Total Yield: ₦${parseInt(balance).toLocaleString()}
+        
+        Click OK to message on WhatsApp.
+    `;
+
+    if (confirm(details)) {
+        if(cleanPhone) {
+            window.open(`https://wa.me/${cleanPhone}?text=Hello%20@${username},%20this%20is%20from%20Synergy%20Protocol`, '_blank');
+        } else {
+            alert("This node has no registered WhatsApp number.");
+        }
+    }
+    }
+    
     
 </script>
     
