@@ -245,6 +245,7 @@
    Firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("Mamba ya shigo:", user.email);
+        // Nemo mamban ta Email
         db.collection("users").where("email", "==", user.email).get().then((querySnapshot) => {
             if (querySnapshot.empty) {
                 console.error("Ba a samu bayanan wannan email din a Firestore ba!");
@@ -256,14 +257,15 @@
                 const myUsername = doc.data().username;
                 const refInput = document.getElementById('ref-link');
                 
-                // NAN NE ZA KA GYARA:
-                // Mun sauya rayhaani.github.io zuwa zynta.org
+                // GYARA: Mun sauya tsohon URL zuwa sabon domain dinka zynta.org
                 const baseUrl = "https://zynta.org/signup.html";
                 
                 // Saita Referral Link
-                refInput.value = `${baseUrl}?ref=${myUsername}`;
+                if (refInput) {
+                    refInput.value = `${baseUrl}?ref=${myUsername}`;
+                }
                 
-                // MUHIMMI: Loda network din mamban nan take
+                // MUHIMMI: Loda network din mamban nan take (Kar ka taba wannan)
                 loadReferralNetwork(myUsername);
             });
         }).catch(err => console.error("Error fetching user:", err));
@@ -271,6 +273,7 @@
         window.location.href = "signin.html";
     }
 });
+    
     
 
 
