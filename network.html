@@ -193,12 +193,13 @@
     </main>
 
 <div id="customNodeModal" class="synergy-modal font-space" style="display: none;">
-    <div class="modal-content animate-ui">
-        <h2 class="orbitron text-cyan-400 text-[10px] tracking-[4px] mb-6">Node Protocol Details</h2>
-        <div id="modalBody" class="text-gray-300 text-[13px] space-y-3 mb-8 text-left px-2"></div>
-        <div class="flex gap-3 relative z-[30000]">
+    <div class="modal-content animate-ui flex flex-col items-center">
+        <h2 class="orbitron text-cyan-400 text-[10px] tracking-[4px] mb-8">Node Protocol Details</h2>
+        <div id="modalBody" class="text-gray-300 text-[13px] space-y-4 mb-10 text-center w-full"></div>
+        
+        <div class="flex gap-3 w-full relative z-[30000]">
             <button id="closeBtn" class="flex-1 py-4 rounded-2xl border border-white/10 text-[10px] orbitron hover:bg-white/5 transition-all">Cancel</button>
-            <button id="waBtn" class="flex-1 py-4 rounded-2xl bg-cyan-500 text-black font-bold text-[10px] orbitron hover:scale-95 transition-all">WhatsApp</button>
+            <button id="waBtn" class="flex-1 py-4 rounded-2xl bg-cyan-500 text-black font-bold text-[10px] orbitron active:scale-95 transition-all">WhatsApp</button>
         </div>
     </div>
 </div>
@@ -334,49 +335,54 @@ function openNodeVault(fullName, username, phone, email, balance) {
     const waBtn = document.getElementById('waBtn');
     const closeBtn = document.getElementById('closeBtn');
 
-    // Tsaftace lambar waya
-    let cleanPhone = phone.replace(/\D/g, '');
+    // 1. Gyara lambar waya nan take
+    let cleanPhone = String(phone).replace(/\D/g, '');
     if(cleanPhone.startsWith('0')) {
         cleanPhone = '234' + cleanPhone.substring(1);
     }
 
-    // Saka bayanan a jiki
+    // 2. Saka bayanan a tsakiya (Centered Layout)
     modalBody.innerHTML = `
-        <div class="space-y-4">
-            <div><p class="text-[10px] text-gray-500 uppercase">Full Name</p><p class="text-white font-bold text-lg">${fullName}</p></div>
-            <div><p class="text-[10px] text-gray-500 uppercase">Node Identity</p><p class="text-cyan-400">@${username}</p></div>
-            <div><p class="text-[10px] text-gray-500 uppercase">Email Address</p><p class="text-white text-[11px]">${email}</p></div>
-            <div><p class="text-[10px] text-gray-500 uppercase">Network Yield</p><p class="text-green-400 font-bold font-mono">₦${parseInt(balance).toLocaleString()}</p></div>
+        <div class="flex flex-col items-center space-y-1">
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest">Full Name</p>
+            <p class="text-white font-bold text-lg mb-2">${fullName}</p>
+            
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest">Node Identity</p>
+            <p class="text-cyan-400 font-medium mb-2">@${username}</p>
+            
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest">Email Address</p>
+            <p class="text-white text-[11px] mb-2">${email}</p>
+            
+            <p class="text-[9px] text-gray-500 uppercase tracking-widest">Network Yield</p>
+            <p class="text-green-400 font-bold font-mono text-base">₦${parseInt(balance).toLocaleString()}</p>
         </div>
+        <div class="h-[1px] bg-white/5 w-2/3 mx-auto my-4"></div>
+        <p class="text-[10px] text-cyan-500/60 italic">Tap WhatsApp to message this node.</p>
     `;
 
-    // Nuna Modal din
+    // 3. Nuna Modal
     modal.style.display = 'flex';
 
-    // MAGANIN MATSALAR BUTTONS:
-    // 1. WhatsApp Action
-    waBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if(cleanPhone && cleanPhone.length > 5) {
+    // 4. MAGANIN WHATSAPP (Direct Assignment)
+    waBtn.onclick = function() {
+        console.log("Attempting WhatsApp to:", cleanPhone); // Don dubawa
+        if(cleanPhone && cleanPhone.length >= 10) {
             const waUrl = `https://wa.me/${cleanPhone}?text=Hello%20${fullName}%20(@${username}),%20this%20is%20from%20Synergy%20Protocol`;
             window.open(waUrl, '_blank');
+            closeModal();
         } else {
-            alert("Lambar wayar bata da kyau!");
+            // Maimakon 'alert', bari mu yi amfani da 'showToast' dinka
+            if(typeof showToast === "function") {
+                showToast("INVALID PHONE NUMBER");
+            } else {
+                alert("Lambar wayar mamban nan bata da kyau a database!");
+            }
         }
-        closeModal();
     };
 
-    // 2. Cancel Action
-    closeBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    closeBtn.onclick = function() {
         closeModal();
     };
-}
-
-function closeModal() {
-    document.getElementById('customNodeModal').style.display = 'none';
 }
     
 
