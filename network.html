@@ -321,19 +321,6 @@ function loadReferralNetwork(currentUsername) {
 
 
 
-    // Wannan function din zai rika fito da popup na lambar waya
-function showNodeDetails(user, phone, email) {
-    // Zaka iya amfani da showSynergyAlert dinka na da, 
-    // amma bari mu yi amfani da 'window.confirm' ko 'alert' a matsayin gaggawa
-    // Ko kuma mu yi amfani da wani 'Synergy Style' alert
-    
-    const details = `NODE DETAILS\n\nUsername: @${user}\nPhone: ${phone}\nEmail: ${email}`;
-    
-    // Idan kana so mutum ya iya kira kai tsaye:
-    if (confirm(details + "\n\nDo you want to call this node?")) {
-        window.location.href = "tel:" + phone;
-    }
-}
     
 </script>
     
