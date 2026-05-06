@@ -1043,21 +1043,28 @@ async function processNode(id) {
         transformBarToInput(id);
 
 
-    } else if (btn.innerText === "GET CODE") { // Mun sauya daga SUBMIT
+    
+        } else if (btn.innerText === "GET CODE") {
         const currentTime = Math.floor(Date.now() / 1000);
         const timeSpent = currentTime - (startTime[id] || 0);
 
-        // 1. DUBA TSARO (Idan lokacin kallo bai cika ba)
+        // 1. SILENT SECURITY CHECK (Maimakon gaya masa lokaci)
         if (timeSpent < task.duration) {
-            const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-            showSynergyAlert(`SECURITY: Wait ${minutesLeft} more mins.`, "error");
+            // Tura shi YouTube kai tsaye
+            const query = `${task.title} Synergy Protocol Official`;
+            window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+            
+            // Nuna sako mai nuna cewa an gano shi
+            showSynergyAlert("SECURITY: UNFINISHED SESSION DETECTED. RE-WATCHING REQUIRED.", "error");
+            
+            // Hukunci: Kara masa wasu sakan 30 na jinkiri don ya gane ba wasa
+            startTime[id] -= 30; 
             return;
         }
 
-        // 2. KIRA POP-UP DIN DA ZARAN AN DANNA "GET CODE"
+        // 2. IDAN YA KALLA YA KAMMALA
         openSynergyModal(task.title, task.code);
         
-        // 3. NAN TAKE BUTTON YA KOMA VERIFY
         btn.innerText = "VERIFY";
         btn.style.background = "#00f2fe"; 
         btn.style.color = "black";
@@ -1067,13 +1074,11 @@ async function processNode(id) {
             if (inputVal === task.code) {
                 handleSuccess(id, task.amount);
             } else {
-                showSynergyAlert("INVALID CODE! CHECK POP-UP.", "error");
+                showSynergyAlert("INVALID HASH CODE!", "error");
             }
         };
     }
-}
     
-        
      
 
 // Function din cika Circle (Progress Ring)
