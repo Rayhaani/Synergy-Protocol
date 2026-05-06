@@ -927,45 +927,6 @@ async function loadNewTask() {
     } catch (e) { console.error("Vault Error:", e); }
 }
 
-// 2. VERIFICATION LOGIC (Don ƙara kuɗi da canza Task)
-async function executeVerification() {
-    const inputVal = document.getElementById('node-code').value.toUpperCase();
-    const p = document.getElementById('verifier-panel');
-
-    if(inputVal === currentCode && currentCode !== "") {
-        try {
-            const userRef = db.collection("users").doc(currentActiveUser);
-            const userDoc = await userRef.get();
-            const watchedToday = userDoc.data().videosWatchedToday || 0;
-
-            if (watchedToday >= 5) {
-                showSynergyAlert("LIMIT REACHED: 5/5 UNITS COMPLETED", "info");
-                return;
-            }
-
-            await userRef.update({
-                videoBalance: firebase.firestore.FieldValue.increment(150),
-                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
-            });
-
-            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-            
-            // Boye Panel
-            p.classList.remove('is-visible-now');
-            p.style.opacity = "0";
-            
-            // Load sabon task nan take ba tare da reload ba
-            setTimeout(loadNewTask, 500);
-
-        } catch (error) { showSynergyAlert("DATABASE ERROR", "error"); }
-    } else {
-        showSynergyAlert("INVALID CODE", "error");
-    }
-}
-
-
-
 
     function updateUI(completed) {
     const count = Math.min(completed.length, 5);
@@ -1115,6 +1076,38 @@ async function addEarningsToFirebase(amount) {
     btn.innerText = "SUBMIT";
     btn.classList.replace('bg-white', 'bg-cyan-500');
     btn.classList.add('text-white');
+    }
+    
+
+    async function handleSuccess(id, amount) {
+    const username = localStorage.getItem('synergy_user');
+    const userRef = db.collection("users").doc(username);
+
+    try {
+        // 1. Aika kudi zuwa Firebase
+        await userRef.update({
+            videoBalance: firebase.firestore.FieldValue.increment(amount),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1)
+        });
+        
+        // 2. Nuna Alert
+        showSynergyAlert(`SUCCESS: ₦${amount} EARNED`, "success");
+        
+        // 3. Kashe wannan Node din tunda an riga an biya kudin
+        const nodeElement = document.getElementById(`node-${id}`);
+        const btnElement = document.getElementById(`btn-${id}`);
+
+        if (nodeElement) nodeElement.style.opacity = "0.4";
+        if (btnElement) {
+            btnElement.innerText = "SECURED";
+            btnElement.disabled = true;
+            btnElement.style.background = "#10b981"; // Green color
+        }
+        
+    } catch (error) {
+        console.error(error);
+        showSynergyAlert("DATABASE ERROR", "error");
+    }
     }
     
     
