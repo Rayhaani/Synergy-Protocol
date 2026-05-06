@@ -180,6 +180,42 @@
       }
 
      body { display: none !important; }
+
+
+
+      /* Custom Holographic Pop-up */
+.synergy-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(5, 10, 21, 0.95);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-top: 4px solid #00f2fe;
+    padding: 30px;
+    border-radius: 30px;
+    z-index: 200000;
+    box-shadow: 0 0 50px rgba(0, 242, 254, 0.2);
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.synergy-modal.active {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 199999;
+}
+
+.modal-overlay.active { display: block; }
       
 </style>
     
@@ -444,6 +480,21 @@
     </div>
         </section>
 
+       
+        
+        <div id="modal-overlay" class="modal-overlay"></div>
+<div id="verification-modal" class="synergy-modal">
+    <div class="orbitron text-cyan-400 text-[10px] tracking-[4px] mb-2">Security Clearance</div>
+    <h3 class="text-white text-lg font-bold mb-4 uppercase" id="modal-task-name">TASK COMPLETED</h3>
+    <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/10">
+        <p class="text-gray-400 text-[9px] orbitron tracking-[2px] mb-1">Your Unique Code</p>
+        <div id="modal-code-display" class="digits-terminal text-4xl text-white tracking-[10px]">----</div>
+    </div>
+    <button onclick="closeSynergyModal()" class="w-full py-3 rounded-xl bg-cyan-500 text-black orbitron font-bold text-[10px] hover:bg-white transition-all">
+        COPY & PROCEED
+    </button>
+</div>
+        
 
     <section id="referral-panel" class="glass-premium p-8 rounded-[32px] mt-6 space-y-8">
     <div class="text-center space-y-2">
@@ -463,6 +514,7 @@
     </div>
     </div>
     </main>
+
     
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
@@ -1112,116 +1164,45 @@ async function addEarningsToFirebase(amount) {
     
 
 
-    // 1. Bayanan Task da kuma Trackers
-const nodeTasks = {
-    1: { title: "AI Wealth Academy", duration: 600, code: "XA99", amount: 150 },
-    2: { title: "Global Wealth Secret", duration: 420, code: "BZ44", amount: 150 },
-    3: { title: "Urban Vision 2050", duration: 540, code: "UV50", amount: 150 },
-    4: { title: "Zenith Nature 4K", duration: 300, code: "ZN4K", amount: 150 },
-    5: { title: "Cosmic Horizon", duration: 480, code: "CH05", amount: 150 }
-};
-
-let startTime = {}; 
-let cheatAttempts = {}; 
-
-// 2. Babban Function na sarrafa Nodes
-async function processNode(id) {
-    const btn = document.getElementById(`btn-${id}`);
-    const task = nodeTasks[id];
-    const username = localStorage.getItem('synergy_user'); // Tabbatar da sunan user
-
-    if (btn.innerText === "START") {
-        startTime[id] = Math.floor(Date.now() / 1000);
-        cheatAttempts[id] = 0; 
-        
-        const query = `${task.title} Synergy Protocol Official`;
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
-
-        transformBarToInput(id);
-
-    } else if (btn.innerText === "SUBMIT") {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const timeSpent = currentTime - (startTime[id] || 0);
-
-        // --- DUBA TSARO ---
-        if (timeSpent < task.duration) {
-            cheatAttempts[id] = (cheatAttempts[id] || 0) + 1; 
-            
-            if (cheatAttempts[id] >= 2) {
-                const penaltyAmount = task.amount * 10; 
-                await deductPenaltyFromFirebase(username, penaltyAmount);
-                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty for false claim!`, "error");
-                setTimeout(() => { location.reload(); }, 2000);
-            } else {
-                const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-                showSynergyAlert(`Wait! You need ${minutesLeft} more mins of watching.`, "error");
-            }
-            return;
-        }
-
-        // --- IDAN LOKACI YA CIKA: NUNA CODE POP-UP ---
-        alert(`VERIFICATION CODE FOR ${task.title}: ${task.code}`); // Pop-up din kenan
-        
-        // Canza button ya koma VERIFY yanzu
-        btn.innerText = "VERIFY";
-        btn.onclick = () => finalVerification(id, task.code, task.amount);
-    }
-}
-
-// 3. Function din tantance Code na karshe
-async function finalVerification(id, correctCode, amount) {
-    const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
+// Function na bude Pop-up
+function openSynergyModal(taskName, code) {
+    document.getElementById('modal-task-name').innerText = taskName;
+    document.getElementById('modal-code-display').innerText = code;
+    document.getElementById('verification-modal').classList.add('active');
+    document.getElementById('modal-overlay').classList.add('active');
     
-    if (inputVal === correctCode) {
-        await handleSuccess(id, amount);
-    } else {
-        showSynergyAlert("INVALID CODE! CHECK AGAIN.", "error");
+    // Copy code to clipboard automatically
+    navigator.clipboard.writeText(code);
+}
+
+// Function na rufe Pop-up
+function closeSynergyModal() {
+    document.getElementById('verification-modal').classList.remove('active');
+    document.getElementById('modal-overlay').classList.remove('active');
+    showSynergyAlert("CODE COPIED! PASTE IT IN THE INPUT BOX", "info");
+}
+
+// GYARAN PROCESS NODE (Sashen SUBMIT kawai na taba)
+// ... a cikin processNode(id) inda "SUBMIT" take ...
+else if (btn.innerText === "SUBMIT") {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeSpent = currentTime - (startTime[id] || 0);
+
+    if (timeSpent < task.duration) {
+        // Penalty logic dinka tana nan...
+        // [Wannan sashen ka bar shi yadda yake]
+        return;
     }
-}
 
-// 4. Helper Functions (Firebase Updates)
-async function handleSuccess(id, amount) {
-    const username = localStorage.getItem('synergy_user');
-    try {
-        await db.collection("users").doc(username).update({
-            videoBalance: firebase.firestore.FieldValue.increment(amount),
-            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
-        });
-        
-        showSynergyAlert(`SUCCESS: ₦${amount} ADDED TO VAULT`, "success");
-        
-        // Kashe Node din
-        const node = document.getElementById(`node-${id}`);
-        if(node) {
-            node.style.transition = "all 0.8s ease";
-            node.style.opacity = "0"; // Zai bace a hankali
-            setTimeout(() => { node.style.display = "none"; }, 800);
-        }
-    } catch (e) { console.error(e); }
-}
-
-async function deductPenaltyFromFirebase(username, amount) {
-    if (!username) return;
-    try {
-        await db.collection("users").doc(username).update({
-            videoBalance: firebase.firestore.FieldValue.increment(-amount)
-        });
-    } catch (e) { console.error(e); }
-}
-
-function transformBarToInput(id) {
-    const textArea = document.getElementById(`text-area-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
+    // IDAN LOKACI YA CIKA: Maimakon Alert, sai mu kira Pop-up dinmu
+    openSynergyModal(task.title, task.code);
     
-    textArea.innerHTML = `
-        <input type="text" id="code-input-${id}" 
-        class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-white text-center orbitron text-[12px]" 
-        placeholder="ENTER CODE">
-    `;
-    btn.innerText = "SUBMIT";
-            }
-                
+    // Canza button ya koma VERIFY
+    btn.innerText = "VERIFY";
+    btn.onclick = () => finalVerification(id, task.code, task.amount);
+}
+    
+
 
 </script>
 </body>
