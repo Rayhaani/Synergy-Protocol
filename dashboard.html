@@ -482,18 +482,22 @@
 
        
         
-        <div id="modal-overlay" class="modal-overlay"></div>
-<div id="verification-modal" class="synergy-modal">
-    <div class="orbitron text-cyan-400 text-[10px] tracking-[4px] mb-2">Security Clearance</div>
-    <h3 class="text-white text-lg font-bold mb-4 uppercase" id="modal-task-name">TASK COMPLETED</h3>
-    <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/10">
-        <p class="text-gray-400 text-[9px] orbitron tracking-[2px] mb-1">Your Unique Code</p>
-        <div id="modal-code-display" class="digits-terminal text-4xl text-white tracking-[10px]">----</div>
+        <div id="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9999;"></div>
+
+<div id="verification-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#050a15; border:1px solid #00f2fe; padding:30px; border-radius:25px; z-index:10000; text-align:center; width:85%; max-width:400px; box-shadow: 0 0 30px rgba(0,242,254,0.3);">
+    <div style="font-family: 'Orbitron', sans-serif; color:#00f2fe; font-size:10px; letter-spacing:3px; margin-bottom:10px;">SECURITY CLEARANCE</div>
+    <h3 id="modal-task-name" style="color:white; margin-bottom:20px; font-size:16px;">TASK COMPLETED</h3>
+    
+    <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px;">
+        <p style="color:#888; font-size:10px; margin-bottom:5px;">COPY THIS CODE</p>
+        <div id="modal-code-display" style="color:white; font-size:32px; font-weight:bold; letter-spacing:8px; font-family: 'Orbitron', sans-serif;">----</div>
     </div>
-    <button onclick="closeSynergyModal()" class="w-full py-3 rounded-xl bg-cyan-500 text-black orbitron font-bold text-[10px] hover:bg-white transition-all">
-        COPY & PROCEED
+
+    <button onclick="closeSynergyModal()" style="width:100%; padding:15px; background:#00f2fe; color:black; border:none; border-radius:12px; font-family: 'Orbitron', sans-serif; font-weight:bold; cursor:pointer;">
+        COPY & CLOSE
     </button>
 </div>
+        
         
 
     <section id="referral-panel" class="glass-premium p-8 rounded-[32px] mt-6 space-y-8">
@@ -1161,6 +1165,33 @@ async function addEarningsToFirebase(amount) {
         showSynergyAlert("DATABASE ERROR", "error");
     }
     }
+
+
+
+    // Function na bude Pop-up
+function openSynergyModal(taskName, code) {
+    document.getElementById('modal-task-name').innerText = taskName;
+    document.getElementById('modal-code-display').innerText = code;
+    document.getElementById('verification-modal').style.display = 'block';
+    document.getElementById('modal-overlay').style.display = 'block';
+    
+    // Copy code to clipboard automatically
+    navigator.clipboard.writeText(code).then(() => {
+        console.log("Code copied to clipboard!");
+    });
+}
+
+// Function na rufe Pop-up
+function closeSynergyModal() {
+    document.getElementById('verification-modal').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'none';
+    
+    if (typeof showSynergyAlert === "function") {
+        showSynergyAlert("CODE COPIED! NOW PASTE IT.", "info");
+    } else {
+        alert("CODE COPIED! NOW PASTE IT.");
+    }
+}
     
 
 
