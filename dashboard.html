@@ -1039,40 +1039,44 @@ async function processNode(id) {
         // 3. Canza Bar zuwa Input
         transformBarToInput(id);
 
-    } else if (btn.innerText === "SUBMIT") {
+        } else if (btn.innerText === "SUBMIT") {
         const currentTime = Math.floor(Date.now() / 1000);
-        const timeSpent = currentTime - startTime[id];
+        const timeSpent = currentTime - (startTime[id] || 0);
 
-        // 4. DUBA TSARO: Shin lokaci ya cika?
+        // 1. Duba tsaro idan lokacin kallo ya cika
         if (timeSpent < task.duration) {
-            cheatAttempts[id]++; 
+            cheatAttempts[id] = (cheatAttempts[id] || 0) + 1; 
             
             if (cheatAttempts[id] >= 2) {
-                // 5. PENALTY: Ragewa mutum kudi (10x) idan ya cika karya sau 2
                 const penaltyAmount = task.amount * 10; 
-                await deductPenaltyFromFirebase(penaltyAmount);
-                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} deducted for false claim!`, "error");
-                
-                // Refresh shafin bayan sakan 2 don ya sake farawa
+                deductPenaltyFromFirebase(penaltyAmount);
+                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty applied!`, "error");
                 setTimeout(() => { location.reload(); }, 2000);
             } else {
-                // 6. WARNING: Gargadi na farko kamar na Bittoken
                 const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-                showSynergyAlert(`Sorry! You haven't watched the video for the required time. Wait ${minutesLeft} more mins.`, "error");
+                showSynergyAlert(`SECURITY: Wait ${minutesLeft} more mins of watching.`, "error");
             }
             return;
         }
 
-        // 7. Duba idan Verification Code din daidai ne
-        const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
-        if (inputVal === task.code) {
-            handleSuccess(id, task.amount);
-        } else {
-            showSynergyAlert("INVALID VERIFICATION CODE!", "error");
-        }
+        // 2. WANNAN SHINE ZAI NUNA POP-UP DIN
+        openSynergyModal(task.title, task.code);
+        
+        // 3. Canza Button ya koma VERIFY don mamba ya saka code
+        btn.innerText = "VERIFY";
+        btn.classList.replace('bg-cyan-500', 'bg-green-500'); // Canza kalar button zuwa kore
+        
+        // Saita aikin da button din zai yi idan an danna shi a matsayin VERIFY
+        btn.onclick = () => {
+            const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
+            if (inputVal === task.code) {
+                handleSuccess(id, task.amount);
+            } else {
+                showSynergyAlert("INVALID CODE! CHECK YOUR POP-UP.", "error");
+            }
+        };
     }
-                    }
-                                                      
+    
         
      
 
