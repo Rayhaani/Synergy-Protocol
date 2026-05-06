@@ -1110,7 +1110,118 @@ async function addEarningsToFirebase(amount) {
     }
     }
     
+
+
+    // 1. Bayanan Task da kuma Trackers
+const nodeTasks = {
+    1: { title: "AI Wealth Academy", duration: 600, code: "XA99", amount: 150 },
+    2: { title: "Global Wealth Secret", duration: 420, code: "BZ44", amount: 150 },
+    3: { title: "Urban Vision 2050", duration: 540, code: "UV50", amount: 150 },
+    4: { title: "Zenith Nature 4K", duration: 300, code: "ZN4K", amount: 150 },
+    5: { title: "Cosmic Horizon", duration: 480, code: "CH05", amount: 150 }
+};
+
+let startTime = {}; 
+let cheatAttempts = {}; 
+
+// 2. Babban Function na sarrafa Nodes
+async function processNode(id) {
+    const btn = document.getElementById(`btn-${id}`);
+    const task = nodeTasks[id];
+    const username = localStorage.getItem('synergy_user'); // Tabbatar da sunan user
+
+    if (btn.innerText === "START") {
+        startTime[id] = Math.floor(Date.now() / 1000);
+        cheatAttempts[id] = 0; 
+        
+        const query = `${task.title} Synergy Protocol Official`;
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+
+        transformBarToInput(id);
+
+    } else if (btn.innerText === "SUBMIT") {
+        const currentTime = Math.floor(Date.now() / 1000);
+        const timeSpent = currentTime - (startTime[id] || 0);
+
+        // --- DUBA TSARO ---
+        if (timeSpent < task.duration) {
+            cheatAttempts[id] = (cheatAttempts[id] || 0) + 1; 
+            
+            if (cheatAttempts[id] >= 2) {
+                const penaltyAmount = task.amount * 10; 
+                await deductPenaltyFromFirebase(username, penaltyAmount);
+                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty for false claim!`, "error");
+                setTimeout(() => { location.reload(); }, 2000);
+            } else {
+                const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
+                showSynergyAlert(`Wait! You need ${minutesLeft} more mins of watching.`, "error");
+            }
+            return;
+        }
+
+        // --- IDAN LOKACI YA CIKA: NUNA CODE POP-UP ---
+        alert(`VERIFICATION CODE FOR ${task.title}: ${task.code}`); // Pop-up din kenan
+        
+        // Canza button ya koma VERIFY yanzu
+        btn.innerText = "VERIFY";
+        btn.onclick = () => finalVerification(id, task.code, task.amount);
+    }
+}
+
+// 3. Function din tantance Code na karshe
+async function finalVerification(id, correctCode, amount) {
+    const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
     
+    if (inputVal === correctCode) {
+        await handleSuccess(id, amount);
+    } else {
+        showSynergyAlert("INVALID CODE! CHECK AGAIN.", "error");
+    }
+}
+
+// 4. Helper Functions (Firebase Updates)
+async function handleSuccess(id, amount) {
+    const username = localStorage.getItem('synergy_user');
+    try {
+        await db.collection("users").doc(username).update({
+            videoBalance: firebase.firestore.FieldValue.increment(amount),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
+        });
+        
+        showSynergyAlert(`SUCCESS: ₦${amount} ADDED TO VAULT`, "success");
+        
+        // Kashe Node din
+        const node = document.getElementById(`node-${id}`);
+        if(node) {
+            node.style.transition = "all 0.8s ease";
+            node.style.opacity = "0"; // Zai bace a hankali
+            setTimeout(() => { node.style.display = "none"; }, 800);
+        }
+    } catch (e) { console.error(e); }
+}
+
+async function deductPenaltyFromFirebase(username, amount) {
+    if (!username) return;
+    try {
+        await db.collection("users").doc(username).update({
+            videoBalance: firebase.firestore.FieldValue.increment(-amount)
+        });
+    } catch (e) { console.error(e); }
+}
+
+function transformBarToInput(id) {
+    const textArea = document.getElementById(`text-area-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+    
+    textArea.innerHTML = `
+        <input type="text" id="code-input-${id}" 
+        class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-white text-center orbitron text-[12px]" 
+        placeholder="ENTER CODE">
+    `;
+    btn.innerText = "SUBMIT";
+            }
+                
 
 </script>
 </body>
