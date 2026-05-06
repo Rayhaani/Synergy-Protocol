@@ -1017,18 +1017,17 @@ let cheatAttempts = {};
 
 // --- 2. MAIN FUNCTION ---
 
-async function processNode(id) {
+Async function processNode(id) {
     const btn = document.getElementById(`btn-${id}`);
     const task = nodeTasks[id];
 
     if (btn.innerText === "START") {
-        // 1. Ajiye lokacin farawa da saita cheat attempts
+        // 1. Ajiye lokacin da aka fara a sakan
         startTime[id] = Math.floor(Date.now() / 1000);
-        cheatAttempts[id] = 0; 
         
-        // 2. Bude YouTube Search tare da dabarar mu ta Search
-        const query = `${task.title} Synergy Protocol Official`;
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
+        // 2. Bude YouTube
+        const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(task.title)}`;
+        window.open(searchUrl, '_blank');
 
         // 3. Canza Bar zuwa Input
         transformBarToInput(id);
@@ -1037,35 +1036,22 @@ async function processNode(id) {
         const currentTime = Math.floor(Date.now() / 1000);
         const timeSpent = currentTime - startTime[id];
 
-        // 4. DUBA TSARO: Shin lokaci ya cika?
+        // 4. DUBA TSARO: Shin ya kalli bidiyon duka?
         if (timeSpent < task.duration) {
-            cheatAttempts[id]++; 
-            
-            if (cheatAttempts[id] >= 2) {
-                // 5. PENALTY: Ragewa mutum kudi (10x) idan ya cika karya sau 2
-                const penaltyAmount = task.amount * 10; 
-                await deductPenaltyFromFirebase(penaltyAmount);
-                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} deducted for false claim!`, "error");
-                
-                // Refresh shafin bayan sakan 2 don ya sake farawa
-                setTimeout(() => { location.reload(); }, 2000);
-            } else {
-                // 6. WARNING: Gargadi na farko kamar na Bittoken
-                const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-                showSynergyAlert(`Sorry! You haven't watched the video for the required time. Wait ${minutesLeft} more mins.`, "error");
-            }
-            return;
+            const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
+            showSynergyAlert(`Sorry! You haven't watched the video for the required time. Wait ${minutesLeft} more minutes.`, "error");
+            return; // Tsayar da aiki anan
         }
 
-        // 7. Duba idan Verification Code din daidai ne
+        // 5. Duba idan Code din daidai ne
         const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
         if (inputVal === task.code) {
             handleSuccess(id, task.amount);
         } else {
-            showSynergyAlert("INVALID VERIFICATION CODE!", "error");
+            showSynergyAlert("INVALID VERIFICATION CODE", "error");
         }
     }
-}
+                     
 
 // --- 3. HELPER FUNCTIONS ---
 
