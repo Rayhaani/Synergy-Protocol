@@ -1017,7 +1017,10 @@ let cheatAttempts = {};
 
 // --- 2. MAIN FUNCTION ---
 
-Async function processNode(id) {
+// Wurin ajiye lokacin farawa
+let startTime = {};
+
+async function processNode(id) {
     const btn = document.getElementById(`btn-${id}`);
     const task = nodeTasks[id];
 
@@ -1051,7 +1054,8 @@ Async function processNode(id) {
             showSynergyAlert("INVALID VERIFICATION CODE", "error");
         }
     }
-                     
+    }
+        
 
 // --- 3. HELPER FUNCTIONS ---
 
