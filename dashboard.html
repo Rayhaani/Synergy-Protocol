@@ -1164,46 +1164,6 @@ async function addEarningsToFirebase(amount) {
     
 
 
-// Function na bude Pop-up
-function openSynergyModal(taskName, code) {
-    document.getElementById('modal-task-name').innerText = taskName;
-    document.getElementById('modal-code-display').innerText = code;
-    document.getElementById('verification-modal').classList.add('active');
-    document.getElementById('modal-overlay').classList.add('active');
-    
-    // Copy code to clipboard automatically
-    navigator.clipboard.writeText(code);
-}
-
-// Function na rufe Pop-up
-function closeSynergyModal() {
-    document.getElementById('verification-modal').classList.remove('active');
-    document.getElementById('modal-overlay').classList.remove('active');
-    showSynergyAlert("CODE COPIED! PASTE IT IN THE INPUT BOX", "info");
-}
-
-// GYARAN PROCESS NODE (Sashen SUBMIT kawai na taba)
-// ... a cikin processNode(id) inda "SUBMIT" take ...
-else if (btn.innerText === "SUBMIT") {
-    const currentTime = Math.floor(Date.now() / 1000);
-    const timeSpent = currentTime - (startTime[id] || 0);
-
-    if (timeSpent < task.duration) {
-        // Penalty logic dinka tana nan...
-        // [Wannan sashen ka bar shi yadda yake]
-        return;
-    }
-
-    // IDAN LOKACI YA CIKA: Maimakon Alert, sai mu kira Pop-up dinmu
-    openSynergyModal(task.title, task.code);
-    
-    // Canza button ya koma VERIFY
-    btn.innerText = "VERIFY";
-    btn.onclick = () => finalVerification(id, task.code, task.amount);
-}
-    
-
-
 </script>
 </body>
 </html>
