@@ -1003,7 +1003,9 @@ const nodeTasks = {
 
 let completedNodes = 0; // Don lura da Progress Ring
     
-    
+ let startTime = {}; 
+let cheatAttempts = {}; 
+
 async function processNode(id) {
     const btn = document.getElementById(`btn-${id}`);
     const task = nodeTasks[id];
