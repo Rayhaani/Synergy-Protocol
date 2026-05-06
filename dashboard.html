@@ -1042,47 +1042,32 @@ async function processNode(id) {
 
         transformBarToInput(id);
 
-    } else if (btn.innerText === "SUBMIT") {
+
+    } else if (btn.innerText === "GET CODE") { // Mun sauya daga SUBMIT
         const currentTime = Math.floor(Date.now() / 1000);
         const timeSpent = currentTime - (startTime[id] || 0);
 
-        // 1. DUBA TSARO
+        // 1. DUBA TSARO (Idan lokacin kallo bai cika ba)
         if (timeSpent < task.duration) {
-            cheatAttempts[id] = (cheatAttempts[id] || 0) + 1; 
-            
-            if (cheatAttempts[id] >= 2) {
-                const penaltyAmount = task.amount * 10; 
-                if (typeof deductPenaltyFromFirebase === "function") {
-                    deductPenaltyFromFirebase(penaltyAmount);
-                }
-                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty!`, "error");
-                setTimeout(() => { location.reload(); }, 2000);
-            } else {
-                const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-                showSynergyAlert(`Wait! You need ${minutesLeft} more mins of watching.`, "error");
-            }
+            const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
+            showSynergyAlert(`SECURITY: Wait ${minutesLeft} more mins.`, "error");
             return;
         }
 
-        // 2. KIRA KYAKKYAWAN POP-UP DIN
-        if (typeof openSynergyModal === "function") {
-            openSynergyModal(task.title, task.code);
-        } else {
-            alert(`YOUR CODE: ${task.code}`); // Backup idan pop-up ya samu matsala
-        }
+        // 2. KIRA POP-UP DIN DA ZARAN AN DANNA "GET CODE"
+        openSynergyModal(task.title, task.code);
         
-        // 3. CANZA BUTTON ZUWA VERIFY
+        // 3. NAN TAKE BUTTON YA KOMA VERIFY
         btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe"; // Aqua color
+        btn.style.background = "#00f2fe"; 
         btn.style.color = "black";
         
-        // Saita aikin VERIFY
         btn.onclick = () => {
             const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
             if (inputVal === task.code) {
                 handleSuccess(id, task.amount);
             } else {
-                showSynergyAlert("INVALID CODE! CHECK THE POP-UP.", "error");
+                showSynergyAlert("INVALID CODE! CHECK POP-UP.", "error");
             }
         };
     }
@@ -1134,18 +1119,18 @@ async function addEarningsToFirebase(amount) {
     const textArea = document.getElementById(`text-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
     
-    // Canza rubutu zuwa Input field
     textArea.innerHTML = `
         <input type="text" id="code-input-${id}" 
         class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-white text-center orbitron text-[12px] verifier-input-focus" 
-        placeholder="ENTER CODE">
+        placeholder="••••••">
     `;
     
-    // Canza Button daga START zuwa SUBMIT
-    btn.innerText = "SUBMIT";
+    // MUN CANZA SUNA DAGA SUBMIT ZUWA GET CODE
+    btn.innerText = "GET CODE"; 
     btn.classList.replace('bg-white', 'bg-cyan-500');
     btn.classList.add('text-white');
-    }
+            }
+        
     
 
     async function handleSuccess(id, amount) {
