@@ -1026,56 +1026,62 @@ let cheatAttempts = {};
 async function processNode(id) {
     const btn = document.getElementById(`btn-${id}`);
     const task = nodeTasks[id];
+    const username = localStorage.getItem('synergy_user');
 
     if (btn.innerText === "START") {
-        // 1. Ajiye lokacin farawa da saita cheat attempts
         startTime[id] = Math.floor(Date.now() / 1000);
         cheatAttempts[id] = 0; 
         
-        // 2. Bude YouTube Search tare da dabarar mu ta Search
         const query = `${task.title} Synergy Protocol Official`;
         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
 
-        // 3. Canza Bar zuwa Input
         transformBarToInput(id);
 
-        } else if (btn.innerText === "SUBMIT") {
+    } else if (btn.innerText === "SUBMIT") {
         const currentTime = Math.floor(Date.now() / 1000);
         const timeSpent = currentTime - (startTime[id] || 0);
 
-        // 1. Duba tsaro idan lokacin kallo ya cika
+        // 1. DUBA TSARO
         if (timeSpent < task.duration) {
             cheatAttempts[id] = (cheatAttempts[id] || 0) + 1; 
             
             if (cheatAttempts[id] >= 2) {
                 const penaltyAmount = task.amount * 10; 
-                deductPenaltyFromFirebase(penaltyAmount);
-                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty applied!`, "error");
+                if (typeof deductPenaltyFromFirebase === "function") {
+                    deductPenaltyFromFirebase(penaltyAmount);
+                }
+                showSynergyAlert(`SECURITY ALERT: -₦${penaltyAmount} penalty!`, "error");
                 setTimeout(() => { location.reload(); }, 2000);
             } else {
                 const minutesLeft = Math.ceil((task.duration - timeSpent) / 60);
-                showSynergyAlert(`SECURITY: Wait ${minutesLeft} more mins of watching.`, "error");
+                showSynergyAlert(`Wait! You need ${minutesLeft} more mins of watching.`, "error");
             }
             return;
         }
 
-        // 2. WANNAN SHINE ZAI NUNA POP-UP DIN
-        openSynergyModal(task.title, task.code);
+        // 2. KIRA KYAKKYAWAN POP-UP DIN
+        if (typeof openSynergyModal === "function") {
+            openSynergyModal(task.title, task.code);
+        } else {
+            alert(`YOUR CODE: ${task.code}`); // Backup idan pop-up ya samu matsala
+        }
         
-        // 3. Canza Button ya koma VERIFY don mamba ya saka code
+        // 3. CANZA BUTTON ZUWA VERIFY
         btn.innerText = "VERIFY";
-        btn.classList.replace('bg-cyan-500', 'bg-green-500'); // Canza kalar button zuwa kore
+        btn.style.background = "#00f2fe"; // Aqua color
+        btn.style.color = "black";
         
-        // Saita aikin da button din zai yi idan an danna shi a matsayin VERIFY
+        // Saita aikin VERIFY
         btn.onclick = () => {
             const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
             if (inputVal === task.code) {
                 handleSuccess(id, task.amount);
             } else {
-                showSynergyAlert("INVALID CODE! CHECK YOUR POP-UP.", "error");
+                showSynergyAlert("INVALID CODE! CHECK THE POP-UP.", "error");
             }
         };
     }
+}
     
         
      
