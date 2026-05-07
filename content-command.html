@@ -8,21 +8,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        :root { --aqua: #00f2fe; --neon-red: #ff0055; --bg: #030712; }
+        :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --bg: #030712; }
         body { 
             background: var(--bg); color: #fff; font-family: 'Quicksand', sans-serif;
-            background-image: linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px), 
-                              linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            background-image: linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px), linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
             background-size: 30px 30px; min-height: 100vh;
         }
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
         .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
         .glow-text { text-shadow: 0 0 10px var(--aqua); }
-        .input-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 254, 0.1); padding: 12px; border-radius: 12px; outline: none; width: 100%; font-size: 13px; color: white; transition: all 0.3s; }
+        
+        .input-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 254, 0.1); padding: 15px; border-radius: 12px; outline: none; width: 100%; font-size: 13px; transition: all 0.3s; color: white; }
         .input-box:focus { border-color: var(--aqua); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); }
+        
         .btn-prime { background: var(--aqua); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; transition: all 0.3s; cursor: pointer; }
         .btn-prime:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); transform: translateY(-2px); }
-        .badge-node { background: rgba(0, 242, 254, 0.1); color: var(--aqua); border: 1px solid rgba(0, 242, 254, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; }
+
+        .video-card { transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .video-card:hover { background: rgba(255, 255, 255, 0.03); border-left-color: var(--aqua); }
+
+        .badge-node { background: rgba(0, 242, 254, 0.1); color: var(--aqua); border: 1px solid rgba(0, 242, 254, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 700; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -30,63 +35,72 @@
     <div class="max-w-6xl mx-auto">
         <div class="mb-12 text-center">
             <h1 class="orbitron text-2xl font-bold glow-text">Content Command</h1>
-            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">Node Deployment System</p>
+            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">YouTube Node & Earning Management</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1 space-y-6">
                 <div class="glass-panel p-6 rounded-2xl">
-                    <p class="orbitron text-[10px] text-cyan-400 mb-6 font-bold">Inject New Node</p>
+                    <p class="orbitron text-[10px] text-cyan-400 mb-6 font-bold">Inject New Video</p>
                     
                     <div class="space-y-4">
                         <div>
                             <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Select Target Channel</label>
                             <select id="channel-node" class="input-box bg-gray-900">
-                                <option value="ai-money-lab">AI Money Lab</option>
-                                <option value="wealth-wave">Wealth Wave Global</option>
-                                <option value="skill-stream">Skill Stream Academy</option>
+                                <option value="ai-wealth-academy">AI Wealth Academy</option>
+                                <option value="urban-vision-2050">Urban Vision 2050</option>
+                                <option value="zenith-nature-4k">Zenith Nature 4K</option>
                                 <option value="cosmic-horizon">Cosmic Horizon</option>
+                                <option value="global-wealth-secret">Global Wealth Secret</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Video Title (Search Query)</label>
-                            <input type="text" id="task-title" placeholder="e.g. AI Wealth Strategy Ep 1" class="input-box">
+                            <input type="text" id="task-title" placeholder="e.g. How to Earn with AI" class="input-box">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Duration (Secs)</label>
+                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Duration (Seconds)</label>
                                 <input type="number" id="task-duration" placeholder="e.g. 300" class="input-box">
                             </div>
                             <div>
-                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Earning (₦)</label>
-                                <input type="number" id="task-amount" placeholder="50" class="input-box">
+                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Earning Rate (₦)</label>
+                                <input type="number" id="task-amount" placeholder="50.00" class="input-box">
                             </div>
                         </div>
 
                         <div>
                             <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Verification Code</label>
-                            <input type="text" id="task-code" placeholder="e.g. SYNERGY77" class="input-box">
+                            <input type="text" id="task-code" placeholder="Enter matching YT code" class="input-box">
                         </div>
 
-                        <button onclick="deployContent()" class="btn-prime w-full mt-4">Deploy to Node</button>
+                        <button onclick="deployContent()" class="btn-prime w-full mt-4">Deploy Content</button>
                     </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl border-dashed border-white/10">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Protocol Info</p>
+                    <p class="text-[11px] text-gray-400 leading-relaxed italic">
+                        "Tabbatar code din da ka saka a nan ya yi daidai da wanda yake cikin bidiyonka na YouTube."
+                    </p>
                 </div>
             </div>
 
             <div class="lg:col-span-2">
                 <div class="glass-panel p-6 rounded-2xl h-full">
                     <div class="flex justify-between items-center mb-8">
-                        <p class="orbitron text-[10px] text-cyan-400 font-bold">Active Protocol Nodes</p>
+                        <p class="orbitron text-[10px] text-cyan-400 font-bold">Live Content Nodes</p>
+                        <span class="text-[9px] text-gray-500 uppercase font-bold">Real-time Deployment</span>
                     </div>
 
                     <div id="live-nodes-container" class="space-y-4">
                         <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-1">
-                                    <span class="badge-node">AI MONEY LAB</span>
+                                    <span class="badge-node">AI WEALTH ACADEMY</span>
                                     <span class="text-[10px] text-gray-500 font-bold">REQUIRED: 300s</span>
                                 </div>
                                 <p class="text-xs font-bold text-white uppercase">Sample Content Node</p>
@@ -96,12 +110,12 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
         function deployContent() {
+            // Wannan function din zai hada bayanan ya tura Firebase
             const channel = document.getElementById('channel-node').value;
             const title = document.getElementById('task-title').value;
             const duration = document.getElementById('task-duration').value;
@@ -109,41 +123,28 @@
             const code = document.getElementById('task-code').value;
 
             if(!title || !duration || !code) {
-                alert("Don Allah cika dukkan bayanan!");
+                alert("Don Allah cika dukkan bayanan kafin ka yi Deploy!");
                 return;
             }
 
-            const taskData = {
-                title: title,
-                duration: parseInt(duration),
-                amount: parseFloat(amount),
-                code: code.toUpperCase(),
-                channel: channel,
-                timestamp: new Date().toLocaleTimeString()
-            };
-
-            // LOGIC NA FIREBASE ZAI SHIGA NAN
-            console.log("Deploying Task:", taskData);
-            
-            // Wannan nuni ne kawai na yadda zai fita a Admin Panel
+            // Misalin nuna shi a Live View kafin refresh
             const container = document.getElementById('live-nodes-container');
-            const newNode = `
-                <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500">
+            const nodeHtml = `
+                <div class="video-card p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500">
                     <div class="flex-1">
                         <div class="flex items-center gap-3 mb-1">
-                            <span class="badge-node">${taskData.channel.replace('-', ' ').toUpperCase()}</span>
-                            <span class="text-[10px] text-gray-500 font-bold">REQUIRED: ${taskData.duration}s</span>
+                            <span class="badge-node">${channel.replace(/-/g, ' ').toUpperCase()}</span>
+                            <span class="text-[10px] text-gray-500 font-bold">REQUIRED: ${duration}s</span>
                         </div>
-                        <p class="text-xs font-bold text-white uppercase">${taskData.title}</p>
-                        <p class="text-[10px] text-cyan-400/60">Reward: ₦${taskData.amount} | Code: ${taskData.code}</p>
+                        <p class="text-xs font-bold text-white uppercase">${title}</p>
+                        <p class="text-[10px] text-cyan-400/60">Reward: ₦${amount} | Code: ${code}</p>
                     </div>
                 </div>
             `;
-            container.innerHTML = newNode + container.innerHTML;
-            alert("Protocol Successfully Deployed to " + channel.toUpperCase());
+            container.insertAdjacentHTML('afterbegin', nodeHtml);
+            alert("Protocol Deployed Successfully!");
         }
-
-
     </script>
+
 </body>
 </html>
