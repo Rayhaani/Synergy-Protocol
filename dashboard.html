@@ -1196,42 +1196,44 @@ function fetchAndRenderNodes() {
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
     const task = nodesList[id];
-    const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
     const currentTime = Math.floor(Date.now() / 1000);
     const timeSpent = currentTime - (startTime[id] || 0);
 
-    // Duba idan ya kalli bidiyon har na tsawon duration din da ka saka a Firebase
+    // Duba idan lokacin da ya kalla ya kai yadda aka saita a Admin Panel
     if (timeSpent < task.duration) {
-        showSynergyAlert("SECURITY: SESSION UNFINISHED. CONTINUE WATCHING!", "error");
+        // Harafin farko kawai babban bako (Capital Letter)
+        showSynergyAlert("Sorry! You haven't watched the video for the required time.", "error");
+
+        // Canza button ya koma RESUME
+        const btn = document.getElementById(`btn-${id}`);
+        if (btn) {
+            btn.innerText = "RESUME";
+            btn.classList.replace('bg-cyan-500', 'bg-yellow-500'); // Launi na gargadi
+            
+            // Sake tura shi YouTube idan ya danna Resume
+            btn.onclick = () => {
+                const searchQuery = `"${task.title}" ${task.channel}`;
+                window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+                
+                // Mayar dashi Verify bayan ya koma
+                btn.innerText = "VERIFY";
+                btn.classList.replace('bg-yellow-500', 'bg-cyan-500');
+                btn.onclick = () => verifyNodeCode(id);
+            };
+        }
         return;
     }
 
+    // Idan lokaci ya cika, sai ya duba Code
+    const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
     if (inputVal === task.code) {
-        try {
-            const username = localStorage.getItem('synergy_user');
-            // Tura kudi zuwa balance din mamba a Firestore
-            await db.collection("users").doc(username).update({
-                videoBalance: firebase.firestore.FieldValue.increment(task.amount),
-                videosWatchedToday: firebase.firestore.FieldValue.increment(1)
-            });
-
-            showSynergyAlert(`SUCCESS: ₦${task.amount} SECURED`, "success");
-            
-            // Kashe Node din domin mamba kar ya sake yi
-            const nodeDiv = document.getElementById(`node-${id}`);
-            if (nodeDiv) nodeDiv.style.opacity = "0.4";
-            const btn = document.getElementById(`btn-${id}`);
-            btn.innerText = "DONE";
-            btn.disabled = true;
-
-        } catch (error) {
-            showSynergyAlert("DATABASE ERROR", "error");
-        }
+        // Logic na bada kudi idan komai yayi dai-dai
+        handleSuccess(id, task.amount);
     } else {
-        showSynergyAlert("INVALID HASH CODE!", "error");
+        showSynergyAlert("Invalid hash code!", "error");
     }
-}
-    
+                    }
+                    
     
 </script>
 </body>
