@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
@@ -100,21 +99,19 @@
     </div>
 
     <script>
-        // Sadiq, ga Config dinka nan na saka ta
         const firebaseConfig = {
             apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
             authDomain: "synergy-protocol.firebaseapp.com",
-            databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
             projectId: "synergy-protocol",
-            storageBucket: "synergy-protocol.firebasestorage.app",
-            messagingSenderId: "179647543031",
             appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
         const db = firebase.firestore();
+
+        // Cloudinary Settings (Daga screenshot dinka)
+        const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/diixjieyp/image/upload';
+        const CLOUDINARY_UPLOAD_PRESET = 'ml_default'; // Sanya sunan preset dinka anan idan ya bambanta
 
         function handleAction(id, link) {
             const btn = document.getElementById('btn-' + id);
@@ -137,26 +134,33 @@
 
             if (fileInput.files && fileInput.files[0]) {
                 const file = fileInput.files[0];
-                
-                // Nuna loading state
                 btn.innerText = "Wait...";
                 btn.disabled = true;
 
                 try {
-                    // 1. Upload hoto zuwa Firebase Storage
-                    const storageRef = storage.ref(`synergy_proofs/${Date.now()}_${file.name}`);
-                    const snapshot = await storageRef.put(file);
-                    const downloadURL = await snapshot.ref.getDownloadURL();
+                    // 1. Shirya bayanan Cloudinary
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-                    // 2. Ajiye record a Firestore
+                    // 2. Tura hoton zuwa Cloudinary
+                    const response = await fetch(CLOUDINARY_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (!data.secure_url) throw new Error("Cloudinary error");
+
+                    // 3. Ajiye link din hoton a Firestore (Kamar yadda kake bukata)
                     await db.collection("task_submissions").add({
                         platform: platformName,
-                        imageUrl: downloadURL,
+                        imageUrl: data.secure_url,
                         submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         status: "pending"
                     });
 
-                    // 3. Update UI
+                    // 4. Update UI
                     const circle = document.getElementById('circle-' + id);
                     btn.innerText = successText;
                     btn.classList.remove('btn-upload');
@@ -164,7 +168,6 @@
                     btn.removeAttribute('onclick');
                     circle.classList.remove('breathing');
 
-                    // 4. Activate next task
                     const nextId = id + 1;
                     const nextBtn = document.getElementById('btn-' + nextId);
                     const nextCircle = document.getElementById('circle-' + nextId);
@@ -176,8 +179,8 @@
                     }
 
                 } catch (error) {
-                    console.error("Firebase Error:", error);
-                    alert("Aiki bai tafi ba. Duba net dinka!");
+                    console.error("Upload Error:", error);
+                    alert("An samu matsala wurin tura hoto!");
                     btn.innerText = "Upload";
                     btn.disabled = false;
                 }
@@ -185,5 +188,4 @@
         }
     </script>
 </body>
-                    </html>
-                    
+</html>
