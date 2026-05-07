@@ -1186,6 +1186,52 @@ function renderToDashboard(id, task) {
 }
 
 
+    // 1. Function din da zai dauko bidiyoyi daga Firestore
+async function fetchAndRenderNodes() {
+    const container = document.getElementById('synergy-nodes-container');
+    if (!container) return;
+
+    // Muna share wajen tukunna
+    container.innerHTML = '<p class="orbitron text-[10px] text-cyan-400 font-bold mb-4 tracking-[3px]">ACTIVE NETWORK NODES</p>';
+
+    const username = localStorage.getItem('synergy_user');
+    
+    // Muna kiran Firestore domin ganin wadanne bidiyoyi ne Admin ya dora
+    const nodesSnapshot = await db.collection("youtube_nodes").get();
+    
+    // Muna kuma duba wadanne ne wannan member din ya riga ya kalla
+    const userSnapshot = await db.collection("users").doc(username).collection("completed_tasks").get();
+    const completedTasks = userSnapshot.docs.map(doc => doc.id);
+
+    nodesSnapshot.forEach((doc) => {
+        const task = doc.data();
+        const taskId = doc.id;
+
+        // TSARI: Idan member ya riga ya kalla, bar din za ta bace (disappearing logic)
+        if (completedTasks.includes(taskId)) {
+            return; // Ba zai nuna wannan node din ba
+        }
+
+        // TSARI: Idan akwai bidiyo a Firestore, sai mu nuna bar din
+        const nodeHtml = `
+            <div id="node-${taskId}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all">
+                <div class="flex items-center gap-4 w-full">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
+                        <i class="fa-brands fa-youtube text-red-500"></i>
+                    </div>
+                    <div class="flex-1" id="text-area-${taskId}">
+                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                        <p class="text-[9px] text-gray-500 uppercase tracking-tighter">EARN: ${task.amount} ZYN</p>
+                    </div>
+                    <button id="btn-${taskId}" onclick="processNode('${taskId}', '${task.code}', ${task.duration}, ${task.amount}, '${task.title}')" 
+                        class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', nodeHtml);
+    });
+}
+    
     
     
 </script>
