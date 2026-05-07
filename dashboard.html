@@ -1144,37 +1144,41 @@ function fetchAndRenderNodes() {
 
     // 1. Function na bude YouTube Search da canza UI
 
- function processNodeViaSearch(id) {
-    // 1. Tabbatar bayanan suna nan
+ 
+  function processNodeViaSearch(id) {
+    // 1. Tabbatar bayanan nodesList suna nan
     if (!nodesList || !nodesList[id]) {
-        console.error("Node data not found for ID:", id);
+        console.error("Node data not found!");
         return;
     }
 
     const task = nodesList[id];
     
-    // 2. Saita lokacin farawa
+    // 2. Saita startTime domin tsaro (Security)
     if (typeof startTime !== 'undefined') {
         startTime[id] = Math.floor(Date.now() / 1000);
     }
     
-    // 3. Dynamic Search: Dauko Sunan Video da Sunan Tasha daga Firebase
+    // 3. EXACT MATCH LOGIC: 
+    // Sanya sunan bidiyo a cikin quotes ("") domin YouTube ya nemo shi kadai
     const videoTitle = task.title || "";
-    const channelName = task.channel || ""; // Wannan zai dauko "AI Wealth Academy" da sauransu
+    const channelHandle = task.channel || ""; // Misali: @AIWealthAcademy
     
-    const searchQuery = `${videoTitle} ${channelName}`;
+    const searchQuery = `"${videoTitle}" ${channelHandle}`;
+    
+    // 4. Bude YouTube Search
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 
-    // 4. Canza UI don saka Code
+    // 5. Canza UI zuwa Input Box (Babu shirme, komai a sarari)
     const infoArea = document.getElementById(`info-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
 
     if (infoArea) {
         infoArea.innerHTML = `
             <div class="flex flex-col gap-1 w-full">
-                <span class="text-[8px] text-cyan-500 orbitron uppercase">Enter Code</span>
+                <span class="text-[8px] text-cyan-500 orbitron uppercase font-bold">VERIFY PROTOCOL CODE</span>
                 <input type="text" id="code-input-${id}" 
-                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none" 
+                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none focus:border-cyan-400" 
                 placeholder="••••••">
             </div>
         `;
@@ -1183,10 +1187,10 @@ function fetchAndRenderNodes() {
     if (btn) {
         btn.innerText = "VERIFY";
         btn.classList.remove('bg-white');
-        btn.classList.add('bg-cyan-500');
-        btn.onclick = () => verifyNodeCode(id);
+        btn.classList.add('bg-cyan-500', 'text-black');
+        btn.onclick = () => verifyNodeCode(id); // Kira function na tabbatarwa
     }
- }
+  }
     
 
 // 2. Function na duba lokaci da tabbatar da Code
