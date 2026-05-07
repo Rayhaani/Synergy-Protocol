@@ -1144,32 +1144,21 @@ function fetchAndRenderNodes() {
 
     // 1. Function na bude YouTube Search da canza UI
 
- 
-  function processNodeViaSearch(id) {
-    // 1. Tabbatar bayanan nodesList suna nan
-    if (!nodesList || !nodesList[id]) {
-        console.error("Node data not found!");
-        return;
-    }
+ function processNodeViaSearch(id) {
+    if (!nodesList || !nodesList[id]) return;
 
     const task = nodesList[id];
     
-    // 2. Saita startTime domin tsaro (Security)
-    if (typeof startTime !== 'undefined') {
-        startTime[id] = Math.floor(Date.now() / 1000);
-    }
+    // MUN AJIYE LOKACI A LOCALSTORAGE (Wannan ba zai goge ba ko an yi refresh)
+    const now = Math.floor(Date.now() / 1000);
+    localStorage.setItem(`startTime_${id}`, now);
     
-    // 3. EXACT MATCH LOGIC: 
-    // Sanya sunan bidiyo a cikin quotes ("") domin YouTube ya nemo shi kadai
     const videoTitle = task.title || "";
-    const channelHandle = task.channel || ""; // Misali: @AIWealthAcademy
-    
+    const channelHandle = task.channel || ""; 
     const searchQuery = `"${videoTitle}" ${channelHandle}`;
     
-    // 4. Bude YouTube Search
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 
-    // 5. Canza UI zuwa Input Box (Babu shirme, komai a sarari)
     const infoArea = document.getElementById(`info-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
 
@@ -1188,34 +1177,41 @@ function fetchAndRenderNodes() {
         btn.innerText = "VERIFY";
         btn.classList.remove('bg-white');
         btn.classList.add('bg-cyan-500', 'text-black');
-        btn.onclick = () => verifyNodeCode(id); // Kira function na tabbatarwa
+        btn.onclick = () => verifyNodeCode(id);
     }
-  }
+ }
+    
+  
     
 
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
     const task = nodesList[id];
     const currentTime = Math.floor(Date.now() / 1000);
-    const timeSpent = currentTime - (startTime[id] || 0);
+    
+    // Daukowa daga localStorage maimakon variable mai gogewa
+    const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+    
+    if (storedStart === 0) {
+        showSynergyAlert("Security Error: Please click START again.", "error");
+        return;
+    }
 
-    // Duba idan lokacin da ya kalla ya kai yadda aka saita a Admin Panel
+    const timeSpent = currentTime - storedStart;
+
+    // Duba idan lokacin ya kai yadda aka saita (Misali 300s)
     if (timeSpent < task.duration) {
-        // Harafin farko kawai babban bako (Capital Letter)
         showSynergyAlert("Sorry! You haven't watched the video for the required time.", "error");
 
-        // Canza button ya koma RESUME
         const btn = document.getElementById(`btn-${id}`);
         if (btn) {
             btn.innerText = "RESUME";
-            btn.classList.replace('bg-cyan-500', 'bg-yellow-500'); // Launi na gargadi
+            btn.classList.replace('bg-cyan-500', 'bg-yellow-500'); 
             
-            // Sake tura shi YouTube idan ya danna Resume
             btn.onclick = () => {
                 const searchQuery = `"${task.title}" ${task.channel}`;
                 window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
                 
-                // Mayar dashi Verify bayan ya koma
                 btn.innerText = "VERIFY";
                 btn.classList.replace('bg-yellow-500', 'bg-cyan-500');
                 btn.onclick = () => verifyNodeCode(id);
@@ -1224,15 +1220,16 @@ async function verifyNodeCode(id) {
         return;
     }
 
-    // Idan lokaci ya cika, sai ya duba Code
     const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
     if (inputVal === task.code) {
-        // Logic na bada kudi idan komai yayi dai-dai
+        // Idan ya yi nasara, mu goge lokacin daga storage don gudun rikicewa an gaba
+        localStorage.removeItem(`startTime_${id}`);
         handleSuccess(id, task.amount);
     } else {
         showSynergyAlert("Invalid hash code!", "error");
     }
-                    }
+}
+    
                     
     
 </script>
