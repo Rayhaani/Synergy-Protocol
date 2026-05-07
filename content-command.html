@@ -108,7 +108,7 @@
         const code = document.getElementById('task-code').value;
 
         if(!title || !duration || !code) {
-            alert("Don Allah cika dukkan bayanan!");
+            alert("please enter the full details");
             return;
         }
 
@@ -126,7 +126,7 @@
             document.getElementById('task-title').value = '';
             document.getElementById('task-code').value = '';
         }).catch((error) => {
-            alert("Kuskure ya faru: " + error.message);
+            alert("error occured: " + error.message);
         });
     }
 
@@ -161,7 +161,7 @@
 
     // 4. DELETE FUNCTION (Don goge bidiyo)
     function deleteNode(key) {
-        if(confirm("Kana da tabbas kana son goge wannan node din?")) {
+        if(confirm("Are you sure you want to delete this node?")) {
             database.ref('nodes/' + key).remove();
         }
     }
