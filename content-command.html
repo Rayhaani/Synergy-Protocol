@@ -85,18 +85,20 @@
 
     <script>
         // 1. FIREBASE CONFIGURATION (SAKA TAKAMAIMAN CONFIG DINKA A NAN)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+  authDomain: "synergy-protocol.firebaseapp.com",
+  databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com", // Na saka maka asalin URL dinka
+  projectId: "synergy-protocol",
+  storageBucket: "synergy-protocol.firebasestorage.app",
+  messagingSenderId: "179647543031",
+  appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
         
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
         // 2. DEPLOY CONTENT TO FIREBASE
         function deployContent() {
