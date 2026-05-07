@@ -8,26 +8,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --bg: #030712; }
+        :root { --aqua: #00f2fe; --neon-red: #ff0055; --bg: #030712; }
         body { 
             background: var(--bg); color: #fff; font-family: 'Quicksand', sans-serif;
-            background-image: linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px), linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            background-image: linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px), 
+                              linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
             background-size: 30px 30px; min-height: 100vh;
         }
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
         .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
         .glow-text { text-shadow: 0 0 10px var(--aqua); }
-        
-        .input-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 254, 0.1); padding: 15px; border-radius: 12px; outline: none; width: 100%; font-size: 13px; transition: all 0.3s; }
+        .input-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 254, 0.1); padding: 12px; border-radius: 12px; outline: none; width: 100%; font-size: 13px; color: white; transition: all 0.3s; }
         .input-box:focus { border-color: var(--aqua); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); }
-        
-        .btn-prime { background: var(--aqua); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; transition: all 0.3s; }
+        .btn-prime { background: var(--aqua); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; transition: all 0.3s; cursor: pointer; }
         .btn-prime:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); transform: translateY(-2px); }
-
-        .video-card { transition: all 0.3s ease; border-left: 3px solid transparent; }
-        .video-card:hover { background: rgba(255, 255, 255, 0.03); border-left-color: var(--aqua); }
-
-        .badge-active { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 700; }
+        .badge-node { background: rgba(0, 242, 254, 0.1); color: var(--aqua); border: 1px solid rgba(0, 242, 254, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -35,105 +30,120 @@
     <div class="max-w-6xl mx-auto">
         <div class="mb-12 text-center">
             <h1 class="orbitron text-2xl font-bold glow-text">Content Command</h1>
-            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">YouTube Node & Earning Management</p>
+            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">Node Deployment System</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1">
                 <div class="glass-panel p-6 rounded-2xl">
-                    <p class="orbitron text-[10px] text-cyan-400 mb-6 font-bold">Inject New Video</p>
+                    <p class="orbitron text-[10px] text-cyan-400 mb-6 font-bold">Inject New Node</p>
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">YouTube Link / ID</label>
-                            <input type="text" placeholder="https://youtube.com/watch?v=..." class="input-box text-white">
+                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Select Target Channel</label>
+                            <select id="channel-node" class="input-box bg-gray-900">
+                                <option value="ai-money-lab">AI Money Lab</option>
+                                <option value="wealth-wave">Wealth Wave Global</option>
+                                <option value="skill-stream">Skill Stream Academy</option>
+                                <option value="cosmic-horizon">Cosmic Horizon</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Video Title (Search Query)</label>
+                            <input type="text" id="task-title" placeholder="e.g. AI Wealth Strategy Ep 1" class="input-box">
                         </div>
                         
-                        <div>
-                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Earning Rate (per view)</label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 font-bold">₦</span>
-                                <input type="number" placeholder="50.00" class="input-box pl-10 text-white">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Duration (Secs)</label>
+                                <input type="number" id="task-duration" placeholder="e.g. 300" class="input-box">
+                            </div>
+                            <div>
+                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Earning (₦)</label>
+                                <input type="number" id="task-amount" placeholder="50" class="input-box">
                             </div>
                         </div>
 
                         <div>
-                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Task Description</label>
-                            <textarea placeholder="Share and earn bonus..." class="input-box h-24 text-white"></textarea>
+                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Verification Code</label>
+                            <input type="text" id="task-code" placeholder="e.g. SYNERGY77" class="input-box">
                         </div>
 
-                        <button class="btn-prime w-full mt-4">Deploy Content</button>
+                        <button onclick="deployContent()" class="btn-prime w-full mt-4">Deploy to Node</button>
                     </div>
-                </div>
-
-                <div class="glass-panel p-6 rounded-2xl border-dashed border-white/10">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-2">Protocol Info</p>
-                    <p class="text-[11px] text-gray-400 leading-relaxed italic">
-                        "Duk bidiyon da ka saka, tsarin zai haɗa shi da API na YouTube domin tabbatar da cewa mamba ya kalla kafin kuɗin su hau."
-                    </p>
                 </div>
             </div>
 
             <div class="lg:col-span-2">
                 <div class="glass-panel p-6 rounded-2xl h-full">
                     <div class="flex justify-between items-center mb-8">
-                        <p class="orbitron text-[10px] text-cyan-400 font-bold">Live Content Nodes</p>
-                        <span class="text-[9px] text-gray-500 uppercase font-bold">Total: 03 Active</span>
+                        <p class="orbitron text-[10px] text-cyan-400 font-bold">Active Protocol Nodes</p>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="video-card p-4 rounded-xl flex items-center gap-4 bg-white/5">
-                            <div class="w-32 h-20 rounded-lg bg-black overflow-hidden relative border border-white/10">
-                                <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg" class="w-full h-full object-cover opacity-60">
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="w-6 h-6 border-2 border-white/20 rounded-full flex items-center justify-center">
-                                        <div class="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-1"></div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div id="live-nodes-container" class="space-y-4">
+                        <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-1">
-                                    <span class="badge-active">ACTIVE</span>
-                                    <span class="text-xs font-bold text-cyan-400">₦50.00 / VIEW</span>
+                                    <span class="badge-node">AI MONEY LAB</span>
+                                    <span class="text-[10px] text-gray-500 font-bold">REQUIRED: 300s</span>
                                 </div>
-                                <p class="text-xs font-bold text-white mb-1">Introduction to Synergy Protocol</p>
-                                <p class="text-[10px] text-gray-500 truncate max-w-xs">ID: dQw4w9WgXcQ • Uploaded: 2h ago</p>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <button class="text-gray-500 hover:text-white transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                                <button class="text-red-500/50 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                                <p class="text-xs font-bold text-white uppercase">Sample Content Node</p>
+                                <p class="text-[10px] text-cyan-400/60">Ready for member verification</p>
                             </div>
                         </div>
-
-                        <div class="video-card p-4 rounded-xl flex items-center gap-4 bg-white/5">
-                            <div class="w-32 h-20 rounded-lg bg-black overflow-hidden relative border border-white/10">
-                                <img src="https://img.youtube.com/vi/yPYZpwSpKqs/0.jpg" class="w-full h-full object-cover opacity-60">
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="w-6 h-6 border-2 border-white/20 rounded-full flex items-center justify-center">
-                                        <div class="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-1"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-1">
-                                    <span class="badge-active">ACTIVE</span>
-                                    <span class="text-xs font-bold text-cyan-400">₦100.00 / VIEW</span>
-                                </div>
-                                <p class="text-xs font-bold text-white mb-1">Advanced Node Management</p>
-                                <p class="text-[10px] text-gray-500 truncate max-w-xs">ID: yPYZpwSpKqs • Uploaded: 5h ago</p>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <button class="text-gray-500 hover:text-white transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                                <button class="text-red-500/50 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
+    <script>
+        function deployContent() {
+            const channel = document.getElementById('channel-node').value;
+            const title = document.getElementById('task-title').value;
+            const duration = document.getElementById('task-duration').value;
+            const amount = document.getElementById('task-amount').value;
+            const code = document.getElementById('task-code').value;
+
+            if(!title || !duration || !code) {
+                alert("Don Allah cika dukkan bayanan!");
+                return;
+            }
+
+            const taskData = {
+                title: title,
+                duration: parseInt(duration),
+                amount: parseFloat(amount),
+                code: code.toUpperCase(),
+                channel: channel,
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            // LOGIC NA FIREBASE ZAI SHIGA NAN
+            console.log("Deploying Task:", taskData);
+            
+            // Wannan nuni ne kawai na yadda zai fita a Admin Panel
+            const container = document.getElementById('live-nodes-container');
+            const newNode = `
+                <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="badge-node">${taskData.channel.replace('-', ' ').toUpperCase()}</span>
+                            <span class="text-[10px] text-gray-500 font-bold">REQUIRED: ${taskData.duration}s</span>
+                        </div>
+                        <p class="text-xs font-bold text-white uppercase">${taskData.title}</p>
+                        <p class="text-[10px] text-cyan-400/60">Reward: ₦${taskData.amount} | Code: ${taskData.code}</p>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = newNode + container.innerHTML;
+            alert("Protocol Successfully Deployed to " + channel.toUpperCase());
+        }
+
+
+    </script>
 </body>
 </html>
