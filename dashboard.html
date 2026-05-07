@@ -313,67 +313,17 @@
 
     
     <main class="max-w-2xl mx-auto p-6 mt-4 space-y-10">
-      
 
- <div id="synergy-nodes-wrapper" class="space-y-4">
-    <div id="node-1" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all duration-500">
-        <div class="flex items-center gap-4 w-full" id="content-1">
-            <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 font-bold orbitron">1</div>
-            <div class="flex-1" id="text-area-1">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">AI Wealth Academy</h4>
-                <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Status: Required</p>
-            </div>
-            <button id="btn-1" onclick="processNode(1)" class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
-        </div>
-    </div>
 
-    <div id="node-2" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all duration-500">
-        <div class="flex items-center gap-4 w-full" id="content-2">
-            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">2</div>
-            <div class="flex-1" id="text-area-2">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">Global Wealth Secret</h4>
-                <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Status: Required</p>
-            </div>
-            <button id="btn-2" onclick="processNode(2)" class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
-        </div>
-    </div>
-
-    <div id="node-3" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all duration-500">
-        <div class="flex items-center gap-4 w-full" id="content-3">
-            <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-bold orbitron">3</div>
-            <div class="flex-1" id="text-area-3">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">Urban Vision 2050</h4>
-                <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Status: Required</p>
-            </div>
-            <button id="btn-3" onclick="processNode(3)" class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
-        </div>
-    </div>
-
-    <div id="node-4" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all duration-500">
-        <div class="flex items-center gap-4 w-full" id="content-4">
-            <div class="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 font-bold orbitron">4</div>
-            <div class="flex-1" id="text-area-4">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">Zenith Nature 4K</h4>
-                <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Status: Required</p>
-            </div>
-            <button id="btn-4" onclick="processNode(4)" class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
-        </div>
-    </div>
-
-    <div id="node-5" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all duration-500">
-        <div class="flex items-center gap-4 w-full" id="content-5">
-            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold orbitron">5</div>
-            <div class="flex-1" id="text-area-5">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">Cosmic Horizon</h4>
-                <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Status: Required</p>
-            </div>
-            <button id="btn-5" onclick="processNode(5)" class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
-        </div>
-    </div>
- </div>
         
-        
+<div id="synergy-nodes-wrapper" class="space-y-4">
+    <div id="synergy-nodes-container" class="space-y-4">
+        <p class="orbitron text-[10px] text-cyan-400 text-center animate-pulse">Initializing Neural Nodes...</p>
+    </div>
+</div>
 
+
+        
         <div class="relative flex items-center justify-center my-10">
     <div id="task-ring-outer" class="absolute w-[160px] h-[160px] rounded-full border border-white/5 shadow-[0_0_30px_rgba(74,222,128,0.1)]" style="background: conic-gradient(#4ade80 0deg, transparent 0deg);"></div>
     
@@ -1182,50 +1132,61 @@ function renderToDashboard(id, task) {
 }
 
 
-    // 1. Function din da zai dauko bidiyoyi daga Firestore
+// Tabbatar an kira wannan function din bayan shafi ya loda
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndRenderNodes();
+});
+
 async function fetchAndRenderNodes() {
     const container = document.getElementById('synergy-nodes-container');
     if (!container) return;
 
-    // Muna share wajen tukunna
-    container.innerHTML = '<p class="orbitron text-[10px] text-cyan-400 font-bold mb-4 tracking-[3px]">ACTIVE NETWORK NODES</p>';
-
     const username = localStorage.getItem('synergy_user');
     
-    // Muna kiran Firestore domin ganin wadanne bidiyoyi ne Admin ya dora
-    const nodesSnapshot = await db.collection("youtube_nodes").get();
-    
-    // Muna kuma duba wadanne ne wannan member din ya riga ya kalla
-    const userSnapshot = await db.collection("users").doc(username).collection("completed_tasks").get();
-    const completedTasks = userSnapshot.docs.map(doc => doc.id);
+    try {
+        // 1. Dauko bidiyoyin da kake dasu a "youtube_nodes"
+        const nodesSnapshot = await db.collection("youtube_nodes").get();
+        
+        // 2. Dauko jerin wadanda mutumin nan ya riga ya kalla
+        const completedSnapshot = await db.collection("users").doc(username).collection("completed_tasks").get();
+        const completedIds = completedSnapshot.docs.map(doc => doc.id);
 
-    nodesSnapshot.forEach((doc) => {
-        const task = doc.data();
-        const taskId = doc.id;
+        container.innerHTML = ""; // Share "Initializing..." text din nan
 
-        // TSARI: Idan member ya riga ya kalla, bar din za ta bace (disappearing logic)
-        if (completedTasks.includes(taskId)) {
-            return; // Ba zai nuna wannan node din ba
+        if (nodesSnapshot.empty) {
+            container.innerHTML = "<p class='text-center text-gray-500 text-[10px] orbitron'>NO ACTIVE NODES FOUND</p>";
+            return;
         }
 
-        // TSARI: Idan akwai bidiyo a Firestore, sai mu nuna bar din
-        const nodeHtml = `
-            <div id="node-${taskId}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all">
-                <div class="flex items-center gap-4 w-full">
-                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
-                        <i class="fa-brands fa-youtube text-red-500"></i>
+        nodesSnapshot.forEach((doc) => {
+            const task = doc.data();
+            const taskId = doc.id;
+
+            // DISAPPEARING LOGIC: Idan an riga an kalla, kada ya fito
+            if (completedIds.includes(taskId)) return;
+
+            const nodeHtml = `
+                <div id="node-${taskId}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all">
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        </div>
+                        <div class="flex-1" id="text-area-${taskId}">
+                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                            <p class="text-[9px] text-cyan-500 uppercase tracking-tighter">YIELD: ₦${task.amount}</p>
+                        </div>
+                        <button id="btn-${taskId}" onclick="startNodeProcess('${taskId}', ${task.duration}, '${task.title}')" 
+                            class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
                     </div>
-                    <div class="flex-1" id="text-area-${taskId}">
-                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                        <p class="text-[9px] text-gray-500 uppercase tracking-tighter">EARN: ${task.amount} ZYN</p>
-                    </div>
-                    <button id="btn-${taskId}" onclick="processNode('${taskId}', '${task.code}', ${task.duration}, ${task.amount}, '${task.title}')" 
-                        class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
                 </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', nodeHtml);
-    });
+            `;
+            container.insertAdjacentHTML('beforeend', nodeHtml);
+        });
+
+    } catch (error) {
+        console.error("Error fetching nodes:", error);
+        container.innerHTML = "<p class='text-red-500 text-[8px]'>NODE CONNECTION ERROR</p>";
+    }
 }
     
     
