@@ -1202,50 +1202,7 @@ function renderToDashboard(id, task) {
 }
 
 
-    let startTime = {}; 
-
-async function processNode(id) {
-    const btn = document.getElementById(`btn-${id}`);
-    const task = nodeTasks[id]; // Wannan yana ɗauko bayanai daga jerin bidiyoyinmu
-    const username = localStorage.getItem('synergy_user');
-
-    // MATAKI NA 1: Fara Kallon Bidiyo
-    if (btn.innerText === "START") {
-        startTime[id] = Math.floor(Date.now() / 1000);
-        
-        const query = `${task.title} Synergy Protocol Official`;
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, '_blank');
-
-        // Canza Bar din ya koma Input field nan take
-        transformBarToInput(id);
-        
-        // Button ya koma "VERIFY" maimakon Get Code tunda mun riga mun san code din a Firebase yake
-        btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe";
-        btn.style.color = "black";
-        
-    } 
-    // MATAKI NA 2: Yin Verification (Babu Pop-up)
-    else if (btn.innerText === "VERIFY") {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const timeSpent = currentTime - (startTime[id] || 0);
-        const inputVal = document.getElementById(`code-input-${id}`).value.toUpperCase();
-
-        // Tsaro: Idan bai gama lokacin kallo ba
-        if (timeSpent < task.duration) {
-            const sauranLokaci = task.duration - timeSpent;
-            showSynergyAlert(`SECURITY: REMAINS ${sauranLokaci}s TO UNLOCK`, "error");
-            return;
-        }
-
-        // Idan ya cika lokaci, duba Code
-        if (inputVal === task.code) {
-            handleSuccess(id, task.amount); // Wannan zai tura kudi Firebase
-        } else {
-            showSynergyAlert("INVALID HASH CODE!", "error");
-        }
-    }
-}
+    
     
 </script>
 </body>
