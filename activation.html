@@ -3,344 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGY | NODES ACTIVATION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>SYNERGY TASK HUB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --aqua: #00f2fe; --bg: #020617; }
+        :root { --aqua: #00f2fe; --bg: #010409; }
+        
         body { 
-            background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; 
-            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(112, 0, 255, 0.15), transparent), 
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
-        .glass-premium { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.08); border-top: 1px solid rgba(0, 242, 254, 0.2); }
-        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 3px; }
-        .digits-terminal { font-family: 'Roboto Mono', monospace; }
+
+        .icon-circle {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .breathing {
+            animation: breathe 2s infinite ease-in-out;
+            border-color: var(--aqua) !important;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+            50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(0, 242, 254, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+        }
+
+        /* ALL BUTTONS ARE NOW WHITE BY DEFAULT */
+        .btn-task {
+            background: #fff;
+            color: #000;
+            font-size: 11px;
+            font-weight: 800;
+            width: 100px;
+            height: 40px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Disabled state still white but slightly faded to maintain look */
+        .btn-task:disabled {
+            background: #fff;
+            opacity: 0.9;
+            color: #000;
+            cursor: not-allowed;
+        }
+
+        .btn-task.completed {
+            background: rgba(0, 242, 254, 0.1) !important;
+            color: var(--aqua) !important;
+            border: 1px solid var(--aqua);
+            opacity: 1 !important;
+        }
+
+        .social-row {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .task-done { opacity: 0.5; }
         
-        /* Neon Button & Effects */
-        .btn-neon { background: linear-gradient(90deg, #00f2fe 0%, #7000ff 100%); transition: all 0.4s; }
-        .btn-neon:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); transform: translateY(-2px); }
-        .node-card { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .node-locked { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
-        
-        /* Shutter for Congestion */
-        #congestion-shutter {
-            position: fixed; inset: 0; background: var(--bg); z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
+        /* Title Casing */
+        .platform-name {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #e2e8f0;
         }
     </style>
 </head>
+<body class="flex flex-col items-center">
 
- <body class="p-6">
-
-    <div id="congestion-shutter">
-        <div class="w-20 h-20 border-2 border-dashed border-red-500 rounded-full flex items-center justify-center animate-spin mb-6">
-            <div class="w-4 h-4 bg-red-500 rounded-full"></div>
-        </div>
-        <h1 class="orbitron text-red-500 text-lg mb-4">Node Saturation Reached</h1>
-        <p class="text-gray-400 text-sm max-w-xs">A yau protocol ya riga ya dauki adadin da yake bukata don kariya. Da fatan zaka dawo nan da awanni 24.</p>
-        <button onclick="location.href='dashboard.html'" class="mt-8 px-8 py-3 glass-premium rounded-full orbitron text-[10px]">Return to Vault</button>
+    <div class="w-full max-w-sm px-6 pt-10 mb-6">
+        <h2 class="text-center text-[13px] font-extrabold tracking-tight text-gray-200">
+            Complete the Below Tasks to Access Your Dashboard
+        </h2>
+        <div class="w-12 h-[2px] bg-cyan-500 mx-auto mt-3"></div>
     </div>
-  
-    <main id="main-content" class="max-w-xl mx-auto space-y-8 mt-10" style="display: none;">
+
+    <div class="w-full max-w-sm px-6 space-y-2">
         
-        <div class="text-center space-y-4">
-            <div class="w-12 h-12 rounded-full border border-cyan-500/30 mx-auto flex items-center justify-center">
-                <div class="w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_15px_#00f2fe]"></div>
+        <div class="social-row" id="row-1">
+            <div class="flex items-center gap-4">
+                <div class="icon-circle breathing" id="circle-1">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#0088cc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.52-1.4.51-.46-.01-1.35-.26-2.01-.48-.81-.27-1.45-.42-1.39-.88.03-.24.36-.48.99-.74 3.88-1.69 6.46-2.8 7.74-3.33 3.68-1.51 4.44-1.78 4.94-1.79.11 0 .35.03.5.16.13.12.16.29.17.41.01.11 0 .23-.01.34z"/></svg>
+                </div>
+                <span class="platform-name">Telegram</span>
             </div>
-            <h1 class="orbitron text-sm font-bold tracking-[6px]">System Activation</h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[2px]">Verify 5 nodes to unlock permanent yield</p>
+            <button class="btn-task" id="btn-1" onclick="completeTask(1, 'Joined')">Join</button>
         </div>
 
-        <div class="glass-premium p-6 rounded-[32px] border-b-2 border-cyan-500/20">
-            <div class="flex justify-between items-center mb-4">
-                <span class="orbitron text-[9px] text-gray-400">Node Synchronization</span>
-                <span id="nodes-count" class="digits-terminal text-cyan-400 text-lg">0 / 5</span>
+        <div class="social-row" id="row-2">
+            <div class="flex items-center gap-4">
+                <div class="icon-circle" id="circle-2">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </div>
+                <span class="platform-name">Twitter X</span>
             </div>
-            <div class="h-1 w-full bg-white/5 rounded-full">
-                <div id="progress-bar" class="h-full bg-cyan-500 rounded-full transition-all duration-700" style="width: 0%"></div>
-            </div>
+            <button class="btn-task" id="btn-2" onclick="completeTask(2, 'Followed')" disabled>Follow</button>
         </div>
 
-        <div id="player-area" class="hidden space-y-6">
-            <div class="aspect-video glass-premium rounded-[30px] overflow-hidden relative">
-                <div id="activation-player"></div>
+        <div class="social-row" id="row-3">
+            <div class="flex items-center gap-4">
+                <div class="icon-circle" id="circle-3">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </div>
+                <span class="platform-name">Facebook</span>
             </div>
-            <div class="text-center space-y-4">
-                <div id="timer-display" class="digits-terminal text-4xl text-white">02:00</div>
-                <div id="verify-ui" class="hidden space-y-4 animate-in fade-in duration-500"></div>
-            </div>
+            <button class="btn-task" id="btn-3" onclick="completeTask(3, 'Followed')" disabled>Follow</button>
         </div>
 
-               <div id="nodes-list" class="space-y-3">
-            <div id="node-1" class="node-card glass-premium p-4 rounded-[24px]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 flex-shrink-0 bg-red-600/10 rounded-xl border border-red-500/20 flex items-center justify-center text-red-500 text-xs">1</div>
-                        <div class="overflow-hidden">
-                            <h4 class="orbitron text-[10px] text-white whitespace-nowrap overflow-hidden text-ellipsis">AI Wealth Academy</h4>
-                            <p class="text-[8px] text-gray-500">Status: Required</p>
-                        </div>
-                    </div>
-                    <button onclick="launchActivation(1)" class="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-black orbitron text-[8px] font-bold">START</button>
+        <div class="social-row" id="row-4">
+            <div class="flex items-center gap-4">
+                <div class="icon-circle" id="circle-4">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.355 2.618 6.778 6.98 6.978 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.058-1.28.072-1.689.072-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.355-2.617-6.783-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                 </div>
+                <span class="platform-name">Instagram</span>
             </div>
+            <button class="btn-task" id="btn-4" onclick="completeTask(4, 'Followed')" disabled>Follow</button>
+        </div>
 
-            <div id="node-2" class="node-card glass-premium p-4 rounded-[24px]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 flex-shrink-0 bg-cyan-600/10 rounded-xl border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">2</div>
-                        <div class="overflow-hidden">
-                            <h4 class="orbitron text-[10px] text-white whitespace-nowrap overflow-hidden text-ellipsis">Global Wealth Secret</h4>
-                            <p class="text-[8px] text-gray-500">Status: Required</p>
-                        </div>
-                    </div>
-                    <button onclick="launchActivation(2)" class="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-black orbitron text-[8px] font-bold">START</button>
+        <div class="social-row" id="row-5">
+            <div class="flex items-center gap-4">
+                <div class="icon-circle" id="circle-5">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 </div>
+                <span class="platform-name">WhatsApp</span>
             </div>
+            <button class="btn-task" id="btn-5" onclick="completeTask(5, 'Joined')" disabled>Join</button>
+        </div>
 
-            <div id="node-3" class="node-card glass-premium p-4 rounded-[24px]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 flex-shrink-0 bg-purple-600/10 rounded-xl border border-purple-500/20 flex items-center justify-center text-purple-400 text-xs">3</div>
-                        <div class="overflow-hidden">
-                            <h4 class="orbitron text-[10px] text-white whitespace-nowrap overflow-hidden text-ellipsis">Urban Vision 2050</h4>
-                            <p class="text-[8px] text-gray-500">Status: Required</p>
-                        </div>
-                    </div>
-                    <button onclick="launchActivation(3)" class="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-black orbitron text-[8px] font-bold">START</button>
-                </div>
-            </div>
+    </div>
 
-            <div id="node-4" class="node-card glass-premium p-4 rounded-[24px]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 flex-shrink-0 bg-green-600/10 rounded-xl border border-green-500/20 flex items-center justify-center text-green-400 text-xs">4</div>
-                        <div class="overflow-hidden">
-                            <h4 class="orbitron text-[10px] text-white whitespace-nowrap overflow-hidden text-ellipsis">Zenith Nature 4K</h4>
-                            <p class="text-[8px] text-gray-500">Status: Required</p>
-                        </div>
-                    </div>
-                    <button onclick="launchActivation(4)" class="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-black orbitron text-[8px] font-bold">START</button>
-                </div>
-            </div>
+    <script>
+        function completeTask(current, text) {
+            const btn = document.getElementById('btn-' + current);
+            const circle = document.getElementById('circle-' + current);
+            const row = document.getElementById('row-' + current);
 
-            <div id="node-5" class="node-card glass-premium p-4 rounded-[24px]">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 flex-shrink-0 bg-blue-600/10 rounded-xl border border-blue-500/20 flex items-center justify-center text-blue-400 text-xs">5</div>
-                        <div class="overflow-hidden">
-                            <h4 class="orbitron text-[10px] text-white whitespace-nowrap overflow-hidden text-ellipsis">Cosmic Horizon</h4>
-                            <p class="text-[8px] text-gray-500">Status: Required</p>
-                        </div>
-                    </div>
-                    <button onclick="launchActivation(5)" class="flex-shrink-0 px-4 py-2 rounded-lg bg-white text-black orbitron text-[8px] font-bold">START</button>
-                </div>
-            </div>
-               </div>
-             
-            
-
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-    
-// 1. FIREBASE CONFIG - Ba mu taba komai ba
-const firebaseConfig = { 
-    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
-    authDomain: "synergy-protocol.firebaseapp.com", 
-    projectId: "synergy-protocol", 
-    storageBucket: "synergy-protocol.firebasestorage.app", 
-    messagingSenderId: "179647543031", 
-    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2" 
-};
-
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-const db = firebase.firestore();
-const currentUser = localStorage.getItem('synergy_user');
-
-// Variables for Player and Logic - Suna nan daram
-let player, activeNode = 0, currentCode = "", timerInterval;
-const nodeData = {
-    1: { videoId: 'RjzdBo6GACw', handle: '@aiwealthacademy_global' }, 
-    2: { videoId: 'GRr6PvD0dn4', handle: '@globalwealthsecrethq' },
-    3: { videoId: 'mSxQ2S-hsNU', handle: '@UrbanVision2050' },
-    4: { videoId: 'koEOl3EiRLI', handle: '@ZenithNature4K' },
-    5: { videoId: 'k68GhD-fhmU', handle: '@CosmicHorizon_X' }
-};
-
-// 2. YOUTUBE PLAYER INITIALIZATION
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('activation-player', {
-        height: '100%', 
-        width: '100%',
-        playerVars: { 
-            'autoplay': 0, 
-            'controls': 0, 
-            'disablekb': 1, 
-            'modestbranding': 1, 
-            'rel': 0,
-            'origin': window.location.origin 
-        },
-        events: { 
-            'onStateChange': onPlayerStateChange,
-            'onError': (e) => { console.error("YT Error:", e); location.reload(); }
-        }
-    });
-}
-
-// 3. SYNC PROGRESS - Gyaran da zai sa shafin ya bayyana
-async function syncProgress() {
-    if (!currentUser) { window.location.replace("signin.html"); return; }
-    
-    try {
-        const userDoc = await db.collection("users").doc(currentUser).get();
-        
-        if (userDoc.exists && userDoc.data().isVerified === true) {
-            window.location.replace("dashboard.html");
-            return;
-        } else {
-            // WANNAN LAYIN NE ZAI KAWAR DA DUHUN SHAFIN
-            document.getElementById('main-content').style.display = 'block';
-        }
-
-        const snapshot = await db.collection("subscription_logs").where("user", "==", currentUser).get();
-        let completedNodes = [];
-        snapshot.forEach(doc => { completedNodes.push(doc.data().node_id); });
-        
-        updateUI(completedNodes);
-    } catch (e) {
-        console.log("Sync error, retrying...");
-        setTimeout(syncProgress, 2000);
-    }
-}
-
-// 4. UI AND ACTIVATION LOGIC - Duk suna nan yadda ka saba
-function updateUI(completed) {
-    const count = Math.min(completed.length, 5); // Mun canza 2 zuwa 5 anan
-    document.getElementById('nodes-count').innerText = `${count} / 5`; // Mun canza 2 zuwa 5 anan ma
-    document.getElementById('progress-bar').style.width = (count * 20) + "%"; // Mun canza 50 zuwa 20 (domin 20 * 5 = 100)
-
-    completed.forEach(nodeId => {
-        const btn = document.querySelector(`[onclick="launchActivation(${nodeId})"]`);
-        if(btn) {
-            btn.innerText = "SYNCHRONIZED";
+            circle.classList.remove('breathing');
+            btn.innerText = text;
+            btn.classList.add('completed');
             btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            const p = btn.parentElement.querySelector('p');
-            if(p) {
-                p.innerText = "Status: Protocol Active";
-                p.classList.replace('text-gray-500', 'text-green-400');
-            }
-        }
-    });
-}
-    
+            row.classList.add('task-done');
 
-function launchActivation(num) {
-    activeNode = num;
-    document.getElementById('nodes-list').classList.add('hidden');
-    document.getElementById('player-area').classList.remove('hidden');
-    player.loadVideoById(nodeData[num].videoId);
-}
-
-function onPlayerStateChange(event) {
-    if(event.data === YT.PlayerState.PLAYING) {
-        let timeLeft = 120; 
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            let m = Math.floor(timeLeft/60), s = timeLeft%60;
-            document.getElementById('timer-display').innerText = `${m}:${s<10?'0'+s:s}`;
-            if(timeLeft <= 0) { 
-                clearInterval(timerInterval); 
-                showSubscribeStep(); 
-            }
-        }, 1000);
-    }
-}
-
-function showSubscribeStep() {
-    const verifyUI = document.getElementById('verify-ui');
-    const data = nodeData[activeNode];
-    verifyUI.innerHTML = `
-        <div class="p-4 border-t border-cyan-500/50 rounded-t-[25px] bg-black/90 backdrop-blur-xl">
-            <button onclick="window.open('https://youtube.com/${data.handle}?sub_confirmation=1', '_blank'); startVerificationProcess();" 
-                    class="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-black orbitron text-[10px] font-black">
-                INITIALIZE SUBSCRIPTION
-            </button>
-        </div>
-    `;
-    verifyUI.classList.remove('hidden');
-}
-
-function startVerificationProcess() {
-    const verifyUI = document.getElementById('verify-ui');
-    verifyUI.innerHTML = `<div class="p-4 text-center animate-pulse orbitron text-[8px] text-cyan-400">CONNECTING...</div>`;
-    setTimeout(() => {
-        verifyUI.innerHTML = `
-            <div class="p-4 border border-white/10 rounded-2xl bg-white/5 space-y-3">
-                <input type="text" id="yt-username" class="w-full bg-black/40 border border-cyan-500/30 rounded-lg p-3 text-center text-white text-xs outline-none" placeholder="Enter your youtube email">
-                <button id="gen-btn" onclick="revealFinalCode()" class="w-full py-3 glass-premium rounded-lg orbitron text-[9px] text-cyan-400 border border-cyan-500/30">GENERATE HASH</button>
-            </div>
-        `;
-    }, 4000);
-}
-
-function revealFinalCode() {
-    const username = document.getElementById('yt-username').value;
-    if(username.length < 2) { return; }
-    currentCode = "SYN-" + Math.floor(1000 + Math.random() * 9999);
-    const verifyUI = document.getElementById('verify-ui');
-    verifyUI.innerHTML = `
-        <div class="p-4 border border-green-500/30 rounded-2xl bg-black/90 space-y-3">
-            <div class="text-center">
-                <p class="text-[8px] text-green-400 orbitron">AUTH CODE</p>
-                <h2 class="text-2xl text-white font-bold tracking-widest">${currentCode}</h2>
-            </div>
-            <input type="text" id="hash-input" class="w-full bg-white/5 border border-green-500/20 rounded-lg p-2 text-center text-white text-sm" placeholder="PASTE CODE">
-            <button id="secure-btn" onclick="confirmNodeActivation('${username}')" class="w-full py-3 btn-neon rounded-lg orbitron text-[9px] font-black">SECURE NODE</button>
-        </div>
-    `;
-}
-
-async function confirmNodeActivation(ytName) {
-    const val = document.getElementById('hash-input').value.toUpperCase();
-    if (val === currentCode) {
-        // ... (loading state code) ...
-        try {
-            await db.collection("subscription_logs").add({
-                youtube_handle: ytName || "USER",
-                node_id: activeNode,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                user: currentUser
-            });
-
-            // MUHIMMI: Dashboard zai bude ne kawai idan Node na 5 aka kammala
-            if (activeNode == 5) { 
-                await db.collection("users").doc(currentUser).update({ isVerified: true });
-                localStorage.setItem('synergy_verified_status', 'true'); 
-                alert("CONGRATULATIONS! ALL NODES ACTIVATED. SYSTEM UNLOCKED.");
-                window.location.replace("dashboard.html");
+            const next = current + 1;
+            const nextBtn = document.getElementById('btn-' + next);
+            const nextCircle = document.getElementById('circle-' + next);
+            
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextCircle.classList.add('breathing');
             } else {
-                alert(`Node ${activeNode} Secured! Progress saved.`);
-                location.reload();
+                alert("Success! Accessing Dashboard...");
             }
-        } catch (e) {
-            // ... (error handling code) ...
         }
-    } else {
-        alert("INVALID CODE");
-    }
-}
-
-    // Tabbatar an kira wannan a karshen Scripts dinka domin shafin ya bude
-syncProgress();
-    
-    
-</script>       
+    </script>
 </body>
-    </html>
-    
+</html>
