@@ -1108,7 +1108,7 @@ function fetchAndRenderNodes() {
 
     nodesRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        nodesList = data; // Adana bayanan a global variable
+        nodesList = data || {}; // Adana bayanan a nan don amfanin wasu functions din
         container.innerHTML = ""; 
 
         if (!data) {
@@ -1116,45 +1116,56 @@ function fetchAndRenderNodes() {
             return;
         }
 
-Object.keys(data).forEach((key) => {
-    const task = data[key];
-    
-    const nodeHtml = `
-        <div id="node-${key}" class="glass-premium ...">
-            <div class="flex items-center gap-4 w-full">
-                ...
-                <div id="info-area-${key}" class="flex-1">
-                    <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+        Object.keys(data).forEach((key) => {
+            const task = data[key];
+            
+            const nodeHtml = `
+                <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4">
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        </div>
+                        <div id="info-area-${key}" class="flex-1">
+                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                         </div>
+                        <button id="btn-${key}" onclick="processNodeViaSearch('${key}')" 
+                            class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
                     </div>
-                <button id="btn-${key}" onclick="processNodeViaSearch('${key}')" 
-                    class="...">START</button>
-            </div>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', nodeHtml);
-});
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', nodeHtml);
+        });
+    });
+}
+    
         
 
 
 
     // 1. Function na bude YouTube Search da canza UI
-function processNodeViaSearch(id) {
-    const task = nodesList[id];
-    if (!task) return;
 
-    startTime[id] = Math.floor(Date.now() / 1000);
+ function processNodeViaSearch(id) {
+    // 1. Tabbatar bayanan suna nan
+    if (!nodesList || !nodesList[id]) {
+        console.error("Node data not found for ID:", id);
+        return;
+    }
+
+    const task = nodesList[id];
     
-    // FETCHING DATA FROM DASHBOARD: 
-    // Muna hada Sunan Video + Sunan Tashar da aka riga aka saita a Admin
-    const videoTitle = task.title;
-    const channelName = task.channel; // Wannan yana fetching ne daga "channel" field a Firebase dinka
+    // 2. Saita lokacin farawa
+    if (typeof startTime !== 'undefined') {
+        startTime[id] = Math.floor(Date.now() / 1000);
+    }
+    
+    // 3. Dynamic Search: Dauko Sunan Video da Sunan Tasha daga Firebase
+    const videoTitle = task.title || "";
+    const channelName = task.channel || ""; // Wannan zai dauko "AI Wealth Academy" da sauransu
     
     const searchQuery = `${videoTitle} ${channelName}`;
-    
-    // Bude YouTube Search tare da takamaiman bayanan bidiyon da tashar sa
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 
-    // UI Transformation
+    // 4. Canza UI don saka Code
     const infoArea = document.getElementById(`info-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
 
@@ -1171,11 +1182,12 @@ function processNodeViaSearch(id) {
 
     if (btn) {
         btn.innerText = "VERIFY";
-        btn.classList.replace('bg-white', 'bg-cyan-500');
+        btn.classList.remove('bg-white');
+        btn.classList.add('bg-cyan-500');
         btn.onclick = () => verifyNodeCode(id);
     }
-}
-        
+ }
+    
 
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
