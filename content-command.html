@@ -83,88 +83,90 @@
         </div>
     </div>
 
-    <script>
-        // 1. FIREBASE CONFIGURATION (SAKA TAKAMAIMAN CONFIG DINKA A NAN)
-const firebaseConfig = {
-  apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
-  authDomain: "synergy-protocol.firebaseapp.com",
-  databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com", // Na saka maka asalin URL dinka
-  projectId: "synergy-protocol",
-  storageBucket: "synergy-protocol.firebasestorage.app",
-  messagingSenderId: "179647543031",
-  appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
-};
+<script>
+    // 1. FIREBASE CONFIGURATION (Cikakken bayaninka na asali)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+      authDomain: "synergy-protocol.firebaseapp.com",
+      databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com", 
+      projectId: "synergy-protocol",
+      storageBucket: "synergy-protocol.firebasestorage.app",
+      messagingSenderId: "179647543031",
+      appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+    };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-        
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // 2. DEPLOY CONTENT (Tura bidiyo zuwa Firebase)
+    function deployContent() {
+        const channel = document.getElementById('channel-node').value;
+        const title = document.getElementById('task-title').value;
+        const duration = document.getElementById('task-duration').value;
+        const amount = document.getElementById('task-amount').value;
+        const code = document.getElementById('task-code').value;
 
-        // 2. DEPLOY CONTENT TO FIREBASE
-        function deployContent() {
-            const channel = document.getElementById('channel-node').value;
-            const title = document.getElementById('task-title').value;
-            const duration = document.getElementById('task-duration').value;
-            const amount = document.getElementById('task-amount').value;
-            const code = document.getElementById('task-code').value;
-
-            if(!title || !duration || !code) {
-                alert("Don Allah cika dukkan bayanan!");
-                return;
-            }
-
-            const newTaskRef = database.ref('nodes/').push();
-            newTaskRef.set({
-                channel: channel,
-                title: title,
-                duration: parseInt(duration),
-                amount: parseFloat(amount),
-                code: code.toUpperCase(),
-                timestamp: Date.now()
-            }).then(() => {
-                alert("Successfully Deployed to Firebase!");
-                document.getElementById('task-title').value = '';
-                document.getElementById('task-code').value = '';
-            }).catch((error) => {
-                alert("Kuskure ya faru: " + error.message);
-            });
+        if(!title || !duration || !code) {
+            alert("Don Allah cika dukkan bayanan!");
+            return;
         }
 
-        // 3. REAL-TIME LISTENER (DAUKO BAYANAI DAGA FIREBASE)
-        database.ref('nodes/').on('value', (snapshot) => {
-            const container = document.getElementById('live-nodes-container');
-            container.innerHTML = '';
-            const data = snapshot.val();
-            
-            if (data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const task = data[key];
-                    const nodeHtml = `
-                        <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500 mb-3">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-1">
-                                    <span class="badge-node">${task.channel.replace(/-/g, ' ').toUpperCase()}</span>
-                                    <span class="text-[10px] text-gray-400 font-bold">WAIT: ${task.duration}s</span>
-                                </div>
-                                <p class="text-xs font-bold text-white uppercase">${task.title}</p>
-                                <p class="text-[10px] text-cyan-400/60">₦${task.amount} | Code: ${task.code}</p>
-                            </div>
-                            <button onclick="deleteNode('${key}')" class="text-red-500 hover:text-red-400 text-xs font-bold">DELETE</button>
-                        </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', nodeHtml);
-                });
-            } else {
-                container.innerHTML = '<p class="text-gray-500 text-xs">No active nodes in database.</p>';
-            }
+        const newTaskRef = database.ref('nodes/').push();
+        newTaskRef.set({
+            channel: channel,
+            title: title,
+            duration: parseInt(duration),
+            amount: parseFloat(amount),
+            code: code.toUpperCase(),
+            timestamp: Date.now()
+        }).then(() => {
+            alert("Successfully Deployed to Firebase!");
+            // Share filayen rubutu bayan an gama
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-code').value = '';
+        }).catch((error) => {
+            alert("Kuskure ya faru: " + error.message);
         });
+    }
 
-        // DELETE FUNCTION
-        function deleteNode(key) {
-            if(confirm("Kana da tabbas kana son goge wannan node din?")) {
-                database.ref('nodes/' + key).remove();
-            }
+    // 3. REAL-TIME LISTENER (Dauko bidiyoyin da ke Firebase a nuna maka su)
+    database.ref('nodes/').on('value', (snapshot) => {
+        const container = document.getElementById('live-nodes-container');
+        container.innerHTML = '';
+        const data = snapshot.val();
+        
+        if (data) {
+            Object.keys(data).reverse().forEach(key => {
+                const task = data[key];
+                const nodeHtml = `
+                    <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500 mb-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="badge-node">${task.channel.replace(/-/g, ' ').toUpperCase()}</span>
+                                <span class="text-[10px] text-gray-400 font-bold">WAIT: ${task.duration}s</span>
+                            </div>
+                            <p class="text-xs font-bold text-white uppercase">${task.title}</p>
+                            <p class="text-[10px] text-cyan-400/60">₦${task.amount} | Code: ${task.code}</p>
+                        </div>
+                        <button onclick="deleteNode('${key}')" class="text-red-500 hover:text-red-400 text-xs font-bold">DELETE</button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', nodeHtml);
+            });
+        } else {
+            container.innerHTML = '<p class="text-gray-500 text-xs">No active nodes in database.</p>';
         }
+    });
+
+    // 4. DELETE FUNCTION (Don goge bidiyo)
+    function deleteNode(key) {
+        if(confirm("Kana da tabbas kana son goge wannan node din?")) {
+            database.ref('nodes/' + key).remove();
+        }
+    }
+    
+    
     </script>
 </body>
 </html>
