@@ -185,11 +185,18 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         }
 
         
-
 async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
+
+    // 1. ZAMU DAUKO USERNAME DAGA LOCALSTORAGE
+    const currentUsername = localStorage.getItem('username'); 
+
+    if (!currentUsername) {
+        alert("Ba a gano sunan user ba, don Allah sake login!");
+        return;
+    }
 
     if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
@@ -197,12 +204,10 @@ async function handleUpload(id, successText) {
         btn.disabled = true;
 
         try {
-            // 1. Shirya bayanan Cloudinary
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-            // 2. Tura hoton zuwa Cloudinary
             const response = await fetch(CLOUDINARY_URL, {
                 method: 'POST',
                 body: formData
@@ -211,15 +216,16 @@ async function handleUpload(id, successText) {
 
             if (!data.secure_url) throw new Error("Cloudinary error");
 
-            // 3. Ajiye link din hoton a Firestore
+            // 2. ANAN NE MUHIMMIN GYARAN: MUN KARA username A CIKIN FIREBASE
             await db.collection("task_submissions").add({
+                username: currentUsername, // Wannan zai nuna sunan user din a Admin Panel
                 platform: platformName,
                 imageUrl: data.secure_url,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending"
             });
 
-            // 4. Update UI na Task din da aka gama
+            // 3. UI Updates (Sauran code dinka yana nan kamar yadda yake)
             const circle = document.getElementById('circle-' + id);
             btn.innerText = successText;
             btn.classList.remove('btn-upload');
@@ -227,36 +233,29 @@ async function handleUpload(id, successText) {
             btn.removeAttribute('onclick');
             circle.classList.remove('breathing');
 
-            // 5. Logic na gaba: Shin akwai sauran task ko an gama?
+            // ... duba idan akwai sauran task ...
             const nextId = id + 1;
             const nextBtn = document.getElementById('btn-' + nextId);
-            const nextCircle = document.getElementById('circle-' + nextId);
-
             if (nextBtn) {
-                // Idan akwai sauran task, kunna na gaba
                 nextBtn.disabled = false;
-                nextCircle.classList.add('breathing');
+                document.getElementById('circle-' + nextId).classList.add('breathing');
             } else {
-                // IDAN AN GAMA TASK NA KARSHE (WhatsApp)
-                // Mun cire alert din nan na dā, mun nuna review section maimakon sa
                 setTimeout(() => {
-                    const reviewSection = document.getElementById('review-section');
-                    if (reviewSection) {
-                        reviewSection.style.display = 'flex'; // Zai bayyana a kasa
-                        reviewSection.scrollIntoView({ behavior: 'smooth' }); // Shafin zai gungura kasa
-                    }
+                    const rs = document.getElementById('review-section');
+                    if (rs) { rs.style.display = 'flex'; rs.scrollIntoView({ behavior: 'smooth' }); }
                 }, 1000);
             }
 
         } catch (error) {
             console.error("Upload Error:", error);
-            alert("An samu matsala wurin tura hoto!");
+            alert("An samu matsala!");
             btn.innerText = "Upload";
             btn.disabled = false;
         }
     }
-                }
-            
+    }
+        
+
         
     </script>
 </body>
