@@ -354,27 +354,32 @@
         
 
 async function approveAndCleanup(username) {
-    if (!confirm(`Confirm approval for ${username}? This will wipe their evidence.`)) return;
+    if (!confirm(`Confirm approval for ${username}?`)) return;
     
     try {
-        // 1. Update User Status
+        // 1. Update User Status a babban folder na Users
         await db.collection("users").doc(username).update({ 
             isVerified: true,
             status: "active" 
         });
 
-        // 2. Clear task_submissions for this user
+        // 2. Maimakon mu goge (Delete), sai mu yi UPDATE zuwa "approved"
         const snap = await db.collection("task_submissions").where("username", "==", username).get();
         const batch = db.batch();
-        snap.forEach(doc => batch.delete(doc.ref));
+        
+        snap.forEach(doc => {
+            // GYARA: Muna canza status ne maimakon batch.delete(doc.ref)
+            batch.update(doc.ref, { status: "approved" }); 
+        });
+        
         await batch.commit();
 
-        alert("Success: Node Approved and Database Cleaned.");
+        alert("Success: User Approved! Dashboard will open for them now.");
         fetchUsers();
     } catch (e) {
         alert("Error: " + e.message);
     }
-}
+    }
         
       
         
