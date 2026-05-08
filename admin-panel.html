@@ -263,6 +263,23 @@
                                 <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
                                 <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
                                 <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
+                        
+<div class="flex flex-row gap-3 w-full max-w-2xl mt-3">
+    <button onclick="event.stopPropagation(); viewScreenshots('${u.id}')" 
+            class="btn-action border-cyan-400/30 text-cyan-400 bg-cyan-400/5 hover:bg-cyan-400 hover:text-black">
+        View Screenshots
+    </button>
+    <button onclick="event.stopPropagation(); approveNode('${u.id}')" 
+            class="btn-action border-green-500/30 text-green-400 bg-green-500/5 hover:bg-green-500 hover:text-black">
+        Approve Node
+    </button>
+</div>
+
+<div id="gallery-${u.id.replace(/\s+/g, '-')}" class="hidden mt-4 p-4 border border-white/5 rounded-xl bg-black/40 flex gap-3 overflow-x-auto">
+    <p class="text-[10px] text-gray-500 italic">Fetching evidence from node...</p>
+</div>
+
+                            
                             </div>
                         </div>
                     </div>
@@ -287,6 +304,40 @@
     fetchUsers();
             
 
+        async function viewScreenshots(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const gallery = document.getElementById(`gallery-${safeId}`);
+    
+    // Nuna wajen hotunan
+    gallery.classList.toggle('hidden');
+    
+    if (!gallery.classList.contains('hidden')) {
+        const snap = await db.collection("task_submissions").where("username", "==", username).get();
+        if (snap.empty) {
+            gallery.innerHTML = '<p class="text-[10px] text-gray-600">No screenshots found for this node.</p>';
+            return;
+        }
+        gallery.innerHTML = ""; // Share "Fetching..." text
+        snap.forEach(doc => {
+            gallery.innerHTML += `<img src="${doc.data().imageUrl}" class="h-32 w-24 object-cover rounded-lg border border-white/10 hover:border-cyan-400 transition-all" onclick="window.open('${doc.data().imageUrl}')">`;
+        });
+    }
+}
+
+async function approveNode(username) {
+    if (!confirm(`Are you sure you want to approve and verify ${username}?`)) return;
+    try {
+        await db.collection("users").doc(username).update({ 
+            isVerified: true,
+            status: "active" 
+        });
+        alert("Node Approved & Verified!");
+        fetchUsers(); // Refresh table
+    } catch (e) {
+        alert("Action failed: " + e.message);
+    }
+}
+        
         
     </script>
 </body>
