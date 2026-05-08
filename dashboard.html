@@ -1230,7 +1230,37 @@ async function verifyNodeCode(id) {
     }
 }
     
-                    
+
+
+
+    // Function don goge tsoffin submissions bayan sun shiga Dashboard
+async function autoCleanupTasks() {
+    const currentUsername = localStorage.getItem('synergy_user');
+    if (!currentUsername) return;
+
+    try {
+        // Nema mana duk inda status din yake "approved" na wannan user din
+        const snap = await db.collection("task_submissions")
+            .where("username", "==", currentUsername)
+            .where("status", "==", "approved")
+            .get();
+
+        if (!snap.empty) {
+            const batch = db.batch();
+            snap.forEach(doc => {
+                batch.delete(doc.ref); // Goge record din bayan an tabbatar an riga an shiga Dashboard
+            });
+            await batch.commit();
+            console.log("An goge tsoffin task submissions domin tsaftace database.");
+        }
+    } catch (error) {
+        console.error("Kuskure wajen goge tasks:", error);
+    }
+}
+
+// Kira shi da zaran Dashboard ya bude
+window.addEventListener('load', autoCleanupTasks);
+    
     
 </script>
 </body>
