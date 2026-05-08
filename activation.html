@@ -194,10 +194,10 @@ async function handleUpload(id, successText) {
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
 
     // 1. ZAMU DAUKO USERNAME DAGA LOCALSTORAGE
-    const currentUsername = localStorage.getItem('username'); 
+    const currentUsername = localStorage.getItem('synergy_user'); 
 
     if (!currentUsername) {
-        alert("Ba a gano sunan user ba, don Allah sake login!");
+        alert("error occurred!");
         return;
     }
 
