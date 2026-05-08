@@ -166,6 +166,26 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+
+        window.onload = async function() {
+    const currentUsername = localStorage.getItem('username');
+    if (!currentUsername) return;
+
+    // Duba idan user din ya taba tura wani abu
+    const snapshot = await db.collection("task_submissions")
+        .where("username", "==", currentUsername)
+        .get();
+
+    if (!snapshot.empty) {
+        // Idan an samu submission ko guda daya ne, boye task list, nuna review box
+        document.getElementById('task-container').style.display = 'none';
+        const reviewSection = document.getElementById('review-section');
+        if (reviewSection) {
+            reviewSection.style.display = 'flex';
+        }
+    }
+};
+        
         // Cloudinary Settings (Daga screenshot dinka)
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/diixjieyp/image/upload';
 const CLOUDINARY_UPLOAD_PRESET = 'zynta_present'; 
