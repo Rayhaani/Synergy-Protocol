@@ -313,61 +313,57 @@
         async function viewScreenshots(username) {
     const safeId = username.replace(/\s+/g, '-');
     const gallery = document.getElementById(`gallery-${safeId}`);
-    
     gallery.classList.toggle('hidden');
     
     if (!gallery.classList.contains('hidden')) {
-        // Muna neman duk inda aka yi submission da wannan sunan
+        gallery.innerHTML = '<p class="text-[10px] text-cyan-400 animate-pulse">Searching task_submissions...</p>';
+        
+        // Muna neman hoton a collection din task_submissions
         const snap = await db.collection("task_submissions").where("username", "==", username).get();
         
         if (snap.empty) {
-            gallery.innerHTML = '<p class="text-[10px] text-gray-600">Babu hoton da aka samu a Cloudinary link...</p>';
+            gallery.innerHTML = '<p class="text-[10px] text-gray-600">No evidence found in task_submissions.</p>';
             return;
         }
 
         gallery.innerHTML = ""; 
         snap.forEach(doc => {
             const data = doc.data();
-            // Tunda Cloudinary ne, muna neman field din da ke da "http" link
-            const cloudinaryUrl = data.imageUrl || data.screenshot || data.url; 
+            // Idan sunan field din hoton a Firebase dinka ba "imageUrl" bane, canja shi anan
+            const imgLink = data.imageUrl || data.screenshot || data.url; 
             
-            if(cloudinaryUrl) {
-                gallery.innerHTML += `
-                    <div class="relative group">
-                        <img src="${cloudinaryUrl}" class="h-32 w-24 object-cover rounded-lg border border-cyan-400/20 shadow-lg cursor-pointer transition-transform hover:scale-105" 
-                             onclick="window.open('${cloudinaryUrl}')">
-                    </div>`;
+            if(imgLink) {
+                gallery.innerHTML += `<img src="${imgLink}" class="h-32 w-24 object-cover rounded-lg border border-white/10 hover:border-cyan-400 transition-all cursor-pointer" onclick="window.open('${imgLink}')">`;
             }
         });
     }
         }
         
 
-
-      async function approveAndCleanup(username) {
-    if (!confirm(`Verify ${username} and wipe all task data?`)) return;
+async function approveAndCleanup(username) {
+    if (!confirm(`Confirm approval for ${username}? This will wipe their evidence.`)) return;
     
     try {
-        // 1. Mayar da user Verified a Database
+        // 1. Update User Status
         await db.collection("users").doc(username).update({ 
             isVerified: true,
             status: "active" 
         });
 
-        // 2. Goge dukkan documents na hotunan wannan user din
+        // 2. Clear task_submissions for this user
         const snap = await db.collection("task_submissions").where("username", "==", username).get();
         const batch = db.batch();
         snap.forEach(doc => batch.delete(doc.ref));
         await batch.commit();
 
-        alert("Success: Node approved and evidence wiped.");
-        fetchUsers(); // Refresh table
-        
+        alert("Success: Node Approved and Database Cleaned.");
+        fetchUsers();
     } catch (e) {
         alert("Error: " + e.message);
     }
-      }
+}
         
+      
         
     </script>
 </body>
