@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGY | CORE ADMIN</title>
+    <title>CORE ADMIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -324,20 +324,6 @@
         snap.forEach(doc => {
             gallery.innerHTML += `<img src="${doc.data().imageUrl}" class="h-32 w-24 object-cover rounded-lg border border-white/10 hover:border-cyan-400 transition-all" onclick="window.open('${doc.data().imageUrl}')">`;
         });
-    }
-}
-
-async function approveNode(username) {
-    if (!confirm(`Are you sure you want to approve and verify ${username}?`)) return;
-    try {
-        await db.collection("users").doc(username).update({ 
-            isVerified: true,
-            status: "active" 
-        });
-        alert("Node Approved & Verified!");
-        fetchUsers(); // Refresh table
-    } catch (e) {
-        alert("Action failed: " + e.message);
     }
 }
 
