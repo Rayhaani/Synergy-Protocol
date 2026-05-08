@@ -249,17 +249,20 @@ async function login() {
             return;
         }
 
+        
         // 4. SABON GYARA: Nemo ainihin Username (Document ID)
-        let finalUsername = "";
-        const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
+let finalUsername = "";
+const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
 
-        if (!usersSnapshot.empty) {
-            finalUsername = usersSnapshot.docs[0].id; 
-            localStorage.setItem('synergy_user', finalUsername);
-        } else {
-            localStorage.setItem('synergy_user', loginInput.toLowerCase());
-        }
-
+if (!usersSnapshot.empty) {
+    finalUsername = usersSnapshot.docs[0].id; 
+    // MUHIMMI: Mun canza synergy_user zuwa username domin sauran shafukan su gane shi
+    localStorage.setItem('username', finalUsername); 
+} else {
+    // Idan aka yi amfani da username kai tsaye wajen login
+    localStorage.setItem('username', loginInput.toLowerCase());
+}
+        
         // 5. Tura shi Dashboard
         showTopNotif("Access Granted! Connecting...", "success");
         setTimeout(() => { 
