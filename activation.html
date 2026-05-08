@@ -27,6 +27,46 @@
         .social-row { padding: 15px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: space-between; }
         .platform-name { font-size: 13px; font-weight: 700; color: #e2e8f0; }
         input[type="file"] { display: none; }
+   
+    .review-box {
+    background: rgba(0, 242, 254, 0.05);
+    border: 1px dashed rgba(0, 242, 254, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    display: none; /* Da farko a boye yake */
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loader-orbit {
+    width: 50px;
+    height: 50px;
+    border: 3px solid transparent;
+    border-top: 3px solid var(--aqua);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: relative;
+}
+
+.loader-orbit::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 2px solid rgba(112, 0, 255, 0.4);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+                        
     </style>
 </head>
 <body class="flex flex-col items-center">
@@ -98,6 +138,16 @@
         </div>
     </div>
 
+
+<div id="review-section" class="review-box w-full">
+    <div class="loader-orbit mb-4"></div>
+    <h3 class="text-cyan-400 text-[14px] font-bold mb-1">Verification in Progress</h3>
+    <p class="text-gray-400 text-[11px] leading-tight">
+        Your tasks are pending review, you'll automatically be redirected to your dashboard once approved.
+    </p>
+</div>
+    
+    
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
@@ -186,6 +236,23 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
                 }
             }
         }
+
+
+
+if (nextBtn) {
+    nextBtn.disabled = false;
+    document.getElementById('circle-' + nextId).classList.add('breathing');
+} else {
+    // IDAN AN GAMA TASK NA KARSHE (WhatsApp)
+    setTimeout(() => {
+        const reviewSection = document.getElementById('review-section');
+        reviewSection.style.display = 'flex'; // Zai bayyana a kasa
+        
+        // Gungura kasan screen din kadan don mutum ya gani
+        reviewSection.scrollIntoView({ behavior: 'smooth' });
+    }, 1000);
+}
+        
     </script>
 </body>
 </html>
