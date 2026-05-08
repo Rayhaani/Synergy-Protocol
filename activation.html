@@ -256,6 +256,30 @@ async function handleUpload(id, successText) {
     }
         
 
+
+        // Wannan zai tabbatar record bai goge ba idan an yi refresh
+async function checkExistingSubmissions() {
+    const currentUsername = localStorage.getItem('username');
+    if (!currentUsername) return;
+
+    try {
+        const snapshot = await db.collection("task_submissions")
+            .where("username", "==", currentUsername)
+            .get();
+
+        if (!snapshot.empty) {
+            // Idan an samu record, boye task list, nuna "Under Review"
+            document.getElementById('task-container').style.display = 'none';
+            document.getElementById('review-section').style.display = 'flex';
+        }
+    } catch (error) {
+        console.error("Kuskure wajen duba database:", error);
+    }
+}
+
+// Kira wannan function din da zaran shafi ya bude
+window.addEventListener('load', checkExistingSubmissions);
+        
         
     </script>
 </body>
