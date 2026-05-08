@@ -255,9 +255,13 @@ async function login() {
 
         // A cikin login function, karkashin inda ake adana sunan:
 if (!usersSnapshot.empty) {
-    finalUsername = usersSnapshot.docs[0].id; 
-    localStorage.setItem('username', finalUsername); // Yi amfani da 'username' anan
-} else {
+            finalUsername = usersSnapshot.docs[0].id; 
+            localStorage.setItem('synergy_user', finalUsername);
+        } else {
+            localStorage.setItem('synergy_user', loginInput.toLowerCase());
+}
+
+else {
     localStorage.setItem('username', loginInput.toLowerCase()); // Yi amfani da 'username' anan
 }
         
