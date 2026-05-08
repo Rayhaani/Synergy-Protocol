@@ -249,21 +249,17 @@ async function login() {
             return;
         }
 
-        
-                // 4. SABON GYARA: Nemo ainihin Username (Document ID)
+        // 4. SABON GYARA: Nemo ainihin Username (Document ID)
         let finalUsername = "";
         const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
 
         if (!usersSnapshot.empty) {
-            // MUHIMMI: Mun canza synergy_user zuwa username
             finalUsername = usersSnapshot.docs[0].id; 
-            localStorage.setItem('username', finalUsername); 
+            localStorage.setItem('synergy_user', finalUsername);
         } else {
-            // Idan loginInput din ne username din
-            localStorage.setItem('username', loginInput.toLowerCase());
-            }
-        
-        
+            localStorage.setItem('synergy_user', loginInput.toLowerCase());
+        }
+
         // 5. Tura shi Dashboard
         showTopNotif("Access Granted! Connecting...", "success");
         setTimeout(() => { 
@@ -301,4 +297,4 @@ function forgotPassword() {
     
     </script>
 </body>
-</html>
+    </html>
