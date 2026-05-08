@@ -310,34 +310,47 @@
     fetchUsers();
             
 
-        async function viewScreenshots(username) {
+       async function viewScreenshots(username) {
     const safeId = username.replace(/\s+/g, '-');
     const gallery = document.getElementById(`gallery-${safeId}`);
     gallery.classList.toggle('hidden');
     
     if (!gallery.classList.contains('hidden')) {
-        gallery.innerHTML = '<p class="text-[10px] text-cyan-400 animate-pulse">Searching task_submissions...</p>';
+        gallery.innerHTML = '<p class="text-[10px] text-cyan-400 animate-pulse">Searching Cloudinary links...</p>';
         
-        // Muna neman hoton a collection din task_submissions
-        const snap = await db.collection("task_submissions").where("username", "==", username).get();
-        
-        if (snap.empty) {
-            gallery.innerHTML = '<p class="text-[10px] text-gray-600">No evidence found in task_submissions.</p>';
-            return;
-        }
-
-        gallery.innerHTML = ""; 
-        snap.forEach(doc => {
-            const data = doc.data();
-            // Idan sunan field din hoton a Firebase dinka ba "imageUrl" bane, canja shi anan
-            const imgLink = data.imageUrl || data.screenshot || data.url; 
+        try {
+            // MUHIMMI: Tabbatar akwai field mai suna "username" a cikin kowane document na task_submissions
+            // Idan babu shi, wannan query din ba zai taba kawo komai ba
+            const snap = await db.collection("task_submissions")
+                                 .where("username", "==", username) 
+                                 .get();
             
-            if(imgLink) {
-                gallery.innerHTML += `<img src="${imgLink}" class="h-32 w-24 object-cover rounded-lg border border-white/10 hover:border-cyan-400 transition-all cursor-pointer" onclick="window.open('${imgLink}')">`;
+            if (snap.empty) {
+                gallery.innerHTML = '<p class="text-[10px] text-gray-600 text-center py-2">No evidence found. <br><span class="text-[8px]">Check if "username" field exists in Firebase.</span></p>';
+                return;
             }
-        });
-    }
+
+            gallery.innerHTML = ""; 
+            snap.forEach(doc => {
+                const data = doc.data();
+                // Na gani a hotonka cewa sunan field din "imageUrl" ne
+                const imgLink = data.imageUrl; 
+                
+                if(imgLink) {
+                    gallery.innerHTML += `
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-[8px] text-gray-500">${data.platform || 'Task'}</span>
+                            <img src="${imgLink}" class="h-32 w-24 object-cover rounded-lg border border-cyan-400/20 hover:border-cyan-400 cursor-pointer transition-all" 
+                                 onclick="window.open('${imgLink}')">
+                        </div>`;
+                }
+            });
+        } catch (e) {
+            gallery.innerHTML = `<p class="text-[10px] text-red-500">Error: ${e.message}</p>`;
         }
+    }
+       }
+        
         
 
 async function approveAndCleanup(username) {
