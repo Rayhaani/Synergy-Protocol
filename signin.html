@@ -253,18 +253,12 @@ async function login() {
         let finalUsername = "";
         const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
 
-        // A cikin login function, karkashin inda ake adana sunan:
-if (!usersSnapshot.empty) {
+        if (!usersSnapshot.empty) {
             finalUsername = usersSnapshot.docs[0].id; 
             localStorage.setItem('synergy_user', finalUsername);
         } else {
             localStorage.setItem('synergy_user', loginInput.toLowerCase());
-}
-
-else {
-    localStorage.setItem('username', loginInput.toLowerCase()); // Yi amfani da 'username' anan
-}
-        
+        }
 
         // 5. Tura shi Dashboard
         showTopNotif("Access Granted! Connecting...", "success");
@@ -303,4 +297,4 @@ function forgotPassword() {
     
     </script>
 </body>
-    </html>
+</html>
