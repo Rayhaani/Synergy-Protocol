@@ -219,11 +219,48 @@
     }
 
     function toggleRow(id) {
-        const el = document.getElementById(`details-${id.replace(/\s+/g, '-')}`);
-        const isActive = el.classList.contains('active');
-        document.querySelectorAll('.details-row').forEach(row => row.classList.remove('active'));
-        if (!isActive) el.classList.add('active');
+    const safeId = id.replace(/\s+/g, '-');
+    const el = document.getElementById(`details-${safeId}`);
+    const isActive = el.classList.contains('active');
+    
+    // Rufe kowane row da yake bude
+    document.querySelectorAll('.details-row').forEach(row => row.classList.remove('active'));
+    
+    if (!isActive) {
+        el.classList.add('active');
+        // Loda hotunan wannan user din
+        loadUserTasks(id, safeId);
     }
+}
+
+// Function din dake kwaso hotunan
+async function loadUserTasks(username, safeId) {
+    const container = document.getElementById(`tasks-${safeId}`);
+    try {
+        const snapshot = await db.collection("task_submissions")
+            .where("username", "==", username)
+            .get();
+
+        if (snapshot.empty) {
+            container.innerHTML = `<p class="text-gray-600 text-[10px]">No tasks submitted for this node yet.</p>`;
+            return;
+        }
+
+        container.innerHTML = ""; // Share loading text
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            container.innerHTML += `
+                <div class="relative min-w-[100px] group">
+                    <img src="${data.imageUrl}" class="w-24 h-32 object-cover rounded-lg border border-white/5 group-hover:border-cyan-400 transition-all cursor-zoom-in" 
+                         onclick="window.open('${data.imageUrl}')">
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-center py-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">${data.platform}</div>
+                </div>`;
+        });
+    } catch (e) {
+        container.innerHTML = `<p class="text-red-500 text-[9px]">Data link failed.</p>`;
+    }
+        }
+        
 
     function render(data) {
         const body = document.getElementById('user-table-body');
@@ -252,19 +289,40 @@
                             <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Phone</span><br><span class="text-white">${u.phone}</span></div>
                             <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Email</span><br><span class="text-white">${u.email}</span></div>
                             <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Location</span><br><span class="text-white">${u.state}</span></div>
+                       <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Location</span><br><span class="text-white">${u.state}</span></div>
+
+<div class="col-span-full mt-6 p-4 border border-cyan-400/10 rounded-xl bg-black/40">
+    <div class="flex justify-between items-center mb-4">
+        <h4 class="text-[10px] font-bold text-cyan-400 uppercase tracking-[2px]">Task Evidence (Screenshots)</h4>
+        <span class="text-[9px] text-gray-500">Node ID: ${u.id}</span>
+    </div>
+    <div id="tasks-${u.id.replace(/\s+/g, '-')}" class="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+        <p class="text-gray-600 text-[10px] italic animate-pulse">Waiting for node synchronization...</p>
+    </div>
+</div>
+
                         </div>
-                        <div class="space-y-6 pt-6 border-t border-white/5">
-                            <div class="flex items-center gap-3">
-                                <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
-                                       class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
-                                <button onclick="event.stopPropagation();" class="btn-update">Update Balance</button>
-                            </div>
-                            <div class="flex flex-row gap-3 w-full max-w-2xl">
-                                <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
-                                <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
-                                <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
-                            </div>
-                        </div>
+                        // ... sauran code na sama ...
+<div class="space-y-6 pt-6 border-t border-white/5">
+    <div class="flex items-center gap-3">
+        <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
+               class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
+        
+        <button onclick="event.stopPropagation(); updateBalance('${u.id}')" class="btn-update">Update Balance</button>
+        
+        <button onclick="event.stopPropagation(); approveAndCleanup('${u.id}')" 
+                class="px-4 py-2 bg-cyan-500/10 border border-cyan-400/30 text-cyan-400 text-[10px] font-bold rounded-lg hover:bg-cyan-400 hover:text-black transition-all">
+            VERIFY NODE & CLEANUP
+        </button>
+    </div>
+
+    <div class="flex flex-row gap-3 w-full max-w-2xl">
+        <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
+        <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
+        <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
+    </div>
+</div>                    
+                    
                     </div>
                 </td>
             </tr>
@@ -287,6 +345,33 @@
     fetchUsers();
             
 
+
+        async function approveAndCleanup(username) {
+    if(!confirm(`Verify and activate ${username}? Pictures will be cleared to save space.`)) return;
+
+    try {
+        // 1. Activate User a Firestore
+        await db.collection("users").doc(username).update({
+            isVerified: true,
+            status: "active"
+        });
+
+        // 2. Nemo dukkan submissions din mutumin
+        const snapshot = await db.collection("task_submissions")
+            .where("username", "==", username).get();
+        
+        // 3. Goge submissions din a Firestore don adana space
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        alert("Node Activated successfully!");
+        fetchUsers(); // Refresh table din
+    } catch (e) {
+        alert("Activation failed: " + e.message);
+    }
+        }
+        
         
     </script>
 </body>
