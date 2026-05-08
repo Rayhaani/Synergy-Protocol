@@ -261,38 +261,37 @@ async function handleUpload(id, successText) {
 
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
-function listenForApproval() {
-    const currentUsername = localStorage.getItem('synergy_user');
-    if (!currentUsername) return;
+function monitorApproval() {
+    const userKey = localStorage.getItem('synergy_user');
+    if (!userKey) return;
 
-    // Wannan layin zai rika kallon Firebase a kowane sakan
     db.collection("task_submissions")
-        .where("username", "==", currentUsername)
+        .where("username", "==", userKey)
         .onSnapshot((snapshot) => {
-            if (!snapshot.empty) {
-                let approved = false;
-                
-                snapshot.forEach((doc) => {
-                    // Idan koda daya daga cikin ayyukansa Admin ya sa masa 'approved'
-                    if (doc.data().status === "approved") {
-                        approved = true;
-                    }
-                });
-
-                if (approved) {
-                    // Wannan shi ne logic din da zai tura shi dashboard
-                    window.location.href = "dashboard.html";
-                } else {
-                    // Idan har yanzu 'pending' ne, nuna masa review box
-                    document.getElementById('task-container').style.display = 'none';
-                    document.getElementById('review-section').style.display = 'flex';
+            const totalTasks = 5; // Adadin tasks din da kake da su a shafin
+            const submittedCount = snapshot.size; // Adadin hotunan da ya tura
+            
+            let hasApproved = false;
+            snapshot.forEach(doc => {
+                if (doc.data().status === "approved") {
+                    hasApproved = true;
                 }
+            });
+
+            if (hasApproved) {
+                window.location.href = "dashboard.html";
+            } 
+            // GYARA: Sai idan hotunan sun kai 5 sannan zai nuna Verification Page
+            else if (submittedCount >= totalTasks) {
+                document.getElementById('task-container').style.display = 'none';
+                document.getElementById('review-section').style.display = 'flex';
+            } else {
+                // In bai kai 5 ba, ya bar shi ya ci gaba da tasks dinsa
+                document.getElementById('task-container').style.display = 'block';
+                document.getElementById('review-section').style.display = 'none';
             }
         });
 }
-
-// Kira wannan function din maimakon wancan na baya
-window.addEventListener('load', listenForApproval);
         
         
     </script>
