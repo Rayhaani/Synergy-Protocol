@@ -45,28 +45,34 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-.loader-orbit {
+  .loader-orbit {
     width: 50px;
     height: 50px;
-    border: 3px solid transparent;
+    border: 3px solid rgba(0, 242, 254, 0.1); /* Dan haske a jiki */
     border-top: 3px solid var(--aqua);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     position: relative;
+    /* Wannan shi ne Glow Effect din */
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.3); 
 }
 
+/* Wannan zai kara wani dan circle a ciki mai bugawa (pulse) */
 .loader-orbit::before {
     content: '';
     position: absolute;
-    inset: 5px;
-    border: 2px solid rgba(112, 0, 255, 0.4);
+    inset: 8px;
+    border: 2px solid rgba(112, 0, 255, 0.3);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
 }
 
-@keyframes spin { 100% { transform: rotate(360deg); } }
-@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-                        
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+        
     </style>
 </head>
 <body class="flex flex-col items-center">
@@ -139,15 +145,14 @@
     </div>
 
 
-    <div id="review-section" style="display: none; background: rgba(0, 242, 254, 0.05); border: 1px dashed rgba(0, 242, 254, 0.3); border-radius: 15px; padding: 25px; margin-top: 25px; flex-direction: column; align-items: center; width: 100%;">
-    <div style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top: 3px solid #00f2fe; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-    <h3 style="color: #00f2fe; font-size: 14px; font-weight: 800; margin-top: 15px; margin-bottom: 5px;">Verification in Progress</h3>
-    <p style="color: #94a3b8; font-size: 11px; text-align: center;">Your tasks are pending review, you'll automatically be redirected to your dashboard once approved.</p>
-</div>
-
-<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
+    <div id="review-section" class="review-box w-full">
+    <div class="loader-orbit"></div>
+    <h3 class="text-cyan-400 text-[14px] font-bold mt-4 mb-1">Verification in Progress</h3>
+    <p class="text-gray-400 text-[11px] leading-tight text-center px-4">
+        Your tasks are pending review, you'll automatically be redirected to your dashboard once approved.
+    </p>
+    </div>
     
-
 
     
     <script>
