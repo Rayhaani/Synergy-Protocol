@@ -314,22 +314,34 @@
     const safeId = username.replace(/\s+/g, '-');
     const gallery = document.getElementById(`gallery-${safeId}`);
     
-    // Nuna wajen hotunan
     gallery.classList.toggle('hidden');
     
     if (!gallery.classList.contains('hidden')) {
+        // Muna neman duk inda aka yi submission da wannan sunan
         const snap = await db.collection("task_submissions").where("username", "==", username).get();
+        
         if (snap.empty) {
-            gallery.innerHTML = '<p class="text-[10px] text-gray-600">No screenshots found for this node.</p>';
+            gallery.innerHTML = '<p class="text-[10px] text-gray-600">Babu hoton da aka samu a Cloudinary link...</p>';
             return;
         }
-        gallery.innerHTML = ""; // Share "Fetching..." text
+
+        gallery.innerHTML = ""; 
         snap.forEach(doc => {
-            gallery.innerHTML += `<img src="${doc.data().imageUrl}" class="h-32 w-24 object-cover rounded-lg border border-white/10 hover:border-cyan-400 transition-all" onclick="window.open('${doc.data().imageUrl}')">`;
+            const data = doc.data();
+            // Tunda Cloudinary ne, muna neman field din da ke da "http" link
+            const cloudinaryUrl = data.imageUrl || data.screenshot || data.url; 
+            
+            if(cloudinaryUrl) {
+                gallery.innerHTML += `
+                    <div class="relative group">
+                        <img src="${cloudinaryUrl}" class="h-32 w-24 object-cover rounded-lg border border-cyan-400/20 shadow-lg cursor-pointer transition-transform hover:scale-105" 
+                             onclick="window.open('${cloudinaryUrl}')">
+                    </div>`;
+            }
         });
     }
-}
-
+        }
+        
 
 
       async function approveAndCleanup(username) {
