@@ -253,12 +253,14 @@ async function login() {
         let finalUsername = "";
         const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
 
-        if (!usersSnapshot.empty) {
-            finalUsername = usersSnapshot.docs[0].id; 
-            localStorage.setItem('synergy_user', finalUsername);
-        } else {
-            localStorage.setItem('synergy_user', loginInput.toLowerCase());
-        }
+        // A cikin login function, karkashin inda ake adana sunan:
+if (!usersSnapshot.empty) {
+    finalUsername = usersSnapshot.docs[0].id; 
+    localStorage.setItem('username', finalUsername); // Yi amfani da 'username' anan
+} else {
+    localStorage.setItem('username', loginInput.toLowerCase()); // Yi amfani da 'username' anan
+}
+        
 
         // 5. Tura shi Dashboard
         showTopNotif("Access Granted! Connecting...", "success");
