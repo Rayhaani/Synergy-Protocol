@@ -205,12 +205,13 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         }
 
         
+
 async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
 
-    // 1. ZAMU DAUKO USERNAME DAGA LOCALSTORAGE
+    // 1. Dauko username daga LocalStorage
     const currentUsername = localStorage.getItem('username'); 
 
     if (!currentUsername) {
@@ -236,16 +237,16 @@ async function handleUpload(id, successText) {
 
             if (!data.secure_url) throw new Error("Cloudinary error");
 
-            // 2. ANAN NE MUHIMMIN GYARAN: MUN KARA username A CIKIN FIREBASE
+            // 2. Tura hoto tare da sunan user
             await db.collection("task_submissions").add({
-                username: currentUsername, // Wannan zai nuna sunan user din a Admin Panel
+                username: currentUsername, 
                 platform: platformName,
                 imageUrl: data.secure_url,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending"
             });
 
-            // 3. UI Updates (Sauran code dinka yana nan kamar yadda yake)
+            // 3. Update UI
             const circle = document.getElementById('circle-' + id);
             btn.innerText = successText;
             btn.classList.remove('btn-upload');
@@ -253,16 +254,19 @@ async function handleUpload(id, successText) {
             btn.removeAttribute('onclick');
             circle.classList.remove('breathing');
 
-            // ... duba idan akwai sauran task ...
             const nextId = id + 1;
             const nextBtn = document.getElementById('btn-' + nextId);
             if (nextBtn) {
                 nextBtn.disabled = false;
                 document.getElementById('circle-' + nextId).classList.add('breathing');
             } else {
+                // Bayyana review section idan an gama na karshe
                 setTimeout(() => {
                     const rs = document.getElementById('review-section');
-                    if (rs) { rs.style.display = 'flex'; rs.scrollIntoView({ behavior: 'smooth' }); }
+                    if (rs) { 
+                        rs.style.display = 'flex'; 
+                        rs.scrollIntoView({ behavior: 'smooth' }); 
+                    }
                 }, 1000);
             }
 
@@ -273,9 +277,33 @@ async function handleUpload(id, successText) {
             btn.disabled = false;
         }
     }
-    }
-        
+                                    }
+                                    
 
+
+        // Wannan zai duba database da zaran shafin ya tashi
+window.onload = async function() {
+    const currentUsername = localStorage.getItem('username');
+    if (!currentUsername) return;
+
+    try {
+        // Duba idan user din yana da aiki a task_submissions
+        const snapshot = await db.collection("task_submissions")
+            .where("username", "==", currentUsername)
+            .get();
+
+        if (!snapshot.empty) {
+            // Idan akwai hotuna, boye list din, nuna "Verification in Progress"
+            document.getElementById('task-container').style.display = 'none';
+            const reviewSection = document.getElementById('review-section');
+            if (reviewSection) {
+                reviewSection.style.display = 'flex';
+            }
+        }
+    } catch (e) {
+        console.error("Initialization error:", e);
+    }
+};
         
     </script>
 </body>
