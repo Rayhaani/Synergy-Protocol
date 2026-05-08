@@ -340,6 +340,36 @@ async function approveNode(username) {
         alert("Action failed: " + e.message);
     }
 }
+
+
+
+        async function approveAndCleanup(username) {
+    if (!confirm(`Approve ${username} and delete all task evidence?`)) return;
+    
+    try {
+        // 1. Update user to Verified & Active
+        await db.collection("users").doc(username).update({ 
+            isVerified: true,
+            status: "active" 
+        });
+
+        // 2. Nemo dukkan hotunan wannan user din a task_submissions
+        const snap = await db.collection("task_submissions").where("username", "==", username).get();
+        
+        // 3. Goge su duka (Batch Delete)
+        const batch = db.batch();
+        snap.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        alert("Node Verified! All evidence deleted successfully.");
+        fetchUsers(); // Refresh table
+        
+    } catch (e) {
+        alert("Operation failed: " + e.message);
+    }
+        }
         
         
     </script>
