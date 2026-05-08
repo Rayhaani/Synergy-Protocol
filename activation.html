@@ -139,14 +139,16 @@
     </div>
 
 
-<div id="review-section" class="review-box w-full">
-    <div class="loader-orbit mb-4"></div>
-    <h3 class="text-cyan-400 text-[14px] font-bold mb-1">Verification in Progress</h3>
-    <p class="text-gray-400 text-[11px] leading-tight">
-        Your tasks are pending review, you'll automatically be redirected to your dashboard once approved.
-    </p>
+    <div id="review-section" style="display: none; background: rgba(0, 242, 254, 0.05); border: 1px dashed rgba(0, 242, 254, 0.3); border-radius: 15px; padding: 25px; margin-top: 25px; flex-direction: column; align-items: center; width: 100%;">
+    <div style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top: 3px solid #00f2fe; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <h3 style="color: #00f2fe; font-size: 14px; font-weight: 800; margin-top: 15px; margin-bottom: 5px;">Verification in Progress</h3>
+    <p style="color: #94a3b8; font-size: 11px; text-align: center;">Your tasks are pending review, you'll automatically be redirected to your dashboard once approved.</p>
 </div>
+
+<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
     
+
+
     
     <script>
         const firebaseConfig = {
@@ -177,81 +179,79 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
             document.getElementById('file-' + id).click();
         }
 
-        async function handleUpload(id, successText) {
-            const fileInput = document.getElementById('file-' + id);
-            const btn = document.getElementById('btn-' + id);
-            const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
-
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                btn.innerText = "Wait...";
-                btn.disabled = true;
-
-                try {
-                    // 1. Shirya bayanan Cloudinary
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-                    // 2. Tura hoton zuwa Cloudinary
-                    const response = await fetch(CLOUDINARY_URL, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await response.json();
-
-                    if (!data.secure_url) throw new Error("Cloudinary error");
-
-                    // 3. Ajiye link din hoton a Firestore (Kamar yadda kake bukata)
-                    await db.collection("task_submissions").add({
-                        platform: platformName,
-                        imageUrl: data.secure_url,
-                        submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: "pending"
-                    });
-
-                    // 4. Update UI
-                    const circle = document.getElementById('circle-' + id);
-                    btn.innerText = successText;
-                    btn.classList.remove('btn-upload');
-                    btn.classList.add('btn-completed');
-                    btn.removeAttribute('onclick');
-                    circle.classList.remove('breathing');
-
-                    const nextId = id + 1;
-                    const nextBtn = document.getElementById('btn-' + nextId);
-                    const nextCircle = document.getElementById('circle-' + nextId);
-                    if (nextBtn) {
-                        nextBtn.disabled = false;
-                        nextCircle.classList.add('breathing');
-                    } else {
-                        alert("Great Job! All tasks submitted to Synergy Protocol.");
-                    }
-
-                } catch (error) {
-                    console.error("Upload Error:", error);
-                    alert("An samu matsala wurin tura hoto!");
-                    btn.innerText = "Upload";
-                    btn.disabled = false;
-                }
-            }
-        }
-
-
-
-if (nextBtn) {
-    nextBtn.disabled = false;
-    document.getElementById('circle-' + nextId).classList.add('breathing');
-} else {
-    // IDAN AN GAMA TASK NA KARSHE (WhatsApp)
-    setTimeout(() => {
-        const reviewSection = document.getElementById('review-section');
-        reviewSection.style.display = 'flex'; // Zai bayyana a kasa
         
-        // Gungura kasan screen din kadan don mutum ya gani
-        reviewSection.scrollIntoView({ behavior: 'smooth' });
-    }, 1000);
-}
+
+async function handleUpload(id, successText) {
+    const fileInput = document.getElementById('file-' + id);
+    const btn = document.getElementById('btn-' + id);
+    const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
+
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        btn.innerText = "Wait...";
+        btn.disabled = true;
+
+        try {
+            // 1. Shirya bayanan Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            // 2. Tura hoton zuwa Cloudinary
+            const response = await fetch(CLOUDINARY_URL, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (!data.secure_url) throw new Error("Cloudinary error");
+
+            // 3. Ajiye link din hoton a Firestore
+            await db.collection("task_submissions").add({
+                platform: platformName,
+                imageUrl: data.secure_url,
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: "pending"
+            });
+
+            // 4. Update UI na Task din da aka gama
+            const circle = document.getElementById('circle-' + id);
+            btn.innerText = successText;
+            btn.classList.remove('btn-upload');
+            btn.classList.add('btn-completed');
+            btn.removeAttribute('onclick');
+            circle.classList.remove('breathing');
+
+            // 5. Logic na gaba: Shin akwai sauran task ko an gama?
+            const nextId = id + 1;
+            const nextBtn = document.getElementById('btn-' + nextId);
+            const nextCircle = document.getElementById('circle-' + nextId);
+
+            if (nextBtn) {
+                // Idan akwai sauran task, kunna na gaba
+                nextBtn.disabled = false;
+                nextCircle.classList.add('breathing');
+            } else {
+                // IDAN AN GAMA TASK NA KARSHE (WhatsApp)
+                // Mun cire alert din nan na dā, mun nuna review section maimakon sa
+                setTimeout(() => {
+                    const reviewSection = document.getElementById('review-section');
+                    if (reviewSection) {
+                        reviewSection.style.display = 'flex'; // Zai bayyana a kasa
+                        reviewSection.scrollIntoView({ behavior: 'smooth' }); // Shafin zai gungura kasa
+                    }
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error("Upload Error:", error);
+            alert("An samu matsala wurin tura hoto!");
+            btn.innerText = "Upload";
+            btn.disabled = false;
+        }
+    }
+                }
+            
         
     </script>
 </body>
