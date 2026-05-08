@@ -194,12 +194,15 @@
             const snapshot = await db.collection("users").get();
             const usersList = [];
 
-            snapshot.forEach(doc => {
+                        snapshot.forEach(doc => {
                 const data = doc.data();
                 usersList.push({
                     id: doc.id, 
                     fullName: data.fullName || "N/A",
-                    phone: data.phoneNumber || "N/A",
+                    
+                    // WANNAN SHINE GYARAN:
+                    phone: data.whatsapp || data.phoneNumber || "N/A", 
+                    
                     email: data.email || "N/A",
                     state: data.state || "N/A",
                     videoBalance: data.videoBalance || 0,
@@ -208,6 +211,7 @@
                     payout: data.shareBalance || 0
                 });
             });
+            
 
             window.allUsers = usersList;
             render(usersList);
