@@ -262,38 +262,21 @@ async function handleUpload(id, successText) {
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
 
- function listenForApproval() {
-    const currentUsername = localStorage.getItem('synergy_user');
-    if (!currentUsername) return;
+ function monitorApproval() {
+    const userKey = localStorage.getItem('synergy_user');
+    if (!userKey) return;
 
-    // Wannan layin zai rika kallon Firebase a kowane sakan
     db.collection("task_submissions")
-        .where("username", "==", currentUsername)
+        .where("username", "==", userKey)
         .onSnapshot((snapshot) => {
-            if (!snapshot.empty) {
-                let approved = false;
-                
-                snapshot.forEach((doc) => {
-                    // Idan koda daya daga cikin ayyukansa Admin ya sa masa 'approved'
-                    if (doc.data().status === "approved") {
-                        approved = true;
-                    }
-                });
-
-                if (approved) {
-                    // Wannan shi ne logic din da zai tura shi dashboard
+            snapshot.forEach(doc => {
+                // Abu guda daya kawai muke nema: Shin Admin ya yi Approve?
+                if (doc.data().status === "approved") {
                     window.location.href = "dashboard.html";
-                } else {
-                    // Idan har yanzu 'pending' ne, nuna masa review box
-                    document.getElementById('task-container').style.display = 'none';
-                    document.getElementById('review-section').style.display = 'flex';
                 }
-            }
+            });
         });
-}
-
-// Kira wannan function din maimakon wancan na baya
-window.addEventListener('load', listenForApproval);       
+ }
         
     </script>
 </body>
