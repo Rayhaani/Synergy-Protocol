@@ -262,21 +262,40 @@ async function handleUpload(id, successText) {
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
 
- function monitorApproval() {
+        function monitorApproval() {
     const userKey = localStorage.getItem('synergy_user');
     if (!userKey) return;
 
     db.collection("task_submissions")
         .where("username", "==", userKey)
         .onSnapshot((snapshot) => {
+            if (snapshot.empty) return;
+
+            let isApprovedByAdmin = false;
+            let submittedCount = snapshot.size;
+
             snapshot.forEach(doc => {
-                // Abu guda daya kawai muke nema: Shin Admin ya yi Approve?
                 if (doc.data().status === "approved") {
-                    window.location.href = "dashboard.html";
+                    isApprovedByAdmin = true;
                 }
             });
+
+            // 1. Idan Admin ya amince
+            if (isApprovedByAdmin) {
+                window.location.href = "dashboard.html";
+                return;
+            }
+
+            // 2. Idan mutum ya gama tura duka hotuna 5 (ko fiye)
+            if (submittedCount >= 5) {
+                document.getElementById('task-container').style.display = 'none';
+                document.getElementById('review-section').style.display = 'flex';
+            }
         });
- }
+}
+
+// KIRA SHI NAN TAKE
+monitorApproval();
         
     </script>
 </body>
