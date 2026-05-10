@@ -1153,10 +1153,16 @@ function fetchAndRenderNodes() {
     const now = Math.floor(Date.now() / 1000);
     localStorage.setItem(`startTime_${id}`, now);
     
-    const videoTitle = task.title || "";
-    const channelHandle = task.channel || ""; 
-    const searchQuery = `"${videoTitle}" ${channelHandle}`;
-    
+   const videoTitle = task.title || "";
+// Mun bar channelHandle tana nan idan ana bukata a wani gurin, 
+// amma ba za mu saka ta a search query ba.
+const channelHandle = task.channel || ""; 
+
+// GYARA: Mun cire channelHandle, mun bar videoTitle kawai
+const searchQuery = `"${videoTitle.trim()}"`;
+     
+     
+     
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 
     const infoArea = document.getElementById(`info-area-${id}`);
