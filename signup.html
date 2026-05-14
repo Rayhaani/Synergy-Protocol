@@ -302,7 +302,7 @@ async function resendVerification() {
         const authDoc = await db.collection("authorized_users").doc(user).get();
 
         if (!authDoc.exists) {
-            throw new Error("Kuskure: Sunan ka baya cikin jerin mutane 320 da aka amince wa.");
+            throw new Error("Access Denied: You are not authorized to register.");
         }
 
         // A. DUBA USERNAME (Firestore Check)
