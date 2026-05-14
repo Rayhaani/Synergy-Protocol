@@ -300,7 +300,7 @@ async function resendVerification() {
         // 1. DUBAN IZINI (AUTHORIZATION)
         const authDoc = await db.collection("authorized_users").doc(user).get();
         if (!authDoc.exists) {
-            throw new Error("Access Denied: Your username is not on the authorized list of 320 members.");
+            throw new Error("Access Denied: You aren't authorised to register at this moment.");
         }
 
         // 2. DUBA USERNAME
