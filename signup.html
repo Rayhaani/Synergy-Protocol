@@ -275,7 +275,7 @@ async function resendVerification() {
 // 2. GYARARREN REGISTER FUNCTION (Don magance duplicate Email/User)
 
 
-      async function register() {
+   async function register() {
     const btn = document.getElementById('reg-btn');
     const mainCard = document.getElementById('main-register-card'); 
     const email = document.getElementById('email').value.trim();
@@ -289,7 +289,6 @@ async function resendVerification() {
     btn.disabled = true;
     btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
 
-    // 1. Gyara lambar WhatsApp
     let formattedPhone = rawPhone;
     if (rawPhone.startsWith('0')) {
         formattedPhone = '234' + rawPhone.substring(1);
@@ -298,41 +297,33 @@ async function resendVerification() {
     }
 
     try {
-        // MATAKI NA FARKO: Duba izini kafin duba sauran abubuwa
+        // 1. DUBAN IZINI (AUTHORIZATION)
         const authDoc = await db.collection("authorized_users").doc(user).get();
-
         if (!authDoc.exists) {
-            throw new Error("Access Denied: You are not authorized to register.");
+            throw new Error("Access Denied: Your username is not on the authorized list of 320 members.");
         }
 
-        // A. DUBA USERNAME (Firestore Check)
+        // 2. DUBA USERNAME
         const userRef = db.collection("users").doc(user);
         const userDoc = await userRef.get();
         if (userDoc.exists) {
             throw new Error("This username isn't available.");
         }
 
-        // B. DUBA WHATSAPP NUMBER (Firestore Query)
+        // 3. DUBA WHATSAPP
         const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
         if (!phoneCheck.empty) {
-            throw new Error("This WhatsApp number is already in use. Try another one.");
+            throw new Error("This WhatsApp number is already in use.");
         }
 
-        // C. DUBA EMAIL (Firebase Auth Check)
-        const signInMethods = await auth.fetchSignInMethodsForEmail(email);
-        if (signInMethods.length > 0) {
-            throw new Error("This email is alreadytaken. Please choose another one.");
-        }
-
-        // D. CREATE ACCOUNT
+        // 4. CREATE ACCOUNT
         const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
         await userCredential.user.sendEmailVerification();
         
-        // Boye main card kafin nuna overlay
         mainCard.style.display = 'none';
-        showSuccessOverlay(email); 
+        showSuccessOverlay(email); // Wannan ne yake kiran Overlay
 
-        // E. ADANA BAYANAN A FIRESTORE
+        // 5. SAVE DATA
         await userRef.set({
             uid: userCredential.user.uid,
             fullName: fullName,
@@ -340,17 +331,11 @@ async function resendVerification() {
             username: user,
             state: state,
             whatsapp: formattedPhone, 
-            videoBalance: 0, 
-            shareBalance: 0, 
             isVerified: false,
-            rank: "IRON", 
-            videosWatchedToday: 0,
-            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }),
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             referredBy: referrer
         });
 
-        // F. ADANA BAYANAN A REALTIME DATABASE
         await database.ref('users/' + user).set({
             whatsapp: formattedPhone,
             balance: 0,
@@ -360,16 +345,52 @@ async function resendVerification() {
 
     } catch (e) {
         console.error("Registration Error:", e);
-        let errorMsg = e.message;
-        if(e.code === 'auth/email-already-in-use') errorMsg = "This email is already in use.";
-        if(e.code === 'auth/invalid-email') errorMsg = "This Email is badly formatted.";
-        
-        showTopNotif(errorMsg, "error");
-        
+        showTopNotif(e.message, "error");
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
     }
+}
+
+// WANNAN FUNCTION DIN NE YA BACE MAKA DAZU
+function showSuccessOverlay(email) {
+    startVerificationListener(); 
+
+    Swal.fire({
+        html: `
+            <div class="flex flex-col items-center">
+                <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
+                <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
+                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
+                    <p>Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
+                </div>
+            </div>`,
+        background: '#020617', 
+        showConfirmButton: true, 
+        confirmButtonText: 'RESEND LINK', 
+        customClass: { confirmButton: 'resend-btn-neon orbitron' }
+    }).then((result) => {
+        if (result.isConfirmed) { resendVerification(); showSuccessOverlay(email); }
+    });
+}
+
+// WANNAN MA YA BACE MAKA DAZU
+function startVerificationListener() {
+    if (checkInterval) clearInterval(checkInterval);
+    checkInterval = setInterval(async () => {
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            await currentUser.reload(); 
+            if (currentUser.emailVerified) {
+                clearInterval(checkInterval); 
+                showTopNotif("Security Verified! Redirecting...", "success");
+                setTimeout(() => { window.location.href = "signin.html"; }, 1500);
             }
+        }
+    }, 3000);
+                }
+            
+    
+
         
         
     </script>
