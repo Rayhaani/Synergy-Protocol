@@ -298,6 +298,13 @@ async function resendVerification() {
     }
 
     try {
+        // MATAKI NA FARKO: Duba izini kafin duba sauran abubuwa
+        const authDoc = await db.collection("authorized_users").doc(user).get();
+
+        if (!authDoc.exists) {
+            throw new Error("Kuskure: Sunan ka baya cikin jerin mutane 320 da aka amince wa.");
+        }
+
         // A. DUBA USERNAME (Firestore Check)
         const userRef = db.collection("users").doc(user);
         const userDoc = await userRef.get();
@@ -317,14 +324,6 @@ async function resendVerification() {
             throw new Error("This email is alreadytaken. Please choose another one.");
         }
 
-        // 1. DUBA IDAN SUNAN YANA CIKIN AUTHORIZED LIST
-const authDoc = await db.collection("authorized_users").doc(user).get();
-
-if (!authDoc.exists) {
-    throw new Error("Kuskure: Sunan ka baya cikin jerin mutane 320 da aka amince wa.");
-}
-
-      
         // D. CREATE ACCOUNT
         const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
         await userCredential.user.sendEmailVerification();
@@ -359,11 +358,8 @@ if (!authDoc.exists) {
             last_update: new Date().toISOString()
         });
 
-} catch (e) {
-        // Amfani da Custom Notification Bar dinka maimakon Firebase alerts
+    } catch (e) {
         console.error("Registration Error:", e);
-        
-        // Nan mun canza sakon zuwa Hausa ko English na kashin kanka
         let errorMsg = e.message;
         if(e.code === 'auth/email-already-in-use') errorMsg = "This email is already in use.";
         if(e.code === 'auth/invalid-email') errorMsg = "This Email is badly formatted.";
@@ -373,36 +369,8 @@ if (!authDoc.exists) {
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
     }
-      }
-        
-       function startVerificationListener() {
-    // 1. Tabbatar mun kashe duk wani tsohon timer don gudun rudani
-    if (checkInterval) clearInterval(checkInterval);
-
-    checkInterval = setInterval(async () => {
-        const currentUser = firebase.auth().currentUser;
-        
-        if (currentUser) {
-            // 2. WANNAN SHINE MUHIMMI: Tilasta wa Firebase sake duba status din user
-            await currentUser.reload(); 
-            
-            if (currentUser.emailVerified) {
-                // 3. Tsayar da binciken tunda an riga an yi verify
-                clearInterval(checkInterval); 
-
-                // 4. Nuna sako sannan a tura shi zuwa Signin
-                showTopNotif("Security Verified! Redirecting...", "success");
-
-                setTimeout(() => {
-                    window.location.href = "signin.html"; // Tabbatar sunan file din ya yi daidai
-                }, 1500);
             }
-        }
-    }, 3000); // Yana dubawa duk bayan sakan 3
-       }
         
-                
-
         
     </script>
 </body>
