@@ -317,6 +317,14 @@ async function resendVerification() {
             throw new Error("This email is alreadytaken. Please choose another one.");
         }
 
+        // 1. DUBA IDAN SUNAN YANA CIKIN AUTHORIZED LIST
+const authDoc = await db.collection("authorized_users").doc(user).get();
+
+if (!authDoc.exists) {
+    throw new Error("Kuskure: Sunan ka baya cikin jerin mutane 320 da aka amince wa.");
+}
+
+      
         // D. CREATE ACCOUNT
         const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
         await userCredential.user.sendEmailVerification();
