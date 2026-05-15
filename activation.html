@@ -198,12 +198,14 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         }
 
     
-
 async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
-    const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
-    const currentUsername = localStorage.getItem('synergy_user');
+    
+    // Tabbatar muna dauko sunan platform din (misali: Telegram ko Twitter)
+    const platformElement = document.querySelector(`#row-${id} .platform-name`);
+    const platformName = platformElement ? platformElement.innerText : "Task " + id;
+    const currentUsername = localStorage.getItem('synergy_user') || 'unknown_user';
 
     if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
@@ -211,60 +213,73 @@ async function handleUpload(id, successText) {
         btn.disabled = true;
 
         try {
-            const fileName = `uploads/${currentUsername}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+            // GYARA 1: Mun kara lokaci da ID a sunan file din don kowane upload ya zama unique
+            const timestamp = Date.now();
+            const fileName = `uploads/${currentUsername}/${timestamp}_task${id}.jpg`;
 
             const params = {
                 Bucket: 'zynta-media',
                 Key: fileName,
                 Body: file,
-                ContentType: file.type,
-                // MU COGE ACL: 'public-read' ANAN DON SAMUN NASARA
+                ContentType: file.type
+                // Mun cire ACL anan don kaucewa "An samu matsala"
             };
 
-            // Tura hoton zuwa Storj
-            const upload = await s3.upload(params).promise();
+            // Tura hoto zuwa Storj
+            await s3.upload(params).promise();
             
-            // Wannan link din zai sa hoton ya fito garau ga Admin
+            // GYARA 2: Direct link wanda zai nuna hoto radau a Admin Panel
             const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
 
-            // 2. AJIYE A FIREBASE
+            // GYARA 3: Amfani da .add() maimakon .set() don gudun goge hoto daya
             await db.collection("task_submissions").add({
                 username: currentUsername,
                 platform: platformName,
                 imageUrl: imageUrl, 
+                taskId: id,
+                timestamp: timestamp,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending"
             });
 
-            // UI UPDATES (Kamar yadda suke a mastercode dinka)
+            // UI UPDATES
             btn.innerText = successText;
             btn.classList.remove('btn-upload');
             btn.classList.add('btn-completed');
             btn.removeAttribute('onclick');
-            document.getElementById('circle-' + id).classList.remove('breathing');
+            
+            const circle = document.getElementById('circle-' + id);
+            if (circle) circle.classList.remove('breathing');
 
+            // Kunna task na gaba
             const nextId = id + 1;
             const nextBtn = document.getElementById('btn-' + nextId);
+            const nextCircle = document.getElementById('circle-' + nextId);
+
             if (nextBtn) {
                 nextBtn.disabled = false;
-                document.getElementById('circle-' + nextId).classList.add('breathing');
+                if (nextCircle) nextCircle.classList.add('breathing');
             } else {
-                document.getElementById('task-container').style.display = 'none';
-                document.getElementById('review-section').style.display = 'flex';
+                // Idan duka tasks sun kare
+                const taskContainer = document.getElementById('task-container');
+                const reviewSection = document.getElementById('review-section');
+                if (taskContainer) taskContainer.style.display = 'none';
+                if (reviewSection) reviewSection.style.display = 'flex';
             }
 
             alert("Uploaded Successfully!");
 
         } catch (error) {
-            console.error("Takamaiman Matsalar:", error);
-            // Idan ya nuna Forbidden, duba idan Bucket dinka sunansa "zynta-media" ne daidai
-            alert("Kuskure ya faru: " + error.message);
+            console.error("Storj/Firebase Error:", error);
+            alert("An samu matsala! Duba idan Keys dinka suna daidai.");
             btn.innerText = "Upload";
             btn.disabled = false;
         }
+    } else {
+        alert("Please select a file first!");
     }
-}
-        
+    }
+                            
 
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
