@@ -157,11 +157,11 @@
     
     <script>
 
-  // Saita sababbin Storj S3 Credentials (Full Access)
+  // 1. Sabon Saitin S3 (Direct Endpoint)
 const s3 = new AWS.S3({
     accessKeyId: 'jvu3nxyqugtsfvmh7sriztfu6sta', 
     secretAccessKey: 'jzpivdjr6g2wuedfpr42xj3zijivaa36imk6pqnwugnomreyv6q3c', 
-    endpoint: 'https://gateway.storjshare.io',
+    endpoint: 'https://s3.eu1.storjshare.io', // Mun sauya wannan zuwa S3 kai tsaye
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
     region: 'eu-1'
@@ -198,18 +198,15 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         }
 
         
-   async function handleUpload(id, successText) {
+
+
+
+
+async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
-
-    // 1. DAUKO USERNAME
-    const currentUsername = localStorage.getItem('synergy_user'); 
-
-    if (!currentUsername) {
-        alert("error occurred!");
-        return;
-    }
+    const currentUsername = localStorage.getItem('synergy_user');
 
     if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
@@ -217,24 +214,22 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         btn.disabled = true;
 
         try {
-            // Samar da sunan hoto na musamman
             const fileName = `uploads/${currentUsername}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
 
             const params = {
                 Bucket: 'zynta-media',
                 Key: fileName,
                 Body: file,
-                ContentType: file.type,
-                ACL: 'public-read' // Wannan zai ba kowa damar kallon hoton
+                ContentType: file.type
             };
 
-            // Tura hoton zuwa Storj
-            const upload = await s3.upload(params).promise();
+            // Tura hoton
+            await s3.putObject(params).promise();
             
-            // Haɗa madaidaicin link na S3 Gateway
-            const imageUrl = `https://gateway.storjshare.io/zynta-media/${fileName}`;
+            // Wannan link din shi ne Admin zai gani garau
+            const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
 
-            // 2. AJIYE A FIREBASE
+            // Ajiye a Firebase
             await db.collection("task_submissions").add({
                 username: currentUsername,
                 platform: platformName,
@@ -243,36 +238,21 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
                 status: "pending"
             });
 
-            // 3. UI Updates (Kamar yadda suke a asali)
-            const circle = document.getElementById('circle-' + id);
+            // UI Updates (Kamar yadda kake so)
             btn.innerText = successText;
-            btn.classList.remove('btn-upload');
-            btn.classList.add('btn-completed');
-            btn.removeAttribute('onclick');
-            circle.classList.remove('breathing');
-
-            const nextId = id + 1;
-            const nextBtn = document.getElementById('btn-' + nextId);
-            if (nextBtn) {
-                nextBtn.disabled = false;
-                document.getElementById('circle-' + nextId).classList.add('breathing');
-            } else {
-                setTimeout(() => {
-                    const rs = document.getElementById('review-section');
-                    if (rs) { rs.style.display = 'flex'; rs.scrollIntoView({ behavior: 'smooth' }); }
-                }, 1000);
-            }
+            btn.classList.replace('btn-upload', 'btn-completed');
+            btn.disabled = true;
+            alert("Success!");
 
         } catch (error) {
-            console.error("Upload Error:", error);
-            alert("An samu matsala!");
+            console.error("Error Details:", error);
+            alert("An samu matsala! Duba idan Keys dinka suna daidai.");
             btn.innerText = "Upload";
             btn.disabled = false;
         }
     }
-                        }
+}
         
-            
 
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
