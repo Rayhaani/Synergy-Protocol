@@ -200,7 +200,7 @@ async function handleUpload(id, successText) {
     const currentUsername = localStorage.getItem('synergy_user'); 
 
     if (!currentUsername) {
-        alert("Ba a sami Username ba. Don Allah sake shiga (Login).");
+        alert("Login back please.");
         return;
     }
 
@@ -296,11 +296,11 @@ const imageUrl = s3.getSignedUrl('getObject', {
                 if (nextCircle) nextCircle.classList.add('breathing');
             }
 
-            alert("An yi nasara! Hoton ya tafi.");
+            alert("Success.");
 
         } catch (error) {
             console.error("Upload Error:", error);
-            alert("An samu matsala: " + error.message);
+            alert("error occur: " + error.message);
             btn.innerText = "Upload";
             btn.disabled = false;
         }
