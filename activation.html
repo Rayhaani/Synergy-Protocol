@@ -248,55 +248,54 @@ function triggerFileSelect(id) {
 }
 
 // 5. HANDLE UPLOAD (STORJ + FIREBASE)
-async function handleUpload(id, successText) {
+
+  async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
-    const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
     const currentUsername = localStorage.getItem('synergy_user');
 
-    if (fileInput.files && fileInput.files[0]) {
+    if (!fileInput.files[0]) return;
+
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+
+    try {
         const file = fileInput.files[0];
-        btn.innerText = "Wait...";
-        btn.disabled = true;
+        const timestamp = Date.now();
+        const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
 
-        try {
-            const timestamp = Date.now();
-            const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
+        // 1. GWADA TURAWA STORJ
+        console.log("Fara tura hoto...");
+        await s3.upload({
+            Bucket: 'zynta-media',
+            Key: fileName,
+            Body: file,
+            ContentType: file.type
+        }).promise();
+        
+        const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
+        console.log("Hoto ya tafi Storj!");
 
-            // A. Tura zuwa Storj
-            await s3.upload({
-                Bucket: 'zynta-media',
-                Key: fileName,
-                Body: file,
-                ContentType: file.type
-            }).promise();
+        // 2. GWADA TURAWA FIREBASE
+        console.log("Fara tura Firebase...");
+        await db.collection("task_submissions").add({
+            username: currentUsername,
+            imageUrl: imageUrl, 
+            taskId: Number(id), // Tabbatar cewa Number ne
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: "pending"
+        });
 
-            const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
-
-            // B. Ajiye a Firebase
-            await db.collection("task_submissions").add({
-                username: currentUsername,
-                platform: platformName,
-                imageUrl: imageUrl, 
-                taskId: id,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                status: "pending"
-            });
-
-            // UI zai gyaru da kansa ta hanyar onSnapshot (restoreProgress)
-            alert("Success!");
-
-        } catch (error) {
-            console.error(error);
-            alert("Upload failed! Check connection or Storj keys.");
-            btn.innerText = "Upload";
-            btn.disabled = false;
-        }
+        alert("An yi nasara!");
+        // UI zai gyaru da kansa ta restoreProgress()
+        
+    } catch (err) {
+        console.error("ERROR DIN SHI NE:", err);
+        alert("Matsala: " + err.message); // Zai fada maka idan Storj ne ko Firebase
+        btn.innerText = "Upload";
+        btn.disabled = false;
     }
-}
-
-// KIRA WANNAN DOMIN GYARA REFRESHING KAI TSAYE
-restoreProgress();
+  }
         
         
     </script>
