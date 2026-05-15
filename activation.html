@@ -6,7 +6,7 @@
     <title>SYNERGY TASK HUB</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1500.0.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
@@ -156,7 +156,16 @@
 
     
     <script>
-
+// Saita Storj S3 Credentials
+const s3 = new AWS.S3({
+    accessKeyId: 'ju2cemiqlqtkicno4hv2yzik3mva', 
+    secretAccessKey: 'jyd66v6wuhhk66vztumxwqpnucerbmtocw7fkseq6ubdtzpcsyemc', 
+    endpoint: 'https://gateway.storjshare.io',
+    s3ForcePathStyle: true,
+    signatureVersion: 'v4',
+    region: 'eu-1'
+});
+        
 
         // Wannan zai nuna maka abin da ke cikin kowane mabuɗi
         const firebaseConfig = {
@@ -207,23 +216,26 @@ async function handleUpload(id, successText) {
         btn.disabled = true;
 
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            // Samar da sunan hoto na musamman don Storj
+            const fileName = `uploads/${currentUsername}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
 
-            const response = await fetch(CLOUDINARY_URL, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
+            const params = {
+                Bucket: 'zynta-media',
+                Key: fileName,
+                Body: file,
+                ContentType: file.type,
+                ACL: 'public-read'
+            };
 
-            if (!data.secure_url) throw new Error("Cloudinary error");
+            // Tura hoton zuwa Storj maimakon Cloudinary
+            const upload = await s3.upload(params).promise();
+            const imageUrl = upload.Location;
 
             // 2. ANAN NE MUHIMMIN GYARAN: MUN KARA username A CIKIN FIREBASE
             await db.collection("task_submissions").add({
                 username: currentUsername, // Wannan zai nuna sunan user din a Admin Panel
                 platform: platformName,
-                imageUrl: data.secure_url,
+                imageUrl: imageUrl, // Link din Storj
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending"
             });
@@ -256,8 +268,8 @@ async function handleUpload(id, successText) {
             btn.disabled = false;
         }
     }
-    }
-        
+                                                           }
+            
 
 
         // Wannan zai tabbatar record bai goge ba idan an yi refresh
