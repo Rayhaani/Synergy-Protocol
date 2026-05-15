@@ -156,10 +156,11 @@
 
     
     <script>
-// Saita Storj S3 Credentials
+
+  // Saita sababbin Storj S3 Credentials (Full Access)
 const s3 = new AWS.S3({
-    accessKeyId: 'ju2cemiqlqtkicno4hv2yzik3mva', 
-    secretAccessKey: 'jyd66v6wuhhk66vztumxwqpnucerbmtocw7fkseq6ubdtzpcsyemc', 
+    accessKeyId: 'jvu3nxyqugtsfvmh7sriztfu6sta', 
+    secretAccessKey: 'jzpivdjr6g2wuedfpr42xj3zijivaa36imk6pqnwugnomreyv6q3c', 
     endpoint: 'https://gateway.storjshare.io',
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
@@ -197,12 +198,12 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         }
 
         
-async function handleUpload(id, successText) {
+   async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
 
-    // 1. ZAMU DAUKO USERNAME DAGA LOCALSTORAGE
+    // 1. DAUKO USERNAME
     const currentUsername = localStorage.getItem('synergy_user'); 
 
     if (!currentUsername) {
@@ -216,7 +217,7 @@ async function handleUpload(id, successText) {
         btn.disabled = true;
 
         try {
-            // Samar da sunan hoto na musamman don Storj
+            // Samar da sunan hoto na musamman
             const fileName = `uploads/${currentUsername}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
 
             const params = {
@@ -224,23 +225,25 @@ async function handleUpload(id, successText) {
                 Key: fileName,
                 Body: file,
                 ContentType: file.type,
-                ACL: 'public-read'
+                ACL: 'public-read' // Wannan zai ba kowa damar kallon hoton
             };
 
-            // Tura hoton zuwa Storj maimakon Cloudinary
+            // Tura hoton zuwa Storj
             const upload = await s3.upload(params).promise();
-            const imageUrl = upload.Location;
+            
+            // Haɗa madaidaicin link na S3 Gateway
+            const imageUrl = `https://gateway.storjshare.io/zynta-media/${fileName}`;
 
-            // 2. ANAN NE MUHIMMIN GYARAN: MUN KARA username A CIKIN FIREBASE
+            // 2. AJIYE A FIREBASE
             await db.collection("task_submissions").add({
-                username: currentUsername, // Wannan zai nuna sunan user din a Admin Panel
+                username: currentUsername,
                 platform: platformName,
-                imageUrl: imageUrl, // Link din Storj
+                imageUrl: imageUrl, 
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: "pending"
             });
 
-            // 3. UI Updates (Sauran code dinka yana nan kamar yadda yake)
+            // 3. UI Updates (Kamar yadda suke a asali)
             const circle = document.getElementById('circle-' + id);
             btn.innerText = successText;
             btn.classList.remove('btn-upload');
@@ -248,7 +251,6 @@ async function handleUpload(id, successText) {
             btn.removeAttribute('onclick');
             circle.classList.remove('breathing');
 
-            // ... duba idan akwai sauran task ...
             const nextId = id + 1;
             const nextBtn = document.getElementById('btn-' + nextId);
             if (nextBtn) {
@@ -268,7 +270,8 @@ async function handleUpload(id, successText) {
             btn.disabled = false;
         }
     }
-                                                           }
+                        }
+        
             
 
 
