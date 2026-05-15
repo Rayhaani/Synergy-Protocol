@@ -250,13 +250,18 @@ const compressedFile = await compressImage(file);
 
          
          // A. TURAWA STORJ
+  // Ranar da hoton zai mutu (Kwana 7 daga yanzu)
+const expirationDate = new Date();
+expirationDate.setDate(expirationDate.getDate() + 7);
+
 await s3.upload({
     Bucket: 'zynta-media',
     Key: fileName,
     Body: file,
-    ContentType: file.type
+    ContentType: file.type,
+    Expires: expirationDate // Wannan zai gaya wa Storj ya goge shi bayan kwana 7
 }).promise();
-
+         
 // ✅ GYARA: Samu Presigned URL bayan upload
 const imageUrl = s3.getSignedUrl('getObject', {
     Bucket: 'zynta-media',
