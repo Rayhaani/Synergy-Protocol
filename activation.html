@@ -157,52 +157,28 @@
     
     <script>
 
-        // 1. Wannan shi ne madaidaicin saiti don magance matsalar S3
+      // 1. S3 CONFIGURATION
 const s3 = new AWS.S3({
     accessKeyId: 'jvu3nxyqugtsfvmh7sriztfu6sta', 
     secretAccessKey: 'jzpivdjr6g2wuedfpr42xj3zijivaa36imk6pqnwugnomreyv6q3c', 
-    endpoint: 'https://gateway.storjshare.io', // Maimakon s3.eu1, bari mu koma asalin Gateway
+    endpoint: 'https://gateway.storjshare.io', 
     s3ForcePathStyle: true,
     signatureVersion: 'v4',
     region: 'eu-1'
 });
 
-  
-        // Wannan zai nuna maka abin da ke cikin kowane mabuɗi
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
-            authDomain: "synergy-protocol.firebaseapp.com",
-            projectId: "synergy-protocol",
-            appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
-        };
+// 2. FIREBASE CONFIGURATION
+const firebaseConfig = {
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+    authDomain: "synergy-protocol.firebaseapp.com",
+    projectId: "synergy-protocol",
+    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Cloudinary Settings (Daga screenshot dinka)
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/diixjieyp/image/upload';
-const CLOUDINARY_UPLOAD_PRESET = 'zynta_present'; 
-        
-        function handleAction(id, link) {
-            const btn = document.getElementById('btn-' + id);
-            window.open(link, '_blank');
-            setTimeout(() => {
-                btn.innerText = "Upload";
-                btn.classList.add('btn-upload');
-                btn.setAttribute('onclick', `triggerFileSelect(${id})`);
-            }, 2000);
-        }
-
-        function triggerFileSelect(id) {
-            document.getElementById('file-' + id).click();
-        }
-
-    
-
-
-        // Wannan zai tabbatar record bai goge ba idan an yi refresh
-
-        function monitorApproval() {
+// 3. WANNAN SHINE ZAI GYARA REFRESHING (ZAI DUBA FIREBASE)
+function restoreProgress() {
     const userKey = localStorage.getItem('synergy_user');
     if (!userKey) return;
 
@@ -211,76 +187,74 @@ const CLOUDINARY_UPLOAD_PRESET = 'zynta_present';
         .onSnapshot((snapshot) => {
             if (snapshot.empty) return;
 
+            let submittedIds = [];
             let isApprovedByAdmin = false;
-            let submittedCount = snapshot.size;
 
             snapshot.forEach(doc => {
-                if (doc.data().status === "approved") {
-                    isApprovedByAdmin = true;
-                }
+                const data = doc.data();
+                if (data.taskId) submittedIds.push(parseInt(data.taskId));
+                if (data.status === "approved") isApprovedByAdmin = true;
             });
 
-            // 1. Idan Admin ya amince
+            // Idan an riga an amince wa mutum
             if (isApprovedByAdmin) {
                 window.location.href = "dashboard.html";
                 return;
             }
 
-            // 2. Idan mutum ya gama tura duka hotuna 5 (ko fiye)
-            if (submittedCount >= 5) {
+            // Gyara UI don kowane task da aka riga aka yi
+            submittedIds.forEach(id => {
+                const btn = document.getElementById('btn-' + id);
+                const circle = document.getElementById('circle-' + id);
+                if (btn) {
+                    btn.innerText = "COMPLETED";
+                    btn.classList.remove('btn-upload');
+                    btn.classList.add('btn-completed');
+                    btn.disabled = true;
+                    btn.removeAttribute('onclick');
+                }
+                if (circle) circle.classList.remove('breathing');
+
+                // Bude task na gaba
+                const nextBtn = document.getElementById('btn-' + (id + 1));
+                const nextCircle = document.getElementById('circle-' + (id + 1));
+                if (nextBtn && !submittedIds.includes(id + 1)) {
+                    nextBtn.disabled = false;
+                    if (nextCircle) nextCircle.classList.add('breathing');
+                }
+            });
+
+            // Idan duka biyar an gama
+            if (submittedIds.length >= 5) {
                 document.getElementById('task-container').style.display = 'none';
                 document.getElementById('review-section').style.display = 'flex';
             }
         });
 }
 
-// KIRA SHI NAN TAKE
-monitorApproval();
-
-
-
-
-
-        // 1. WANNAN ZAI DUBA IDAN AN RIGA AN YI TASK DIN
-async function checkSubmissionStatus() {
-    const currentUsername = localStorage.getItem('synergy_user');
-    if (!currentUsername) return;
-
-    const snapshot = await db.collection("task_submissions")
-        .where("username", "==", currentUsername)
-        .get();
-
-    snapshot.forEach(doc => {
-        const data = doc.data();
-        const id = data.taskId;
-
-        const btn = document.getElementById('btn-' + id);
-        if (btn) {
-            btn.innerText = "COMPLETED"; 
-            btn.classList.replace('btn-upload', 'btn-completed');
-            btn.disabled = true;
-            btn.removeAttribute('onclick');
-            document.getElementById('circle-' + id).classList.remove('breathing');
-        }
-
-        // Bude na gaba
-        const nextId = id + 1;
-        const nextBtn = document.getElementById('btn-' + nextId);
-        if (nextBtn) {
-            nextBtn.disabled = false;
-            document.getElementById('circle-' + nextId).classList.add('breathing');
-        }
-    });
+// 4. HANDLE ACTION (JOIN/FOLLOW)
+function handleAction(id, link) {
+    const btn = document.getElementById('btn-' + id);
+    window.open(link, '_blank');
+    setTimeout(() => {
+        btn.innerText = "Upload";
+        btn.classList.add('btn-upload');
+        btn.onclick = () => triggerFileSelect(id); // Gyara: amfani da onclick kai tsaye
+    }, 2000);
 }
 
-// 2. GYARARRAN UPLOAD MAI BUDE HOTO
+function triggerFileSelect(id) {
+    document.getElementById('file-' + id).click();
+}
+
+// 5. HANDLE UPLOAD (STORJ + FIREBASE)
 async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
     const platformName = document.querySelector(`#row-${id} .platform-name`).innerText;
     const currentUsername = localStorage.getItem('synergy_user');
 
-    if (fileInput.files[0]) {
+    if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
         btn.innerText = "Wait...";
         btn.disabled = true;
@@ -289,6 +263,7 @@ async function handleUpload(id, successText) {
             const timestamp = Date.now();
             const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
 
+            // A. Tura zuwa Storj
             await s3.upload({
                 Bucket: 'zynta-media',
                 Key: fileName,
@@ -296,9 +271,9 @@ async function handleUpload(id, successText) {
                 ContentType: file.type
             }).promise();
 
-            // WANNAN LINK DIN ZAI BUDE (Babu Access Denied)
             const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
 
+            // B. Ajiye a Firebase
             await db.collection("task_submissions").add({
                 username: currentUsername,
                 platform: platformName,
@@ -308,32 +283,21 @@ async function handleUpload(id, successText) {
                 status: "pending"
             });
 
-            btn.innerText = successText;
-            btn.classList.replace('btn-upload', 'btn-completed');
-            btn.removeAttribute('onclick');
-            document.getElementById('circle-' + id).classList.remove('breathing');
-
-            const nextBtn = document.getElementById('btn-' + (id + 1));
-            if (nextBtn) {
-                nextBtn.disabled = false;
-                document.getElementById('circle-' + (id + 1)).classList.add('breathing');
-            }
-
-            alert("Nasara! Hoton ya tafi.");
+            // UI zai gyaru da kansa ta hanyar onSnapshot (restoreProgress)
+            alert("Success!");
 
         } catch (error) {
-            alert("Error! Tabbatar an yi 'Create Access' a Storj.");
+            console.error(error);
+            alert("Upload failed! Check connection or Storj keys.");
             btn.innerText = "Upload";
             btn.disabled = false;
         }
     }
 }
 
-// Karka manta ka kira wannan a karshen script dinka
-checkSubmissionStatus();
+// KIRA WANNAN DOMIN GYARA REFRESHING KAI TSAYE
+restoreProgress();
         
-
-    
         
     </script>
 </body>
