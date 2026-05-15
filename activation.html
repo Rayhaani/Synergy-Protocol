@@ -214,7 +214,41 @@ async function handleUpload(id, successText) {
             const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
 
             
-            
+
+// Wannan function din zai rage nauyin hoto
+async function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; // Rage fadin hoton
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // Maida shi JPEG mai quality kashi 60% (wanda ya isa gani a admin)
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', 0.6); 
+            };
+        };
+    });
+}
+
+// A cikin handleUpload, sai ka kira shi haka:
+const compressedFile = await compressImage(file);
+
+// Sai ka sauya Body a s3.upload:
+// Body: compressedFile
+
+         
          // A. TURAWA STORJ
 await s3.upload({
     Bucket: 'zynta-media',
