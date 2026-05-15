@@ -214,16 +214,19 @@ async function handleUpload(id, successText) {
             const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
 
             // A. TURAWA STORJ
-            await s3.upload({
-                Bucket: 'zynta-media',
-                Key: fileName,
-                Body: file,
-                ContentType: file.type
-            }).promise();
-            
-            // Wannan shi ne link din da zai bude hoto a Admin Panel ba tare da Access Denied ba
-            const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
+await s3.upload({
+    Bucket: 'zynta-media',
+    Key: fileName,
+    Body: file,
+    ContentType: file.type
+}).promise();
 
+// ✅ GYARA: Samu Presigned URL bayan upload
+const imageUrl = s3.getSignedUrl('getObject', {
+    Bucket: 'zynta-media',
+    Key: fileName,
+    Expires: 60 * 60 * 24 * 7 // 7 days
+});
             // B. TURAWA FIREBASE
             await db.collection("task_submissions").add({
                 username: currentUsername, 
