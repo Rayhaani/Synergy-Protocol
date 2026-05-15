@@ -318,6 +318,120 @@ async function handleUpload(id, successText) {
 
 // KIRA SHI NAN TAKE
 monitorApproval();
+
+
+
+
+        // 1. WANNAN SHINE ZAI HANA REFRESHING YA GOGE AIKIN KA
+async function checkSubmissionStatus() {
+    const currentUsername = localStorage.getItem('synergy_user');
+    if (!currentUsername) return;
+
+    try {
+        const snapshot = await db.collection("task_submissions")
+            .where("username", "==", currentUsername)
+            .get();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const id = data.taskId;
+
+            // Idan an riga an yi wannan task din, mu gyara UI din
+            const btn = document.getElementById('btn-' + id);
+            const circle = document.getElementById('circle-' + id);
+            
+            if (btn) {
+                btn.innerText = "COMPLETED"; // Ko wane success text kake amfani da shi
+                btn.classList.remove('btn-upload');
+                btn.classList.add('btn-completed');
+                btn.disabled = true;
+                btn.removeAttribute('onclick');
+            }
+            if (circle) {
+                circle.classList.remove('breathing');
+            }
+
+            // Kunna task na gaba
+            const nextId = id + 1;
+            const nextBtn = document.getElementById('btn-' + nextId);
+            const nextCircle = document.getElementById('circle-' + nextId);
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                if (nextCircle) nextCircle.classList.add('breathing');
+            }
+        });
+    } catch (error) {
+        console.error("Error checking status:", error);
+    }
+}
+
+// Kira wannan function din da zaran page ya gama loading
+window.onload = function() {
+    checkSubmissionStatus();
+};
+
+// 2. GYARARRAN HANDLEUPLOAD MAI KARFI
+async function handleUpload(id, successText) {
+    const fileInput = document.getElementById('file-' + id);
+    const btn = document.getElementById('btn-' + id);
+    const platformElement = document.querySelector(`#row-${id} .platform-name`);
+    const platformName = platformElement ? platformElement.innerText : "Task " + id;
+    const currentUsername = localStorage.getItem('synergy_user');
+
+    if (!fileInput.files[0]) return alert("Select file!");
+
+    const file = fileInput.files[0];
+    btn.innerText = "Uploading...";
+    btn.disabled = true;
+
+    try {
+        const timestamp = Date.now();
+        const fileName = `uploads/${currentUsername}/${timestamp}_task${id}.jpg`;
+
+        // TURAWA ZUWA STORJ
+        await s3.upload({
+            Bucket: 'zynta-media',
+            Key: fileName,
+            Body: file,
+            ContentType: file.type
+        }).promise();
+
+        // LINK MAI KYAU (Babu Access Denied)
+        const imageUrl = `https://link.storjshare.io/raw/jvu3nxyqugtsfvmh7sriztfu6sta/zynta-media/${fileName}`;
+
+        // AJIYE A FIREBASE (Domin Admin da kuma hana Resetting)
+        await db.collection("task_submissions").add({
+            username: currentUsername,
+            platform: platformName,
+            imageUrl: imageUrl,
+            taskId: id,
+            status: "pending",
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // GYARA UI
+        btn.innerText = successText;
+        btn.classList.replace('btn-upload', 'btn-completed');
+        btn.removeAttribute('onclick');
+        document.getElementById('circle-' + id).classList.remove('breathing');
+
+        // BUDE NA GABA
+        const nextId = id + 1;
+        const nextBtn = document.getElementById('btn-' + nextId);
+        if (nextBtn) {
+            nextBtn.disabled = false;
+            document.getElementById('circle-' + nextId).classList.add('breathing');
+        }
+
+        alert("Success!");
+
+    } catch (err) {
+        alert("Error! Check Storj Keys.");
+        btn.innerText = "Upload";
+        btn.disabled = false;
+    }
+    }
+        
         
     </script>
 </body>
