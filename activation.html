@@ -193,6 +193,7 @@ function triggerFileSelect(id) {
 }
 
 // 4. MAIN UPLOAD FUNCTION (STORJ -> FIREBASE)
+// 4. MAIN UPLOAD FUNCTION (STORJ -> FIREBASE)
 async function handleUpload(id, successText) {
     const fileInput = document.getElementById('file-' + id);
     const btn = document.getElementById('btn-' + id);
@@ -213,64 +214,58 @@ async function handleUpload(id, successText) {
             const timestamp = Date.now();
             const fileName = `uploads/${currentUsername}/${timestamp}_${id}.jpg`;
 
-            
+            // Wannan function din zai rage nauyin hoto
+            async function compressImage(imageFile) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(imageFile);
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 800; // Rage fadin hoton
+                            const scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = MAX_WIDTH;
+                            canvas.height = img.height * scaleSize;
 
-// Wannan function din zai rage nauyin hoto
-async function compressImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 800; // Rage fadin hoton
-                const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            // Maida shi JPEG mai quality kashi 60%
+                            canvas.toBlob((blob) => {
+                                resolve(blob);
+                            }, 'image/jpeg', 0.6); 
+                        };
+                    };
+                });
+            }
 
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                // Maida shi JPEG mai quality kashi 60% (wanda ya isa gani a admin)
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.6); 
-            };
-        };
-    });
-}
+            // Kira compressImage don rage nauyin hoton da aka saka
+            const compressedFile = await compressImage(file);
+                     
+            // A. TURAWA STORJ
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 7);
 
-// A cikin handleUpload, sai ka kira shi haka:
-const compressedFile = await compressImage(file);
+            // NAN NE ANKA GYARA: Anyi amfani da 'compressedFile' maimakon 'file'
+            await s3.upload({
+                Bucket: 'zynta-media',
+                Key: fileName,
+                Body: compressedFile, 
+                ContentType: 'image/jpeg',
+                Expires: expirationDate 
+            }).promise();
+                     
+            // ✅ Samu Presigned URL bayan upload
+            const imageUrl = s3.getSignedUrl('getObject', {
+                Bucket: 'zynta-media',
+                Key: fileName,
+                Expires: 60 * 60 * 24 * 7 // 7 days
+            });
 
-// Sai ka sauya Body a s3.upload:
-// Body: compressedFile
-
-         
-         // A. TURAWA STORJ
-  // Ranar da hoton zai mutu (Kwana 7 daga yanzu)
-const expirationDate = new Date();
-expirationDate.setDate(expirationDate.getDate() + 7);
-
-await s3.upload({
-    Bucket: 'zynta-media',
-    Key: fileName,
-    Body: file,
-    ContentType: file.type,
-    Expires: expirationDate // Wannan zai gaya wa Storj ya goge shi bayan kwana 7
-}).promise();
-         
-// ✅ GYARA: Samu Presigned URL bayan upload
-const imageUrl = s3.getSignedUrl('getObject', {
-    Bucket: 'zynta-media',
-    Key: fileName,
-    Expires: 60 * 60 * 24 * 7 // 7 days
-});
-         // B. TURAWA FIREBASE
-            
-         await db.collection("task_submissions").add({
+            // B. TURAWA FIREBASE
+            await db.collection("task_submissions").add({
                 username: currentUsername, 
                 platform: platformName,
                 imageUrl: imageUrl,
@@ -306,7 +301,8 @@ const imageUrl = s3.getSignedUrl('getObject', {
         }
     }
 }
-
+     
+         
 // 5. PERSISTENCE & MONITORING (Hana Resetting idan an yi refresh)
 function monitorApproval() {
     const userKey = localStorage.getItem('synergy_user');
