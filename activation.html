@@ -273,7 +273,7 @@ async function handleUpload(id, successText) {
             if (circle) circle.classList.remove('breathing');
 
             // Bude task na gaba
-            const nextId = id + 1;
+            const nextId = (id === 3) ? 5 : id + 1;
             const nextBtn = document.getElementById('btn-' + nextId);
             if (nextBtn) {
                 nextBtn.disabled = false;
