@@ -32,8 +32,16 @@
             transition: all 0.5s ease;
             overflow-y: auto;
         }
-        
-        .input-node { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 15px; outline: none; color: white; transition: 0.3s; }
+         .input-node { 
+    width: 100%; 
+    background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    padding: 8px 12px; /* An rage tsayin input anan */
+    border-radius: 12px; /* An ɗan rage shi don ya dace */
+    outline: none; 
+    color: white; 
+    transition: 0.3s; 
+         }
         .input-node:focus { border-color: var(--aqua); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); }
         
         .resend-btn-neon {
@@ -182,34 +190,42 @@ function getReferrerFromURL() {
     return params.get('ref') || "admin";
 }
         
-        function validateForm() {
-            const fullName = document.getElementById('full-name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const user = document.getElementById('username').value.trim();
-            const state = document.getElementById('state').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const pass = document.getElementById('password').value.trim();
+       function validateForm() {
+    const fullName = document.getElementById('full-name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const user = document.getElementById('username').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const pass = document.getElementById('password').value.trim();
 
-            const steps = [ 
-                { el: 'step-email', valid: fullName.split(' ').length >= 2 }, 
-                { el: 'step-user', valid: email.includes('@') && email.includes('.') }, 
-                { el: 'step-state', valid: user.length >= 3 }, 
-                { el: 'step-phone', valid: state.length >= 3 }, 
-                { el: 'step-pass', valid: phone.length >= 10 },
-                { el: 'reg-btn', valid: pass.length >= 6 }
-            ];
-            
-            let completed = 0;
-            steps.forEach(s => {
-                const target = document.getElementById(s.el);
-                if (s.valid) {
-                    if (target.id === 'reg-btn') { target.disabled = false; target.style.opacity = "1"; }
-                    else { target.classList.remove('hidden'); }
-                    completed++;
-                }
-            });
-            document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/6)*100)}%`;
+    const steps = [ 
+        { el: 'step-email', valid: fullName.split(' ').length >= 2 }, 
+        { el: 'step-user', valid: email.includes('@') && email.includes('.') }, 
+        { el: 'step-state', valid: user.length >= 3 }, 
+        { el: 'step-phone', valid: state.length >= 3 }, 
+        { el: 'step-pass', valid: phone.length >= 10 },
+        { el: 'reg-btn', valid: pass.length >= 6 }
+    ];
+    
+    let completed = 0;
+    steps.forEach(s => {
+        const target = document.getElementById(s.el);
+        if (s.valid) {
+            if (target.id === 'reg-btn') { target.disabled = false; target.style.opacity = "1"; }
+            else { target.classList.remove('hidden'); }
+            completed++;
         }
+    });
+    document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/6)*100)}%`;
+
+    // SNEAKY SCROLL GYARA: Wannan zai tura katin kasa ta atomatik don button ya fito
+    const card = document.getElementById('main-register-card');
+    if (card) {
+        card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+    }
+         }
+        
+        
 
         // GYARA 3: GitHub Style Top Notification (Resend logic)
         // Function na nuna sanarwa a sama (GitHub Style)
