@@ -331,16 +331,14 @@ function monitorApproval() {
                 if (circle) circle.classList.remove('breathing');
                 
                 //Bude na gaba
-                // Bude na gaba daidai (Cire matsalar daskarewa)
-let nextId = id + 1;
-if (id === 3) {
-    nextId = 5; // Tsallake zuwa WhatsApp idan an gama Facebook
-}
+               // Wannan shi ne asalin code dinka da aka gyara gurbin id+1 kawai
+let targetId = id + 1;
+if (targetId === 4) targetId = 5;
 
-const nextBtn = document.getElementById('btn-' + nextId);
-if (nextBtn && !submittedTasks.includes(nextId)) {
+const nextBtn = document.getElementById('btn-' + targetId);
+if (nextBtn && !submittedTasks.includes(targetId)) {
     nextBtn.disabled = false;
-    const nextCircle = document.getElementById('circle-' + nextId);
+    const nextCircle = document.getElementById('circle-' + targetId);
     if (nextCircle) nextCircle.classList.add('breathing');
 }
              
