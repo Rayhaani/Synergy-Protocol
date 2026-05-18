@@ -330,15 +330,16 @@ function monitorApproval() {
                 }
                 if (circle) circle.classList.remove('breathing');
                 
-                // Bude na gaba
-                const nextBtn = document.getElementById('btn-' + (id + 1));
-                if (nextBtn && !submittedTasks.includes(id + 1)) {
-                    nextBtn.disabled = false;
-                    const nextCircle = document.getElementById('circle-' + (id + 1));
-                    if (nextCircle) nextCircle.classList.add('breathing');
-                }
-            });
-
+                
+                // Bude na gaba (An gyara tsallaken hudu zuwa biyar)
+const nextId = (id === 3) ? 5 : id + 1;
+const nextBtn = document.getElementById('btn-' + nextId);
+if (nextBtn && !submittedTasks.includes(nextId)) {
+    nextBtn.disabled = false;
+    const nextCircle = document.getElementById('circle-' + nextId);
+    if (nextCircle) nextCircle.classList.add('breathing');
+}
+             
             if (submittedTasks.length >= 4) {
                 const container = document.getElementById('task-container');
                 const review = document.getElementById('review-section');
