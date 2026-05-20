@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZYNTA TASK BOARD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ASALIN BACKGROUND COLOUR DA TEXTURE SUNA NAN 100% */
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+        body { 
+            background: var(--bg); color: #fff; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); 
+            min-height: 100vh;
+        }
+
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; }
+        .digits-terminal { font-family: 'Roboto Mono', monospace; font-weight: 700; }
+        
+        /* SLEEK ULTRA-MINIMAL MICRO CARDS */
+        .zynta-sleek-card { 
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .zynta-sleek-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-left-color: var(--aqua);
+            border-right-color: rgba(0, 242, 254, 0.1);
+            border-top-color: rgba(0, 242, 254, 0.1);
+            border-bottom-color: rgba(0, 242, 254, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transform: translateX(4px);
+        }
+
+        /* 3D PERSPECTIVE CONTAINER FOR REAL SLOPES */
+        .futuristic-3d-bar {
+            perspective: 150px;
+            perspective-origin: top;
+        }
+
+        /* REAL 3D TUDU/SLOPE SHAPE */
+        .slope-3d-btn {
+            transform: rotateX(15deg);
+            transform-origin: bottom;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backface-visibility: hidden;
+        }
+        .slope-3d-btn:hover {
+            transform: rotateX(5deg) translateY(-1px);
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        /* Minimal Shimmer Loading */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: loading-shimmer 1.5s infinite;
+        }
+        @keyframes loading-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div class="max-w-6xl mx-auto px-6 mt-4 space-y-8">
+        
+        <header class="w-full flex items-center justify-between border-b border-white/[0.04] pb-6 relative">
+            <div class="flex-none z-20">
+                <button onclick="window.history.back()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-cyan-400 transition-all duration-300 shadow-md focus:outline-none" aria-label="Go back">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="absolute inset-x-0 flex justify-center items-center pointer-events-none px-10">
+                <h1 class="orbitron text-sm md:text-base text-white font-bold tracking-[1px] text-center pointer-events-auto">
+                    Zynta Task Board
+                </h1>
+            </div>
+            
+            <div class="w-8 h-8 opacity-0 flex-none pointer-events-none"></div>
+        </header>
+
+        <div class="futuristic-3d-bar w-full bg-slate-950/20 border border-white/[0.04] rounded-xl p-2 grid grid-cols-4 gap-1.5 sm:gap-3 backdrop-blur-md overflow-hidden">
+            
+            <button class="slope-3d-btn bg-cyan-500/[0.03] border-b-2 border-cyan-400/40 rounded-b-md py-3 px-1 focus:outline-none">
+                <div class="text-cyan-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
+                    Ongoing
+                </div>
+            </button>
+            
+            <button class="slope-3d-btn bg-yellow-500/[0.03] border-b-2 border-yellow-400/40 rounded-b-md py-3 px-1 focus:outline-none">
+                <div class="text-yellow-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
+                    Completed
+                </div>
+            </button>
+            
+            <button class="slope-3d-btn bg-emerald-500/[0.03] border-b-2 border-emerald-400/40 rounded-b-md py-3 px-1 focus:outline-none">
+                <div class="text-emerald-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
+                    Approved
+                </div>
+            </button>
+            
+            <button class="slope-3d-btn bg-rose-500/[0.03] border-b-2 border-rose-400/40 rounded-b-md py-3 px-1 focus:outline-none">
+                <div class="text-rose-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
+                    Rejected
+                </div>
+            </button>
+
+        </div>
+
+        <section class="relative pt-2">
+            <div id="board-loader" class="space-y-4">
+                <div class="zynta-sleek-card rounded-2xl p-6 h-24 shimmer"></div>
+                <div class="zynta-sleek-card rounded-2xl p-6 h-24 shimmer"></div>
+            </div>
+
+            <div id="tasks-grid-target" class="space-y-4 opacity-0 transition-opacity duration-500">
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        let MasterTaskRepository = [];
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+            authDomain: "synergy-protocol.firebaseapp.com", 
+            projectId: "synergy-protocol"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+
+        window.onload = async () => {
+            await startSleekAggregator();
+        };
+
+        async function startSleekAggregator() {
+            try {
+                const [pico, micro, hive, click] = await Promise.all([
+                    fetchMockAPI('picoworkers'),
+                    fetchMockAPI('microworkers'),
+                    fetchMockAPI('hive'),
+                    fetchMockAPI('clickworker')
+                ]);
+
+                MasterTaskRepository = [...pico, ...micro, ...hive, ...click];
+                renderTaskMatrix();
+            } catch (err) {
+                console.error("Aggregation Error:", err);
+            }
+        }
+
+        async function fetchMockAPI(provider) {
+            await new Promise(r => setTimeout(r, 1100));
+            const mockDatabase = {
+                'picoworkers': [
+                    { id: 'p1', title: 'High Retention YouTube Watch + 2 Min Stay', reward: 0.22, slots: '140/200' },
+                    { id: 'p2', title: 'Register on FinTech App & Basic Verification', reward: 2.10, slots: '12/50' }
+                ],
+                'microworkers': [
+                    { id: 'm1', title: 'Create Verified Outlook Account with Details', reward: 0.30, slots: '450/1000' },
+                    { id: 'm2', title: 'Engage with Google Search Engine SEO Node', reward: 0.12, slots: '88/100' }
+                ],
+                'hive': [
+                    { id: 'h1', title: 'Identify & Box Autonomous Vehicle Objects', reward: 0.05, slots: 'Continuous' },
+                    { id: 'h2', title: 'Transcribe Short Audio Clip (Hausa Dialect)', reward: 0.65, slots: '41/200' }
+                ],
+                'clickworker': [
+                    { id: 'c1', title: 'AI Language Model Quality Rating Assessment', reward: 3.40, slots: 'High Volume' }
+                ]
+            };
+            return mockDatabase[provider].map(t => ({ ...t, network: provider }));
+        }
+
+        function renderTaskMatrix() {
+            const target = document.getElementById('tasks-grid-target');
+            target.innerHTML = '';
+
+            MasterTaskRepository.forEach(task => {
+                const rowHtml = `
+                    <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-start gap-4 w-full">
+                            <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
+                            
+                            <div class="space-y-1 w-full">
+                                <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
+                                    ${task.title}
+                                </h3>
+                                <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
+                                    <span>Slots: ${task.slots}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
+                            <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+$${task.reward.toFixed(2)}</span>
+                            
+                            <button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">
+                                DO TASK
+                            </button>
+                        </div>
+                    </div>
+                `;
+                target.insertAdjacentHTML('beforeend', rowHtml);
+            });
+
+            document.getElementById('board-loader').classList.add('hidden');
+            target.classList.remove('opacity-0');
+        }
+
+        function deployTaskNode(id) {
+            console.log(`Executing node: ${id}`);
+        }
+    </script>
+</body>
+                                                                             </html>
+                                                                             
