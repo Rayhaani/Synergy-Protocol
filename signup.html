@@ -172,7 +172,15 @@ const firebaseConfig = {
 
 // 2. Tada Tsarin (Initialize Firebase)
 // Mun sanya shi a cikin variable 'app' domin komai ya zama standard
+// Asalin yadda ka kunna Firebase dinka yana nan 100%
 const app = firebase.initializeApp(firebaseConfig);
+
+// SAKA WADANNAN LAYUKAN MAI KYAU A DAIDAI KASANSA:
+firebase.firestore(app).settings({
+    experimentalForceLongPolling: true,
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+        
 
 // 3. Saita Manhajoji (Initialize Services)
 const db = firebase.firestore();      // Domin Profile da Security
