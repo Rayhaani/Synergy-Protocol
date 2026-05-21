@@ -163,10 +163,19 @@ const firebaseConfig = {
     authDomain: "synergy-protocol.firebaseapp.com", 
     projectId: "synergy-protocol" 
 };
+
+        // Asalin yadda shafin Sign-in naka yake 100%
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-function showTopNotif(message, type) {
+// SAKA WANNAN GYARAN KAI TSAYE A KASA DA SHI:
+db.settings({
+    experimentalForceLongPolling: true,
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+        
+
+        function showTopNotif(message, type) {
     let bar = document.getElementById('notification-bar');
     if (!bar) {
         bar = document.createElement('div');
@@ -291,10 +300,6 @@ function forgotPassword() {
     
     
 
-
-        
-        
-    
     </script>
 </body>
 </html>
