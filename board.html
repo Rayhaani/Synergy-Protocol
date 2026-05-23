@@ -135,71 +135,67 @@
     </div>
 
     <script>
-           let MasterTaskRepository = [];
+    let MasterTaskRepository = [];
 
-    // Firebase configuration dinka na asali
+    // Saita Firebase Config dinka na asali
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
         projectId: "synergy-protocol"
     };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.firestore(); // Kunna Firestore
+    const db = firebase.firestore();
 
     window.onload = async () => {
         await startSleekAggregator();
     };
 
-    // Mun canza wannan gurin ya dawo da ainihin tasks na Adsterra Smartlinks ɗinka
+    // Wannan function din zai samar da ayyuka 60 gaba daya ta amfani da Loop
     async function startSleekAggregator() {
-    try {
-        MasterTaskRepository = [];
-        
-        // Jerin sunayen ayyukan fasaha daban-daban da zamu rika juya suna
-        const techTitles = [
-            "⚡ Activate Core Quantum Mining Node",
-            "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
-            "🌐 Decentralized Web3 Protocol Verification Check",
-            "🧠 Train Neural Interface Model - Pattern Recognition",
-            "🔐 Secure Quantum Ledger Authentication Validation",
-            "💎 Shard Processing Node Verification Check",
-            "🚀 Cloud Compute Optimisation Task (Beta Node)",
-            "📊 Distributed Data Pipeline Structuring Process",
-            "🧬 Validate Bio-Metric Encrypted Data Link",
-            "🛡️ Cyber Security Firewall Penetration Log"
-        ];
-
-        // Muna amfani da Loop guda 6 don ya ninka wadannan sunayen su bamu ayyuka 60 gaba daya
-        for (let i = 1; i <= 60; i++) {
-            // Dauko suna daya bayan daya daga cikin array din sama
-            let titleIndex = i % techTitles.length;
-            let baseTitle = techTitles[titleIndex];
+        try {
+            MasterTaskRepository = [];
             
-            // Sauya adadin maki kadan-kadan don kada su zama iri daya
-            let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+            const techTitles = [
+                "⚡ Activate Core Quantum Mining Node",
+                "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
+                "🌐 Decentralized Web3 Protocol Verification Check",
+                "🧠 Train Neural Interface Model - Pattern Recognition",
+                "🔐 Secure Quantum Ledger Authentication Validation",
+                "💎 Shard Processing Node Verification Check",
+                "🚀 Cloud Compute Optimisation Task (Beta Node)",
+                "📊 Distributed Data Pipeline Structuring Process",
+                "🧬 Validate Bio-Metric Encrypted Data Link",
+                "🛡️ Cyber Security Firewall Penetration Log"
+            ];
 
-            MasterTaskRepository.push({
-                id: `ad_node_${i}`,
-                title: `[NODE-${1000 + i}] ${baseTitle}`,
-                reward: parseFloat(randomReward),
-                slots: 'Continuous',
-                // Dukansu suna amfani da babban Smartlink dinka na Adsterra
-                link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
-            });
+            // Generating 60 tasks automatically
+            for (let i = 1; i <= 60; i++) {
+                let titleIndex = i % techTitles.length;
+                let baseTitle = techTitles[titleIndex];
+                let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+
+                MasterTaskRepository.push({
+                    id: `ad_node_${i}`,
+                    title: `[NODE-${1000 + i}] ${baseTitle}`,
+                    reward: parseFloat(randomReward),
+                    slots: 'Continuous',
+                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+                });
+            }
+
+            // Dan tsayawa na sakan 1 don loading shimmer ya nuna
+            await new Promise(r => setTimeout(r, 1000));
+            renderTaskMatrix();
+        } catch (err) {
+            console.error("Aggregation Error:", err);
         }
-
-        await new Promise(r => setTimeout(r, 1000));
-        renderTaskMatrix();
-    } catch (err) {
-        console.error("Aggregation Error:", err);
     }
-                }
-        
 
     function renderTaskMatrix() {
         const target = document.getElementById('tasks-grid-target');
         target.innerHTML = '';
 
+        // Idan loop din yana aiki, nan zai gina katuna guda 60 gaba daya
         MasterTaskRepository.forEach(task => {
             const rowHtml = `
                 <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -232,45 +228,32 @@
         target.classList.remove('opacity-0');
     }
 
-    // Wannan shi ne ainihin babban injin dake sarrafa dannawa da adana kudi
     function deployTaskNode(id) {
-        // Nemo takaitaccen aikin da aka danna
         const selectedTask = MasterTaskRepository.find(t => t.id === id);
         if (!selectedTask) return;
 
-        // 1. Bude Adsterra Smartlink dinka a sabon shafi (New Tab)
         window.open(selectedTask.link, '_blank');
-
-        // 2. Nuna wa mamba sanarwa cewa aikin ya fara kirga lokaci
         alert("Task Node Deployed! Don Allah tsaya a shafin da ya bude na tsawon sakan 15 don samun maki.");
 
-        // 3. Tsarin Jira na sakan 15 (Timer) kafin tura kudi ga Firebase
         setTimeout(async () => {
             try {
-                // Tabbatar mamba yana ciki (Kuna iya amfani da firebase.auth().currentUser.uid)
                 const user = firebase.auth().currentUser;
-                
                 if (user) {
                     const userRef = db.collection('users').doc(user.uid);
-                    
-                    // Kara maki (points) a asusun mamba na Firestore ta atomatik
                     await userRef.update({
                         points: firebase.firestore.FieldValue.increment(selectedTask.reward)
                     });
-                    
                     alert(`An kammala aiki lafiya! +${selectedTask.reward} Points an saka a asusunka.`);
                 } else {
-                    // Idan ba kayi login ba (Don gwaji tukunna)
                     alert(`Gwajin Nasara: Node dinka ya cika sharadin sakan 15! (Login don ceton maki).`);
                 }
             } catch (error) {
                 console.error("Firebase Update Error:", error);
                 alert("An samu matsala wajen tura maki ga database.");
             }
-        }, 15000); // 15000 milliseconds = Sakan 15
-                                                       }
-        
+        }, 15000); 
+    }
+   
     </script>
 </body>
-                                                                             </html>
-                                                                             
+                                                                             </html>                                                                           
