@@ -152,39 +152,49 @@
 
     // Mun canza wannan gurin ya dawo da ainihin tasks na Adsterra Smartlinks ɗinka
     async function startSleekAggregator() {
-        try {
-            // A halin yanzu mun saita nodes guda uku na daban da zasu raba wa mutane lada
-            MasterTaskRepository = [
-                { 
-                    id: 'ad_node_1', 
-                    title: '⚡ Activate Core Core Crypto Mining Node (High Yield)', 
-                    reward: 0.15, 
-                    slots: 'Continuous',
-                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
-                },
-                { 
-                    id: 'ad_node_2', 
-                    title: '🛰️ Synchronize Satellite Data & Verify AI Sub-Network', 
-                    reward: 0.15, 
-                    slots: 'Continuous',
-                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
-                },
-                { 
-                    id: 'ad_node_3', 
-                    title: '🌐 Decentralized Web3 Protocol Verification Check', 
-                    reward: 0.15, 
-                    slots: 'Continuous',
-                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
-                }
-            ];
+    try {
+        MasterTaskRepository = [];
+        
+        // Jerin sunayen ayyukan fasaha daban-daban da zamu rika juya suna
+        const techTitles = [
+            "⚡ Activate Core Quantum Mining Node",
+            "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
+            "🌐 Decentralized Web3 Protocol Verification Check",
+            "🧠 Train Neural Interface Model - Pattern Recognition",
+            "🔐 Secure Quantum Ledger Authentication Validation",
+            "💎 Shard Processing Node Verification Check",
+            "🚀 Cloud Compute Optimisation Task (Beta Node)",
+            "📊 Distributed Data Pipeline Structuring Process",
+            "🧬 Validate Bio-Metric Encrypted Data Link",
+            "🛡️ Cyber Security Firewall Penetration Log"
+        ];
 
-            // Jira na dakika guda don loading shimmer din ya fito kafin ya nuna aikin
-            await new Promise(r => setTimeout(r, 1000));
-            renderTaskMatrix();
-        } catch (err) {
-            console.error("Aggregation Error:", err);
+        // Muna amfani da Loop guda 6 don ya ninka wadannan sunayen su bamu ayyuka 60 gaba daya
+        for (let i = 1; i <= 60; i++) {
+            // Dauko suna daya bayan daya daga cikin array din sama
+            let titleIndex = i % techTitles.length;
+            let baseTitle = techTitles[titleIndex];
+            
+            // Sauya adadin maki kadan-kadan don kada su zama iri daya
+            let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+
+            MasterTaskRepository.push({
+                id: `ad_node_${i}`,
+                title: `[NODE-${1000 + i}] ${baseTitle}`,
+                reward: parseFloat(randomReward),
+                slots: 'Continuous',
+                // Dukansu suna amfani da babban Smartlink dinka na Adsterra
+                link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+            });
         }
+
+        await new Promise(r => setTimeout(r, 1000));
+        renderTaskMatrix();
+    } catch (err) {
+        console.error("Aggregation Error:", err);
     }
+                }
+        
 
     function renderTaskMatrix() {
         const target = document.getElementById('tasks-grid-target');
