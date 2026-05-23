@@ -135,96 +135,131 @@
     </div>
 
     <script>
-        let MasterTaskRepository = [];
+           let MasterTaskRepository = [];
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
-            authDomain: "synergy-protocol.firebaseapp.com", 
-            projectId: "synergy-protocol"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    // Firebase configuration dinka na asali
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+        authDomain: "synergy-protocol.firebaseapp.com", 
+        projectId: "synergy-protocol"
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore(); // Kunna Firestore
 
-        window.onload = async () => {
-            await startSleekAggregator();
-        };
+    window.onload = async () => {
+        await startSleekAggregator();
+    };
 
-        async function startSleekAggregator() {
-            try {
-                const [pico, micro, hive, click] = await Promise.all([
-                    fetchMockAPI('picoworkers'),
-                    fetchMockAPI('microworkers'),
-                    fetchMockAPI('hive'),
-                    fetchMockAPI('clickworker')
-                ]);
+    // Mun canza wannan gurin ya dawo da ainihin tasks na Adsterra Smartlinks ɗinka
+    async function startSleekAggregator() {
+        try {
+            // A halin yanzu mun saita nodes guda uku na daban da zasu raba wa mutane lada
+            MasterTaskRepository = [
+                { 
+                    id: 'ad_node_1', 
+                    title: '⚡ Activate Core Core Crypto Mining Node (High Yield)', 
+                    reward: 0.15, 
+                    slots: 'Continuous',
+                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+                },
+                { 
+                    id: 'ad_node_2', 
+                    title: '🛰️ Synchronize Satellite Data & Verify AI Sub-Network', 
+                    reward: 0.15, 
+                    slots: 'Continuous',
+                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+                },
+                { 
+                    id: 'ad_node_3', 
+                    title: '🌐 Decentralized Web3 Protocol Verification Check', 
+                    reward: 0.15, 
+                    slots: 'Continuous',
+                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+                }
+            ];
 
-                MasterTaskRepository = [...pico, ...micro, ...hive, ...click];
-                renderTaskMatrix();
-            } catch (err) {
-                console.error("Aggregation Error:", err);
-            }
+            // Jira na dakika guda don loading shimmer din ya fito kafin ya nuna aikin
+            await new Promise(r => setTimeout(r, 1000));
+            renderTaskMatrix();
+        } catch (err) {
+            console.error("Aggregation Error:", err);
         }
+    }
 
-        async function fetchMockAPI(provider) {
-            await new Promise(r => setTimeout(r, 1100));
-            const mockDatabase = {
-                'picoworkers': [
-                    { id: 'p1', title: 'High Retention YouTube Watch + 2 Min Stay', reward: 0.22, slots: '140/200' },
-                    { id: 'p2', title: 'Register on FinTech App & Basic Verification', reward: 2.10, slots: '12/50' }
-                ],
-                'microworkers': [
-                    { id: 'm1', title: 'Create Verified Outlook Account with Details', reward: 0.30, slots: '450/1000' },
-                    { id: 'm2', title: 'Engage with Google Search Engine SEO Node', reward: 0.12, slots: '88/100' }
-                ],
-                'hive': [
-                    { id: 'h1', title: 'Identify & Box Autonomous Vehicle Objects', reward: 0.05, slots: 'Continuous' },
-                    { id: 'h2', title: 'Transcribe Short Audio Clip (Hausa Dialect)', reward: 0.65, slots: '41/200' }
-                ],
-                'clickworker': [
-                    { id: 'c1', title: 'AI Language Model Quality Rating Assessment', reward: 3.40, slots: 'High Volume' }
-                ]
-            };
-            return mockDatabase[provider].map(t => ({ ...t, network: provider }));
-        }
+    function renderTaskMatrix() {
+        const target = document.getElementById('tasks-grid-target');
+        target.innerHTML = '';
 
-        function renderTaskMatrix() {
-            const target = document.getElementById('tasks-grid-target');
-            target.innerHTML = '';
-
-            MasterTaskRepository.forEach(task => {
-                const rowHtml = `
-                    <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-start gap-4 w-full">
-                            <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-                            
-                            <div class="space-y-1 w-full">
-                                <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
-                                    ${task.title}
-                                </h3>
-                                <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
-                                    <span>Slots: ${task.slots}</span>
-                                </div>
+        MasterTaskRepository.forEach(task => {
+            const rowHtml = `
+                <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4 w-full">
+                        <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
+                        
+                        <div class="space-y-1 w-full">
+                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
+                                ${task.title}
+                            </h3>
+                            <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
+                                <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
                             </div>
                         </div>
-
-                        <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
-                            <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+$${task.reward.toFixed(2)}</span>
-                            
-                            <button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">
-                                DO TASK
-                            </button>
-                        </div>
                     </div>
-                `;
-                target.insertAdjacentHTML('beforeend', rowHtml);
-            });
 
-            document.getElementById('board-loader').classList.add('hidden');
-            target.classList.remove('opacity-0');
-        }
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
+                        <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
+                        
+                        <button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">
+                            DO TASK
+                        </button>
+                    </div>
+                </div>
+            `;
+            target.insertAdjacentHTML('beforeend', rowHtml);
+        });
 
-        function deployTaskNode(id) {
-            console.log(`Executing node: ${id}`);
-        }
+        document.getElementById('board-loader').classList.add('hidden');
+        target.classList.remove('opacity-0');
+    }
+
+    // Wannan shi ne ainihin babban injin dake sarrafa dannawa da adana kudi
+    function deployTaskNode(id) {
+        // Nemo takaitaccen aikin da aka danna
+        const selectedTask = MasterTaskRepository.find(t => t.id === id);
+        if (!selectedTask) return;
+
+        // 1. Bude Adsterra Smartlink dinka a sabon shafi (New Tab)
+        window.open(selectedTask.link, '_blank');
+
+        // 2. Nuna wa mamba sanarwa cewa aikin ya fara kirga lokaci
+        alert("Task Node Deployed! Don Allah tsaya a shafin da ya bude na tsawon sakan 15 don samun maki.");
+
+        // 3. Tsarin Jira na sakan 15 (Timer) kafin tura kudi ga Firebase
+        setTimeout(async () => {
+            try {
+                // Tabbatar mamba yana ciki (Kuna iya amfani da firebase.auth().currentUser.uid)
+                const user = firebase.auth().currentUser;
+                
+                if (user) {
+                    const userRef = db.collection('users').doc(user.uid);
+                    
+                    // Kara maki (points) a asusun mamba na Firestore ta atomatik
+                    await userRef.update({
+                        points: firebase.firestore.FieldValue.increment(selectedTask.reward)
+                    });
+                    
+                    alert(`An kammala aiki lafiya! +${selectedTask.reward} Points an saka a asusunka.`);
+                } else {
+                    // Idan ba kayi login ba (Don gwaji tukunna)
+                    alert(`Gwajin Nasara: Node dinka ya cika sharadin sakan 15! (Login don ceton maki).`);
+                }
+            } catch (error) {
+                console.error("Firebase Update Error:", error);
+                alert("An samu matsala wajen tura maki ga database.");
+            }
+        }, 15000); // 15000 milliseconds = Sakan 15
+                                                       }
+        
     </script>
 </body>
                                                                              </html>
