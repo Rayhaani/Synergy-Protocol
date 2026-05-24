@@ -298,8 +298,6 @@ async function resendVerification() {
 }
 
 // 2. GYARARREN REGISTER FUNCTION (Don magance duplicate Email/User)
-
-
    async function register() {
     const btn = document.getElementById('reg-btn');
     const mainCard = document.getElementById('main-register-card'); 
@@ -322,24 +320,19 @@ async function resendVerification() {
     }
 
     try {
-        // 1. DUBAN IZINI (AUTHORIZATION)
-        const authDoc = await db.collection("authorized_users").doc(user).get();
-        if (!authDoc.exists) {
-            throw new Error("Access Denied: You aren't authorised to register at this moment.");
-        }
-
-        // 2. DUBA USERNAME
+        // 1. DUBA USERNAME
         const userRef = db.collection("users").doc(user);
         const userDoc = await userRef.get();
         if (userDoc.exists) {
             throw new Error("This username isn't available.");
         }
 
-        // 3. DUBA WHATSAPP
+        // 2. DUBA WHATSAPP
         const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
         if (!phoneCheck.empty) {
             throw new Error("This WhatsApp number is already in use.");
         }
+        
 
         // 4. CREATE ACCOUNT
         const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
