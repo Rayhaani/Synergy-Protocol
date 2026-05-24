@@ -161,255 +161,218 @@ body {
     </p>
     
     <script>
-        // 1. Bayanan Hadin Gwiwa (Firebase Configuration)
-const firebaseConfig = { 
-    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
-    authDomain: "synergy-protocol.firebaseapp.com", 
-    projectId: "synergy-protocol",
-    // Tabbatar wannan URL din ya yi daidai da na Firebase Console dinka
-    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" 
-};
+      
+    // 1. Bayanan Hadin Gwiwa (Firebase Configuration)
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+        authDomain: "synergy-protocol.firebaseapp.com", 
+        projectId: "synergy-protocol",
+        databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" 
+    };
 
-// 2. Tada Tsarin (Initialize Firebase)
-// Mun sanya shi a cikin variable 'app' domin komai ya zama standard
-// Asalin yadda ka kunna Firebase dinka yana nan 100%
-const app = firebase.initializeApp(firebaseConfig);
+    // 2. Tada Tsarin (Initialize Firebase)
+    const app = firebase.initializeApp(firebaseConfig);
 
-// SAKA WADANNAN LAYUKAN MAI KYAU A DAIDAI KASANSA:
-firebase.firestore(app).settings({
-    experimentalForceLongPolling: true,
-    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-});
-        
-
-// 3. Saita Manhajoji (Initialize Services)
-const db = firebase.firestore();      // Domin Profile da Security
-const database = firebase.database(); // Domin Network da Realtime Data
-const auth = firebase.auth();           // Domin Shiga da Fita (Authentication)
-
-// 4. Saita Timer (Global Variables)
-// Wannan shi ne zai hana "checkInterval is not defined" error
-let checkInterval = null; 
-
-// 5. Neman Referrer (Helper Function)
-// Zai taimaka wajen gano wanda ya gayyaci mamba tun a farkon loda shafin
-function getReferrerFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('ref') || "admin";
-}
-        
-       function validateForm() {
-    const fullName = document.getElementById('full-name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const user = document.getElementById('username').value.trim();
-    const state = document.getElementById('state').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const pass = document.getElementById('password').value.trim();
-
-    const steps = [ 
-        { el: 'step-email', valid: fullName.split(' ').length >= 2 }, 
-        { el: 'step-user', valid: email.includes('@') && email.includes('.') }, 
-        { el: 'step-state', valid: user.length >= 3 }, 
-        { el: 'step-phone', valid: state.length >= 3 }, 
-        { el: 'step-pass', valid: phone.length >= 10 },
-        { el: 'reg-btn', valid: pass.length >= 6 }
-    ];
+    firebase.firestore(app).settings({
+        experimentalForceLongPolling: true,
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+    });
     
-    let completed = 0;
-    steps.forEach(s => {
-        const target = document.getElementById(s.el);
-        if (s.valid) {
-            if (target.id === 'reg-btn') { target.disabled = false; target.style.opacity = "1"; }
-            else { target.classList.remove('hidden'); }
-            completed++;
-        }
-    });
-    document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/6)*100)}%`;
+    // 3. Saita Manhajoji (Initialize Services)
+    const db = firebase.firestore();      
+    const database = firebase.database(); 
+    const auth = firebase.auth();           
 
-    // SNEAKY SCROLL GYARA: Wannan zai tura katin kasa ta atomatik don button ya fito
-    const card = document.getElementById('main-register-card');
-    if (card) {
-        card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+    // 4. Saita Timer (Global Variables)
+    let checkInterval = null; 
+
+    // 5. Neman Referrer (Helper Function)
+    function getReferrerFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('ref') || "admin";
     }
-         }
-        
-        
-
-        // GYARA 3: GitHub Style Top Notification (Resend logic)
-        // Function na nuna sanarwa a sama (GitHub Style)
-function showTopNotif(message, type) {
-    const bar = document.getElementById('notification-bar');
-    const msg = document.getElementById('notif-message');
     
-    bar.className = (type === 'success') ? 'notif-success show' : 'notif-error show';
-    msg.innerText = message;
+    function validateForm() {
+        const fullName = document.getElementById('full-name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const user = document.getElementById('username').value.trim();
+        const state = document.getElementById('state').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const pass = document.getElementById('password').value.trim();
 
-    // Zai bace bayan sakan 5
-    setTimeout(closeNotif, 5000);
-}
-
-function closeNotif() {
-    document.getElementById('notification-bar').classList.remove('show');
-}
-
-
-     function showSuccessOverlay(email) {
-    // 1. Mun fara duba email din a background
-    startVerificationListener(); 
-
-    Swal.fire({
-        html: `
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
-                <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
-                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
-                    <p style="font-family: 'Quicksand', sans-serif; font-size: 15px; line-height: 1.6;">Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
-                    <p class="animate-pulse" style="font-size: 11px; color: #3fb950; margin-top: 10px; font-family: 'Syncopate', sans-serif;">Waiting for verification...</p>
-                </div>
-            </div>`,
-        background: '#020617', 
-        showConfirmButton: true, 
-        confirmButtonText: 'RESEND LINK', 
-        allowOutsideClick: false,
-        customClass: { 
-            popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', 
-            confirmButton: 'resend-btn-neon orbitron' 
-        }
-    }).then((result) => {
-        if (result.isConfirmed) { 
-            resendVerification(); 
-            showSuccessOverlay(email); 
-        }
-    });
-     }
+        const steps = [ 
+            { el: 'step-email', valid: fullName.split(' ').length >= 2 }, 
+            { el: 'step-user', valid: email.includes('@') && email.includes('.') }, 
+            { el: 'step-state', valid: user.length >= 3 }, 
+            { el: 'step-phone', valid: state.length >= 3 }, 
+            { el: 'step-pass', valid: phone.length >= 10 },
+            { el: 'reg-btn', valid: pass.length >= 6 }
+        ];
         
-
-       // 1. GYARARREN RESEND FUNCTION (Don ya fito a bar)
-async function resendVerification() {
-    try {
-        const fbUser = firebase.auth().currentUser;
-        if (fbUser) {
-            await fbUser.sendEmailVerification();
-            showTopNotif("Your verification link has been resent", "success");
-        }
-    } catch (err) {
-        showTopNotif("Security protocol active. Please wait a moment.", "error");
-    }
-}
-
-// 2. GYARARREN REGISTER FUNCTION (Don magance duplicate Email/User)
-   async function register() {
-    const btn = document.getElementById('reg-btn');
-    const mainCard = document.getElementById('main-register-card'); 
-    const email = document.getElementById('email').value.trim();
-    const user = document.getElementById('username').value.toLowerCase().trim();
-    const pass = document.getElementById('password').value.trim();
-    const rawPhone = document.getElementById('phone').value.trim();
-    const fullName = document.getElementById('full-name').value.trim();
-    const state = document.getElementById('state').value.trim();
-    const referrer = getReferrerFromURL();
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
-
-    let formattedPhone = rawPhone;
-    if (rawPhone.startsWith('0')) {
-        formattedPhone = '234' + rawPhone.substring(1);
-    } else if (!rawPhone.startsWith('234') && rawPhone !== "") {
-        formattedPhone = '234' + rawPhone;
-    }
-
-    try {
-        // 1. DUBA USERNAME
-        const userRef = db.collection("users").doc(user);
-        const userDoc = await userRef.get();
-        if (userDoc.exists) {
-            throw new Error("This username isn't available.");
-        }
-
-        // 2. DUBA WHATSAPP
-        const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
-        if (!phoneCheck.empty) {
-            throw new Error("This WhatsApp number is already in use.");
-        }
-        
-
-        // 4. CREATE ACCOUNT
-        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-        await userCredential.user.sendEmailVerification();
-        
-        mainCard.style.display = 'none';
-        showSuccessOverlay(email); // Wannan ne yake kiran Overlay
-
-        // 5. SAVE DATA
-        await userRef.set({
-            uid: userCredential.user.uid,
-            fullName: fullName,
-            email: email, 
-            username: user,
-            state: state,
-            whatsapp: formattedPhone, 
-            isVerified: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            referredBy: referrer
-        });
-
-        await database.ref('users/' + user).set({
-            whatsapp: formattedPhone,
-            balance: 0,
-            referredBy: referrer,
-            last_update: new Date().toISOString()
-        });
-
-    } catch (e) {
-        console.error("Registration Error:", e);
-        showTopNotif(e.message, "error");
-        btn.disabled = false;
-        btn.innerText = "RETRY ACTIVATION";
-    }
-}
-
-// WANNAN FUNCTION DIN NE YA BACE MAKA DAZU
-function showSuccessOverlay(email) {
-    startVerificationListener(); 
-
-    Swal.fire({
-        html: `
-            <div class="flex flex-col items-center">
-                <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
-                <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
-                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
-                    <p>Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
-                </div>
-            </div>`,
-        background: '#020617', 
-        showConfirmButton: true, 
-        confirmButtonText: 'RESEND LINK', 
-        customClass: { confirmButton: 'resend-btn-neon orbitron' }
-    }).then((result) => {
-        if (result.isConfirmed) { resendVerification(); showSuccessOverlay(email); }
-    });
-}
-
-// WANNAN MA YA BACE MAKA DAZU
-function startVerificationListener() {
-    if (checkInterval) clearInterval(checkInterval);
-    checkInterval = setInterval(async () => {
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            await currentUser.reload(); 
-            if (currentUser.emailVerified) {
-                clearInterval(checkInterval); 
-                showTopNotif("Security Verified! Redirecting...", "success");
-                setTimeout(() => { window.location.href = "signin.html"; }, 1500);
+        let completed = 0;
+        steps.forEach(s => {
+            const target = document.getElementById(s.el);
+            if (s.valid) {
+                if (target.id === 'reg-btn') { target.disabled = false; target.style.opacity = "1"; }
+                else { target.classList.remove('hidden'); }
+                completed++;
             }
-        }
-    }, 3000);
-                }
-            
-    
+        });
+        document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/6)*100)}%`;
 
+        const card = document.getElementById('main-register-card');
+        if (card) {
+            card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
+        }
+    }
+    
+    // Function na nuna sanarwa a sama (GitHub Style)
+    function showTopNotif(message, type) {
+        const bar = document.getElementById('notification-bar');
+        const msg = document.getElementById('notif-message');
         
+        bar.className = (type === 'success') ? 'notif-success show' : 'notif-error show';
+        msg.innerText = message;
+
+        setTimeout(closeNotif, 5000);
+    }
+
+    function closeNotif() {
+        document.getElementById('notification-bar').classList.remove('show');
+    }
+
+    // RESEND FUNCTION
+    async function resendVerification() {
+        try {
+            const fbUser = firebase.auth().currentUser;
+            if (fbUser) {
+                await fbUser.sendEmailVerification();
+                showTopNotif("Your verification link has been resent", "success");
+            }
+        } catch (err) {
+            showTopNotif("Security protocol active. Please wait a moment.", "error");
+        }
+    }
+
+    // GYARARREN REGISTER FUNCTION (An cire authorized_users check fafur)
+    async function register() {
+        const btn = document.getElementById('reg-btn');
+        const mainCard = document.getElementById('main-register-card'); 
+        const email = document.getElementById('email').value.trim();
+        const user = document.getElementById('username').value.toLowerCase().trim();
+        const pass = document.getElementById('password').value.trim();
+        const rawPhone = document.getElementById('phone').value.trim();
+        const fullName = document.getElementById('full-name').value.trim();
+        const state = document.getElementById('state').value.trim();
+        const referrer = getReferrerFromURL();
+
+        btn.disabled = true;
+        btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
+
+        let formattedPhone = rawPhone;
+        if (rawPhone.startsWith('0')) {
+            formattedPhone = '234' + rawPhone.substring(1);
+        } else if (!rawPhone.startsWith('234') && rawPhone !== "") {
+            formattedPhone = '234' + rawPhone;
+        }
+
+        try {
+            // [AN CIRE MATAKI NA 1 DANA ASALI NA DUBA AUTHORIZED USERS]
+            // Tsarin zai tafi kai tsaye ga duba ko username yana free
+
+            // 1. DUBA USERNAME
+            const userRef = db.collection("users").doc(user);
+            const userDoc = await userRef.get();
+            if (userDoc.exists) {
+                throw new Error("This username isn't available.");
+            }
+
+            // 2. DUBA WHATSAPP
+            const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
+            if (!phoneCheck.empty) {
+                throw new Error("This WhatsApp number is already in use.");
+            }
+
+            // 3. CREATE ACCOUNT
+            const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+            await userCredential.user.sendEmailVerification();
+            
+            mainCard.style.display = 'none';
+            showSuccessOverlay(email); 
+
+            // 4. SAVE DATA TO FIRESTORE
+            await userRef.set({
+                uid: userCredential.user.uid,
+                fullName: fullName,
+                email: email, 
+                username: user,
+                state: state,
+                whatsapp: formattedPhone, 
+                isVerified: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                referredBy: referrer
+            });
+
+            // 5. SAVE DATA TO REALTIME DATABASE
+            await database.ref('users/' + user).set({
+                whatsapp: formattedPhone,
+                balance: 0,
+                referredBy: referrer,
+                last_update: new Date().toISOString()
+            });
+
+        } catch (e) {
+            console.error("Registration Error:", e);
+            showTopNotif(e.message, "error");
+            btn.disabled = false;
+            btn.innerText = "RETRY ACTIVATION";
+        }
+    }
+
+    function showSuccessOverlay(email) {
+        startVerificationListener(); 
+
+        Swal.fire({
+            html: `
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-cyan-500 rounded-full mb-6 shadow-[0_0_20px_#00f2fe]"></div>
+                    <h2 class="orbitron text-white text-xl mb-6">REGISTRATION SUCCESSFUL</h2>
+                    <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px dashed rgba(0,242,254,0.3); width: 100%; color: #fff;">
+                        <p style="font-family: 'Space Grotesk', sans-serif; font-size: 15px;">Email sent to <b style="color:#00f2fe;">${email}</b>. Verify to proceed.</p>
+                        <p class="animate-pulse" style="font-size: 11px; color: #3fb950; margin-top: 10px; font-family: 'Syncopate', sans-serif;">Waiting for verification...</p>
+                    </div>
+                </div>`,
+            background: '#020617', 
+            showConfirmButton: true, 
+            confirmButtonText: 'RESEND LINK', 
+            allowOutsideClick: false,
+            customClass: { 
+                popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', 
+                confirmButton: 'resend-btn-neon orbitron' 
+            }
+        }).then((result) => {
+            if (result.isConfirmed) { 
+                resendVerification(); 
+                showSuccessOverlay(email); 
+            }
+        });
+    }
+
+    function startVerificationListener() {
+        if (checkInterval) clearInterval(checkInterval);
+        checkInterval = setInterval(async () => {
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                await currentUser.reload(); 
+                if (currentUser.emailVerified) {
+                    clearInterval(checkInterval); 
+                    showTopNotif("Security Verified! Redirecting...", "success");
+                    setTimeout(() => { window.location.href = "signin.html"; }, 1500);
+                }
+            }
+        }, 3000);
+    }
+
         
     </script>
 </body>
