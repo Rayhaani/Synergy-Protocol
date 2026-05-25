@@ -66,7 +66,12 @@
     };
 
     const app = firebase.initializeApp(firebaseConfig);
-    firebase.firestore(app).settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+    
+    // GINA NAN: experimentalForceLongPolling ya dawo don kwanciyar hankali
+    firebase.firestore(app).settings({ 
+        experimentalForceLongPolling: true, 
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED 
+    });
     
     const db = firebase.firestore();      
     const database = firebase.database(); 
