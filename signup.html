@@ -256,79 +256,82 @@ body {
 
     // GYARARREN REGISTER FUNCTION (An cire authorized_users check fafur)
     async function register() {
-        const btn = document.getElementById('reg-btn');
-        const mainCard = document.getElementById('main-register-card'); 
-        const email = document.getElementById('email').value.trim();
-        const user = document.getElementById('username').value.toLowerCase().trim();
-        const pass = document.getElementById('password').value.trim();
-        const rawPhone = document.getElementById('phone').value.trim();
-        const fullName = document.getElementById('full-name').value.trim();
-        const state = document.getElementById('state').value.trim();
-        const referrer = getReferrerFromURL();
+    const btn = document.getElementById('reg-btn');
+    const mainCard = document.getElementById('main-register-card'); 
+    const email = document.getElementById('email').value.trim();
+    const user = document.getElementById('username').value.toLowerCase().trim();
+    const pass = document.getElementById('password').value.trim();
+    const rawPhone = document.getElementById('phone').value.trim();
+    const fullName = document.getElementById('full-name').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const referrer = getReferrerFromURL();
 
-        btn.disabled = true;
-        btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
 
-        let formattedPhone = rawPhone;
-        if (rawPhone.startsWith('0')) {
-            formattedPhone = '234' + rawPhone.substring(1);
-        } else if (!rawPhone.startsWith('234') && rawPhone !== "") {
-            formattedPhone = '234' + rawPhone;
-        }
-
-        try {
-            // [AN CIRE MATAKI NA 1 DANA ASALI NA DUBA AUTHORIZED USERS]
-            // Tsarin zai tafi kai tsaye ga duba ko username yana free
-
-            // 1. DUBA USERNAME
-            const userRef = db.collection("users").doc(user);
-            const userDoc = await userRef.get();
-            if (userDoc.exists) {
-                throw new Error("This username isn't available.");
-            }
-
-            // 2. DUBA WHATSAPP
-            const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
-            if (!phoneCheck.empty) {
-                throw new Error("This WhatsApp number is already in use.");
-            }
-
-            // 3. CREATE ACCOUNT
-            const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-            await userCredential.user.sendEmailVerification();
-            
-            mainCard.style.display = 'none';
-            showSuccessOverlay(email); 
-
-            // 4. SAVE DATA TO FIRESTORE
-            await userRef.set({
-                uid: userCredential.user.uid,
-                fullName: fullName,
-                email: email, 
-                username: user,
-                state: state,
-                whatsapp: formattedPhone, 
-                isVerified: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                referredBy: referrer
-            });
-
-            // 5. SAVE DATA TO REALTIME DATABASE
-            await database.ref('users/' + user).set({
-                whatsapp: formattedPhone,
-                balance: 0,
-                referredBy: referrer,
-                last_update: new Date().toISOString()
-            });
-
-        } catch (e) {
-            console.error("Registration Error:", e);
-            showTopNotif(e.message, "error");
-            btn.disabled = false;
-            btn.innerText = "RETRY ACTIVATION";
-        }
+    let formattedPhone = rawPhone;
+    if (rawPhone.startsWith('0')) {
+        formattedPhone = '234' + rawPhone.substring(1);
+    } else if (!rawPhone.startsWith('234') && rawPhone !== "") {
+        formattedPhone = '234' + rawPhone;
     }
 
+    try {
+        // ✅ CHECK USERNAME — Realtime Database (babu offline issue)
+        const usernameSnap = await database.ref('users/' + user).get();
+        if (usernameSnap.exists()) {
+            throw new Error("This username isn't available.");
+        }
+
+        // ✅ CHECK PHONE — Realtime Database
+        const phoneSnap = await database.ref('phones/' + formattedPhone).get();
+        if (phoneSnap.exists()) {
+            throw new Error("This WhatsApp number is already in use.");
+        }
+
+        // ✅ CREATE AUTH ACCOUNT
+        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+        await userCredential.user.sendEmailVerification();
+        
+        mainCard.style.display = 'none';
+        showSuccessOverlay(email); 
+
+        // ✅ SAVE TO REALTIME DATABASE
+        await database.ref('users/' + user).set({
+            uid: userCredential.user.uid,
+            fullName: fullName,
+            email: email,
+            username: user,
+            state: state,
+            whatsapp: formattedPhone,
+            isVerified: false,
+            referredBy: referrer,
+            last_update: new Date().toISOString()
+        });
+
+        // ✅ SAVE PHONE INDEX (don future duplicate check)
+        await database.ref('phones/' + formattedPhone).set(user);
+
+        // ✅ SAVE TO FIRESTORE (background — babu await don kada ya block)
+        db.collection("users").doc(user).set({
+            uid: userCredential.user.uid,
+            fullName: fullName,
+            email: email, 
+            username: user,
+            state: state,
+            whatsapp: formattedPhone, 
+            isVerified: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            referredBy: referrer
+        }).catch(err => console.log("Firestore background save:", err));
+
+    } catch (e) {
+        console.error("Registration Error:", e);
+        showTopNotif(e.message, "error");
+        btn.disabled = false;
+        btn.innerText = "RETRY ACTIVATION";
+    }
+    }
     function showSuccessOverlay(email) {
         startVerificationListener(); 
 
