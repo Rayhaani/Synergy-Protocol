@@ -126,10 +126,10 @@
         try {
             const userRef = db.collection("users").doc(user);
             const userDoc = await userRef.get();
-            if (userDoc.exists) throw new Error("This username is already taken.");
+            if (userDoc.exists) throw new Error("Unavailable");
 
             const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
-            if (!phoneCheck.empty) throw new Error("This WhatsApp number is already in use.");
+            if (!phoneCheck.empty) throw new Error("Used");
 
             const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
             await userCredential.user.sendEmailVerification();
@@ -159,17 +159,7 @@
         } catch (e) {
             console.error("Auth Error:", e);
             btn.disabled = false;
-            btn.innerText = "RETRY ACTIVATION";
-            
-            Swal.fire({
-                title: 'Connection Error',
-                text: 'Muna da matsala wajen haɗuwa da uwar garkenmu. Don Allah duba network ɗinka ka sake gwadawa.',
-                icon: 'error',
-                background: '#020617',
-                color: '#fff',
-                confirmButtonText: 'RETRY',
-                confirmButtonColor: '#00f2fe'
-            });
+            btn.innerHTML = "RETRY ACTIVATION";
         }
     }
 
