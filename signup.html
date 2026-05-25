@@ -255,7 +255,7 @@ body {
     }
 
     // GYARARREN REGISTER FUNCTION (An cire authorized_users check fafur)
-    async function register() {
+     async function register() {
     const btn = document.getElementById('reg-btn');
     const mainCard = document.getElementById('main-register-card'); 
     const email = document.getElementById('email').value.trim();
@@ -277,16 +277,24 @@ body {
     }
 
     try {
-        // ✅ CHECK USERNAME — Realtime Database (babu offline issue)
+        // ✅ CHECK USERNAME — Realtime Database
         const usernameSnap = await database.ref('users/' + user).get();
         if (usernameSnap.exists()) {
             throw new Error("This username isn't available.");
         }
 
-        // ✅ CHECK PHONE — Realtime Database
-        const phoneSnap = await database.ref('phones/' + formattedPhone).get();
-        if (phoneSnap.exists()) {
-            throw new Error("This WhatsApp number is already in use.");
+        // ✅ CHECK PHONE — Scan all users
+        const usersSnap = await database.ref('users').get();
+        if (usersSnap.exists()) {
+            let phoneUsed = false;
+            usersSnap.forEach(child => {
+                if (child.val().whatsapp === formattedPhone) {
+                    phoneUsed = true;
+                }
+            });
+            if (phoneUsed) {
+                throw new Error("This WhatsApp number is already in use.");
+            }
         }
 
         // ✅ CREATE AUTH ACCOUNT
@@ -309,10 +317,7 @@ body {
             last_update: new Date().toISOString()
         });
 
-        // ✅ SAVE PHONE INDEX (don future duplicate check)
-        await database.ref('phones/' + formattedPhone).set(user);
-
-        // ✅ SAVE TO FIRESTORE (background — babu await don kada ya block)
+        // ✅ SAVE TO FIRESTORE (background)
         db.collection("users").doc(user).set({
             uid: userCredential.user.uid,
             fullName: fullName,
@@ -331,7 +336,7 @@ body {
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
     }
-    }
+     }
     function showSuccessOverlay(email) {
         startVerificationListener(); 
 
