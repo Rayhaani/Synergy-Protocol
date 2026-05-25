@@ -330,13 +330,29 @@ body {
             referredBy: referrer
         }).catch(err => console.log("Firestore background save:", err));
 
-    } catch (e) {
+} catch (e) {
         console.error("Registration Error:", e);
-        showTopNotif(e.message, "error");
+        
+        let friendlyMessage = "Something went wrong. Please try again.";
+        
+        if (e.code === "auth/email-already-in-use") {
+            friendlyMessage = "This email is already registered. Please sign in.";
+        } else if (e.code === "auth/invalid-email") {
+            friendlyMessage = "Please enter a valid email address.";
+        } else if (e.code === "auth/weak-password") {
+            friendlyMessage = "Password is too weak. Use at least 6 characters.";
+        } else if (e.code === "auth/network-request-failed") {
+            friendlyMessage = "Network error. Please check your connection.";
+        } else if (e.message) {
+            friendlyMessage = e.message;
+        }
+        
+        showTopNotif(friendlyMessage, "error");
         btn.disabled = false;
         btn.innerText = "RETRY ACTIVATION";
-    }
+            }
      }
+        
     function showSuccessOverlay(email) {
         startVerificationListener(); 
 
