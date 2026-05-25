@@ -17,136 +17,34 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
         
-    
     <style>
         :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
         body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 3px; font-size: 10px; }
-        
-        /* GYARA 1: Mun rage padding da max-height don button ya fito fili */
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            backdrop-filter: blur(40px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-top: 1px solid rgba(0, 242, 254, 0.3); 
-            transition: all 0.5s ease;
-            overflow-y: auto;
-        }
-         .input-node { 
-    width: 100%; 
-    background: rgba(255, 255, 255, 0.05); 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    padding: 8px 12px; /* An rage tsayin input anan */
-    border-radius: 12px; /* An ɗan rage shi don ya dace */
-    outline: none; 
-    color: white; 
-    transition: 0.3s; 
-         }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.08); border-top: 1px solid rgba(0, 242, 254, 0.3); transition: all 0.5s ease; overflow-y: auto; }
+        .input-node { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 12px; outline: none; color: white; transition: 0.3s; }
         .input-node:focus { border-color: var(--aqua); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); }
-        
-        .resend-btn-neon {
-            background: transparent !important;
-            border: 1px solid var(--aqua) !important;
-            color: var(--aqua) !important;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-            font-family: 'Syncopate', sans-serif !important;
-            font-size: 11px !important;
-            padding: 16px 40px !important;
-            border-radius: 20px !important;
-            transition: 0.4s !important;
-            letter-spacing: 2px;
-        }
+        .resend-btn-neon { background: transparent !important; border: 1px solid var(--aqua) !important; color: var(--aqua) !important; box-shadow: 0 0 15px rgba(0, 242, 254, 0.3); font-family: 'Syncopate', sans-serif !important; font-size: 11px !important; padding: 16px 40px !important; border-radius: 20px !important; transition: 0.4s !important; letter-spacing: 2px; }
         .resend-btn-neon:hover { background: var(--aqua) !important; color: #000 !important; box-shadow: 0 0 30px var(--aqua); }
-
-
-        /* GITHUB STYLE NOTIFICATION BAR */
-#notification-bar {
-    position: fixed;
-    top: -100px; /* Boyayye a farko */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 450px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 13px;
-    font-family: 'Space Grotesk', sans-serif;
-    z-index: 9999;
-    transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid rgba(0, 242, 254, 0.3);
-}
-
-.notif-success { background: #0c2d21; color: #3fb950; border-color: #238636 !important; }
-.notif-error { background: #2d1616; color: #f85149; border-color: #da3633 !important; }
-
-#notification-bar.show { top: 20px; } /* Zai fito idan an kira shi */
-
-.close-notif { cursor: pointer; font-weight: bold; font-size: 18px; margin-left: 15px; }
-        
-
-
-        /* SYNERGY PROTOCOL - GLOBAL BACKGROUND ENGINE */
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-color: #020617; /* Deep Space Blue-Black */
-    
-    /* Wannan shi ne hadin Radial Gradient da Carbon Fibre Texture */
-    background-image: 
-        radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), 
-        url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-    
-    /* Wannan zai sa background din ya tsaya wuri daya koda ana scrolling (Premium Feel) */
-    background-attachment: fixed;
-    
-    color: #ffffff;
-    font-family: 'Space Grotesk', sans-serif;
-    overflow-x: hidden;
-}
-
-/* Kyautatawa: Karin haske ga Glassmorphism cards a kan wannan background din */
-.glass-premium {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(0, 242, 254, 0.3); /* Neon line a sama */
-    border-radius: 24px;
-}
-            </style>
+        body { margin: 0; padding: 0; min-height: 100vh; background-color: #020617; background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); background-attachment: fixed; color: #ffffff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
+    </style>
 </head>
 <body>
-<div id="notification-bar">
-    <span id="notif-message"></span>
-    <span class="close-notif" onclick="closeNotif()">×</span>
-</div>
     
 <div id="main-register-card" class="glass-card p-5 rounded-[30px] w-full max-w-md mx-4 relative z-10 max-h-[85vh] flex flex-col justify-between">
-        <div class="mb-6">
+    <div class="mb-6">
+        <div class="w-10 h-10 bg-cyan-500 rounded-full mx-auto mb-4 shadow-[0_0_15px_#00f2fe]"></div>
+        <h1 style="font-family: 'Syncopate', sans-serif !important; letter-spacing: -1px; text-align: center; text-transform: lowercase;" class="text-[22px] font-bold text-white mb-1 w-full text-center">Zynta<span class="text-cyan-400">.</span></h1> 
+        <p id="progress-text" style="font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: -0.01em; text-align: center; text-transform: capitalize;" class="text-[15px] text-cyan-400 font-bold w-full text-center mb-8">Create Your Account</p>
     
-            <div class="w-10 h-10 bg-cyan-500 rounded-full mx-auto mb-4 shadow-[0_0_15px_#00f2fe]"></div>
-            <h1 style="font-family: 'Syncopate', sans-serif !important; letter-spacing: -1px; text-align: center; text-transform: lowercase;" 
-    class="text-[22px] font-bold text-white mb-1 w-full text-center">
-    Zynta<span class="text-cyan-400">.</span>
-            </h1> 
-             <p id="progress-text" 
-   style="font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: -0.01em; text-align: center; text-transform: capitalize;" 
-   class="text-[15px] text-cyan-400 font-bold w-full text-center mb-8">
-    Create Your Account
-             </p>
-    
-            
         <div id="form-content" class="space-y-3">
             <div><label class="orbitron text-gray-500 ml-1 mb-1 block">Full Name</label><input type="text" id="full-name" oninput="validateForm()" class="input-node"></div>
             <div id="step-email" class="hidden"><label class="orbitron text-gray-500 ml-1 mb-1 block">Email Address</label><input type="email" id="email" oninput="validateForm()" class="input-node"></div>
             <div id="step-user" class="hidden"><label class="orbitron text-gray-500 ml-1 mb-1 block">Username</label><input type="text" id="username" oninput="validateForm()" class="input-node"></div>
             <div id="step-state" class="hidden"><label class="orbitron text-gray-500 ml-1 mb-1 block">State</label><input type="text" id="state" oninput="validateForm()" class="input-node"></div>
             <div id="step-phone" class="hidden">
-    <label class="orbitron text-gray-500 ml-1 mb-1 block">WhatsApp Number</label>
-    <input type="tel" id="phone" oninput="validateForm()" placeholder="08012345678" class="input-node">
+                <label class="orbitron text-gray-500 ml-1 mb-1 block">WhatsApp Number</label>
+                <input type="tel" id="phone" oninput="validateForm()" placeholder="08012345678" class="input-node">
             </div>
             <div id="step-pass" class="hidden"><label class="orbitron text-gray-500 ml-1 mb-1 block">Password</label><input type="password" id="password" oninput="validateForm()" class="input-node"></div>
             
@@ -154,15 +52,12 @@ body {
         </div>
     </div>
 
-    <p style="font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: -0.01em;" 
-   class="text-[13px] text-gray-500 text-center mt-6">
-    Already have an account? 
-    <a href="signin.html" class="text-cyan-400 font-bold hover:underline">Sign In</a>
+    <p style="font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: -0.01em;" class="text-[13px] text-gray-500 text-center mt-6">
+        Already have an account? <a href="signin.html" class="text-cyan-400 font-bold hover:underline">Sign In</a>
     </p>
+</div>
     
-    <script>
-      
-    // 1. Bayanan Hadin Gwiwa (Firebase Configuration)
+<script>
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
@@ -170,23 +65,14 @@ body {
         databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" 
     };
 
-    // 2. Tada Tsarin (Initialize Firebase)
     const app = firebase.initializeApp(firebaseConfig);
-
-    firebase.firestore(app).settings({
-        experimentalForceLongPolling: true,
-        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-    });
+    firebase.firestore(app).settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
     
-    // 3. Saita Manhajoji (Initialize Services)
     const db = firebase.firestore();      
     const database = firebase.database(); 
     const auth = firebase.auth();           
-
-    // 4. Saita Timer (Global Variables)
     let checkInterval = null; 
 
-    // 5. Neman Referrer (Helper Function)
     function getReferrerFromURL() {
         const params = new URLSearchParams(window.location.search);
         return params.get('ref') || "admin";
@@ -219,42 +105,8 @@ body {
             }
         });
         document.getElementById('progress-text').innerText = `Initialize Sequence: ${Math.round((completed/6)*100)}%`;
-
-        const card = document.getElementById('main-register-card');
-        if (card) {
-            card.scrollTo({ top: card.scrollHeight, behavior: 'smooth' });
-        }
-    }
-    
-    // Function na nuna sanarwa a sama (GitHub Style)
-    function showTopNotif(message, type) {
-        const bar = document.getElementById('notification-bar');
-        const msg = document.getElementById('notif-message');
-        
-        bar.className = (type === 'success') ? 'notif-success show' : 'notif-error show';
-        msg.innerText = message;
-
-        setTimeout(closeNotif, 5000);
     }
 
-    function closeNotif() {
-        document.getElementById('notification-bar').classList.remove('show');
-    }
-
-    // RESEND FUNCTION
-    async function resendVerification() {
-        try {
-            const fbUser = firebase.auth().currentUser;
-            if (fbUser) {
-                await fbUser.sendEmailVerification();
-                showTopNotif("Your verification link has been resent", "success");
-            }
-        } catch (err) {
-            showTopNotif("Security protocol active. Please wait a moment.", "error");
-        }
-    }
-
-    // GYARARREN REGISTER FUNCTION (An cire authorized_users check fafur)
     async function register() {
         const btn = document.getElementById('reg-btn');
         const mainCard = document.getElementById('main-register-card'); 
@@ -269,38 +121,22 @@ body {
         btn.disabled = true;
         btn.innerHTML = `<span class="orbitron animate-pulse">CONNECTING...</span>`;
 
-        let formattedPhone = rawPhone;
-        if (rawPhone.startsWith('0')) {
-            formattedPhone = '234' + rawPhone.substring(1);
-        } else if (!rawPhone.startsWith('234') && rawPhone !== "") {
-            formattedPhone = '234' + rawPhone;
-        }
+        let formattedPhone = rawPhone.startsWith('0') ? '234' + rawPhone.substring(1) : (!rawPhone.startsWith('234') ? '234' + rawPhone : rawPhone);
 
         try {
-            // [AN CIRE MATAKI NA 1 DANA ASALI NA DUBA AUTHORIZED USERS]
-            // Tsarin zai tafi kai tsaye ga duba ko username yana free
-
-            // 1. DUBA USERNAME
             const userRef = db.collection("users").doc(user);
             const userDoc = await userRef.get();
-            if (userDoc.exists) {
-                throw new Error("This username isn't available.");
-            }
+            if (userDoc.exists) throw new Error("This username is already taken.");
 
-            // 2. DUBA WHATSAPP
             const phoneCheck = await db.collection("users").where("whatsapp", "==", formattedPhone).get();
-            if (!phoneCheck.empty) {
-                throw new Error("This WhatsApp number is already in use.");
-            }
+            if (!phoneCheck.empty) throw new Error("This WhatsApp number is already in use.");
 
-            // 3. CREATE ACCOUNT
             const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
             await userCredential.user.sendEmailVerification();
             
             mainCard.style.display = 'none';
             showSuccessOverlay(email); 
 
-            // 4. SAVE DATA TO FIRESTORE
             await userRef.set({
                 uid: userCredential.user.uid,
                 fullName: fullName,
@@ -313,7 +149,6 @@ body {
                 referredBy: referrer
             });
 
-            // 5. SAVE DATA TO REALTIME DATABASE
             await database.ref('users/' + user).set({
                 whatsapp: formattedPhone,
                 balance: 0,
@@ -322,16 +157,24 @@ body {
             });
 
         } catch (e) {
-            console.error("Registration Error:", e);
-            showTopNotif(e.message, "error");
+            console.error("Auth Error:", e);
             btn.disabled = false;
             btn.innerText = "RETRY ACTIVATION";
+            
+            Swal.fire({
+                title: 'Connection Error',
+                text: 'Muna da matsala wajen haɗuwa da uwar garkenmu. Don Allah duba network ɗinka ka sake gwadawa.',
+                icon: 'error',
+                background: '#020617',
+                color: '#fff',
+                confirmButtonText: 'RETRY',
+                confirmButtonColor: '#00f2fe'
+            });
         }
     }
 
     function showSuccessOverlay(email) {
         startVerificationListener(); 
-
         Swal.fire({
             html: `
                 <div class="flex flex-col items-center">
@@ -346,16 +189,8 @@ body {
             showConfirmButton: true, 
             confirmButtonText: 'RESEND LINK', 
             allowOutsideClick: false,
-            customClass: { 
-                popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', 
-                confirmButton: 'resend-btn-neon orbitron' 
-            }
-        }).then((result) => {
-            if (result.isConfirmed) { 
-                resendVerification(); 
-                showSuccessOverlay(email); 
-            }
-        });
+            customClass: { popup: 'rounded-[35px] border border-cyan-500/30 shadow-2xl', confirmButton: 'resend-btn-neon orbitron' }
+        }).then((result) => { if (result.isConfirmed) { resendVerification(); showSuccessOverlay(email); } });
     }
 
     function startVerificationListener() {
@@ -366,15 +201,11 @@ body {
                 await currentUser.reload(); 
                 if (currentUser.emailVerified) {
                     clearInterval(checkInterval); 
-                    showTopNotif("Security Verified! Redirecting...", "success");
-                    setTimeout(() => { window.location.href = "signin.html"; }, 1500);
+                    window.location.href = "signin.html";
                 }
             }
         }, 3000);
     }
-
-        
-    </script>
+</script>
 </body>
-    </html>
-    
+</html>
