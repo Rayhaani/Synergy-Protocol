@@ -169,22 +169,21 @@
             ];
 
                         // Generating 60 tasks automatically
-            for (let i = 1; i <= 60; i++) {
-                let titleIndex = i % techTitles.length;
-                let baseTitle = techTitles[titleIndex];
-                let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+for (let i = 1; i <= 60; i++) {
+    let titleIndex = i % techTitles.length;
+    let baseTitle = techTitles[titleIndex];
+    let randomReward = (0.10 + (i * 0.003)).toFixed(2);
 
-                MasterTaskRepository.push({
-                    id: `ad_node_${i}`,
-                    title: `[NODE-${1000 + i}] ${baseTitle}`,
-                    reward: parseFloat(randomReward),
-                    slots: 'Continuous',
-                link: 'https://fluffy-machine.com/o8laPe';
-
-                   
-                });
-            }
-
+    MasterTaskRepository.push({
+        id: `ad_node_${i}`,
+        title: `[NODE-${1000 + i}] ${baseTitle}`,
+        reward: parseFloat(randomReward),
+        slots: 'Continuous',
+        // Anan na saka sabon link din naka
+        link: 'https://fluffy-machine.com/o8laPe' 
+    });
+}
+            
             // Dan tsayawa na sakan 1 don loading shimmer ya nuna
             await new Promise(r => setTimeout(r, 1000));
             renderTaskMatrix();
