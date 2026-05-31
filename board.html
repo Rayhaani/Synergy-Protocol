@@ -168,20 +168,26 @@
                 "🛡️ Cyber Security Firewall Penetration Log"
             ];
 
-            // Generating 60 tasks automatically
+                        // Generating 60 tasks automatically
             for (let i = 1; i <= 60; i++) {
                 let titleIndex = i % techTitles.length;
                 let baseTitle = techTitles[titleIndex];
                 let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+
+                let adsterraLink = 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f';
+                let hilltopLink = 'https://fluffy-machine.com/o8laPe';
+                
+                let finalLink = (i % 2 === 0) ? adsterraLink : hilltopLink;
 
                 MasterTaskRepository.push({
                     id: `ad_node_${i}`,
                     title: `[NODE-${1000 + i}] ${baseTitle}`,
                     reward: parseFloat(randomReward),
                     slots: 'Continuous',
-                    link: 'https://www.effectivecpmnetwork.com/j1y0iav7e?key=7ca2b1abef2a2d9cf1a6383cc68d0a8f'
+                    link: finalLink
                 });
-            }
+                                    }
+            
 
             // Dan tsayawa na sakan 1 don loading shimmer ya nuna
             await new Promise(r => setTimeout(r, 1000));
