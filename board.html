@@ -226,30 +226,54 @@
     }
 
 
-            function deployTaskNode(id) {
-        const selectedTask = MasterTaskRepository.find(t => t.id === id);
-        if (!selectedTask) return;
+      // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
 
-        // 1. Bude link din
-        const adWindow = window.open(selectedTask.link, '_blank');
-        
-        // 2. Nuna ma mai amfani cewa lokaci yana tafiya
-        let timeLeft = 30;
-        const msg = document.createElement("div");
-        msg.style = "position:fixed; bottom:20px; right:20px; background:#000; padding:15px; border:1px solid #00f2fe; color:#fff; z-index:9999;";
-        msg.innerHTML = `Ka jira <span id="timerVal">30</span>s kafin ka dawo nan ka claim`;
-        document.body.appendChild(msg);
+function deployTaskNode(id) {
+    const task = MasterTaskRepository.find(t => t.id === id);
+    const btn = event.target; // Wannan shine button din da aka danna
+    
+    // Bude shafin tallar
+    window.open(task.link, '_blank');
+    
+    let timeLeft = 20; 
+    btn.disabled = true;
+    btn.innerText = `Jira: 20s`;
 
-        const timerInterval = setInterval(async () => {
+    const timerInterval = setInterval(async () => {
+        // Tabbatar mutum yana kan shafin (Tab Focus)
+        if (document.visibilityState === 'visible') {
             if (timeLeft > 0) {
                 timeLeft--;
-                document.getElementById("timerVal").innerText = timeLeft;
+                btn.innerText = `Jira: ${timeLeft}s`;
             } else {
                 clearInterval(timerInterval);
-                msg.innerHTML = "Lokaci ya cika! <button onclick='claimReward(\""+id+"\")' style='background:#00f2fe; color:#000; padding:5px; border-radius:5px;'>Claim Reward</button>";
+                btn.innerText = "CLAIM REWARD";
+                btn.disabled = false;
+                btn.onclick = () => finishTask(id); // Idan ya gama, ya danna claim
             }
-        }, 1000);
-    }
+        } else {
+            // Idan mutum ya bar shafin
+            btn.innerText = "RESUME TASK";
+            btn.disabled = false;
+            btn.onclick = () => deployTaskNode(id); // Zai sake bude link din
+        }
+    }, 1000);
+}
+
+async function finishTask(id) {
+    const task = MasterTaskRepository.find(t => t.id === id);
+    try {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            await db.collection('users').doc(user.uid).update({
+                points: firebase.firestore.FieldValue.increment(task.reward)
+            });
+            alert(`Nasara! +${task.reward} pts sun shiga.`);
+            location.reload();
+        }
+    } catch (e) { alert("Error"); }
+}
+        
 
     async function claimReward(id) {
         const selectedTask = MasterTaskRepository.find(t => t.id === id);
