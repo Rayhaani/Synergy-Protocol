@@ -225,41 +225,49 @@
         target.classList.remove('opacity-0');
     }
 
-    function deployTaskNode(id) {
+
+            function deployTaskNode(id) {
         const selectedTask = MasterTaskRepository.find(t => t.id === id);
         if (!selectedTask) return;
 
-        window.open(selectedTask.link, '_blank');
+        // 1. Bude link din
+        const adWindow = window.open(selectedTask.link, '_blank');
         
+        // 2. Nuna ma mai amfani cewa lokaci yana tafiya
         let timeLeft = 30;
-        alert("Node an bude! Don Allah ka tsaya a shafin na tsawon 30 seconds don tabbatar da valid engagement.");
+        const msg = document.createElement("div");
+        msg.style = "position:fixed; bottom:20px; right:20px; background:#000; padding:15px; border:1px solid #00f2fe; color:#fff; z-index:9999;";
+        msg.innerHTML = `Ka jira <span id="timerVal">30</span>s kafin ka dawo nan ka claim`;
+        document.body.appendChild(msg);
 
         const timerInterval = setInterval(async () => {
-            if (document.visibilityState === 'visible') {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                } else {
-                    clearInterval(timerInterval);
-                    try {
-                        const user = firebase.auth().currentUser;
-                        if (user) {
-                            const userRef = db.collection('users').doc(user.uid);
-                            await userRef.update({
-                                points: firebase.firestore.FieldValue.increment(selectedTask.reward)
-                            });
-                            alert(`Aikin ya zama Valid! +${selectedTask.reward} Points an saka a asusunka.`);
-                        } else {
-                            alert(`Gwajin Nasara: Node dinka ya cika sharadin! (Login don ceton maki).`);
-                        }
-                    } catch (error) {
-                        console.error("Firebase Update Error:", error);
-                        alert("An samu matsala wajen tura maki ga database.");
-                    }
-                }
+            if (timeLeft > 0) {
+                timeLeft--;
+                document.getElementById("timerVal").innerText = timeLeft;
+            } else {
+                clearInterval(timerInterval);
+                msg.innerHTML = "Lokaci ya cika! <button onclick='claimReward(\""+id+"\")' style='background:#00f2fe; color:#000; padding:5px; border-radius:5px;'>Claim Reward</button>";
             }
         }, 1000);
     }
-   
+
+    async function claimReward(id) {
+        const selectedTask = MasterTaskRepository.find(t => t.id === id);
+        try {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const userRef = db.collection('users').doc(user.uid);
+                await userRef.update({
+                    points: firebase.firestore.FieldValue.increment(selectedTask.reward)
+                });
+                alert("An gama! Points din sun shiga.");
+            }
+            location.reload(); // Refresh don cire sakon
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    }
+        
     </script>
 </body>
 </html>
