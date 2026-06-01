@@ -189,41 +189,97 @@
         }
     }
 
-    function renderTaskMatrix() {
-        const target = document.getElementById('tasks-grid-target');
-        target.innerHTML = '';
 
-        MasterTaskRepository.forEach(task => {
-            const rowHtml = `
-                <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-start gap-4 w-full">
-                        <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-                        
-                        <div class="space-y-1 w-full">
-                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
-                                ${task.title}
-                            </h3>
-                            <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
-                                <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
-                            </div>
-                        </div>
-                    </div>
+        const firebaseConfig = {
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+    authDomain: "synergy-protocol.firebaseapp.com",
+    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+    projectId: "synergy-protocol",
+    storageBucket: "synergy-protocol.firebasestorage.app",
+    messagingSenderId: "179647543031",
+    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+};
 
-                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
-                        <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
-                        
-                        <button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">
-                            DO TASK
-                        </button>
-                    </div>
-                </div>
-            `;
-            target.insertAdjacentHTML('beforeend', rowHtml);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+
+async function checkIfClaimed(taskId) {
+    const user = firebase.auth().currentUser;
+    if (!user) return false;
+    const today = new Date().toISOString().split('T')[0];
+    const doc = await db.collection('task_claims').doc(`${user.uid}_${taskId}_${today}`).get();
+    return doc.exists;
+}
+
+async function finishTask(id) {
+    const task = MasterTaskRepository.find(t => t.id === id);
+    const user = firebase.auth().currentUser;
+    if (!user) { alert("Da fari ka shiga account ɗinka!"); return; }
+
+    const today = new Date().toISOString().split('T')[0];
+    const claimRef = db.collection('task_claims').doc(`${user.uid}_${id}_${today}`);
+
+    try {
+        const existing = await claimRef.get();
+        if (existing.exists) {
+            alert("Kin riga ka yi wannan task yau! Sai gobe.");
+            return;
+        }
+
+        await claimRef.set({
+            userId: user.uid,
+            taskId: id,
+            date: today,
+            claimedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        document.getElementById('board-loader').classList.add('hidden');
-        target.classList.remove('opacity-0');
+        await db.collection('users').doc(user.uid).update({
+            points: firebase.firestore.FieldValue.increment(task.reward)
+        });
+
+        alert(`Nasara! +${task.reward} pts an saka.`);
+        location.reload();
+
+    } catch (e) {
+        alert("Error: " + e.message);
     }
+}
+
+async function renderTaskMatrix() {
+    const target = document.getElementById('tasks-grid-target');
+    target.innerHTML = '';
+
+    for (const task of MasterTaskRepository) {
+        const isClaimed = await checkIfClaimed(task.id);
+        const btnHtml = isClaimed
+            ? `<button disabled class="px-5 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-[10px] tracking-[1px] cursor-not-allowed" style="font-family: 'Syncopate', sans-serif;">DONE TODAY</button>`
+            : `<button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">DO TASK</button>`;
+
+        const rowHtml = `
+            <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4 w-full">
+                    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
+                    <div class="space-y-1 w-full">
+                        <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
+                            ${task.title}
+                        </h3>
+                        <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
+                            <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
+                    <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
+                    ${btnHtml}
+                </div>
+            </div>
+        `;
+        target.insertAdjacentHTML('beforeend', rowHtml);
+    }
+
+    document.getElementById('board-loader').classList.add('hidden');
+    target.classList.remove('opacity-0');
+            }
 
 
       // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
