@@ -155,191 +155,149 @@ body {
         
     </div>
 
-<script>
-    let MasterTaskRepository = [];
+    <script>
+        
+        
+const firebaseConfig = { 
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
+    authDomain: "synergy-protocol.firebaseapp.com", 
+    projectId: "synergy-protocol" 
+};
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
-        authDomain: "synergy-protocol.firebaseapp.com",
-        databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
-        projectId: "synergy-protocol",
-        storageBucket: "synergy-protocol.firebasestorage.app",
-        messagingSenderId: "179647543031",
-        appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
-    };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.firestore();
+        // Asalin yadda shafin Sign-in naka yake 100%
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // ✅ KEY DAIDAI - synergy_user, plain string
-    function getCurrentUsername() {
-        return localStorage.getItem('synergy_user') || null;
+// SAKA WANNAN GYARAN KAI TSAYE A KASA DA SHI:
+db.settings({
+    experimentalForceLongPolling: true,
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+        
+
+        function showTopNotif(message, type) {
+    let bar = document.getElementById('notification-bar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'notification-bar';
+        bar.style = "position:fixed; top:-100px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; padding:12px; border-radius:8px; display:flex; justify-content:space-between; z-index:9999; transition:0.4s; font-size:12px; font-family:sans-serif; border:1px solid rgba(0,242,254,0.3);";
+        document.body.appendChild(bar);
     }
+    bar.style.background = (type === 'success') ? '#0c2d21' : '#2d1616';
+    bar.style.color = (type === 'success') ? '#3fb950' : '#f85149';
+    bar.innerHTML = `<span>${message}</span><span style="cursor:pointer" onclick="this.parentElement.style.top='-100px'">×</span>`;
+    bar.style.top = '20px';
+    setTimeout(() => { bar.style.top = '-100px'; }, 5000);
+}
 
-    async function checkIfClaimed(taskId) {
-        const username = getCurrentUsername();
-        if (!username) return false;
-        const today = new Date().toISOString().split('T')[0];
-        try {
-            const doc = await db.collection('task_claims').doc(`${username}_${taskId}_${today}`).get();
-            return doc.exists;
-        } catch (e) {
-            return false;
-        }
+function validateLogin() {
+    const loginID = document.getElementById('login-id').value.trim();
+    const loginPass = document.getElementById('login-pass').value.trim();
+    const btn = document.getElementById('login-btn');
+    
+    // WANNAN SHI NE ZAI BUDE PASSWORD FIELD
+    if (loginID.length >= 3) { 
+        show(2); 
+    } else { 
+        hide(2); 
     }
+    
+    if (loginID.length >= 3 && loginPass.length >= 6) {
+        btn.disabled = false;
+        btn.classList.remove('btn-locked');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('btn-locked');
+    }
+}
 
-    async function finishTask(id) {
-        const task = MasterTaskRepository.find(t => t.id === id);
-        const username = getCurrentUsername();
+function show(id) {
+    const el = document.getElementById(`step-${id}`);
+    if(el) { el.classList.remove('step-hidden'); el.classList.add('step-visible'); }
+}
 
-        if (!username) {
-            alert("Da fari ka shiga account ɗinka!");
-            window.location.href = 'index.html';
-            return;
-        }
+function hide(id) {
+    const el = document.getElementById(`step-${id}`);
+    if(el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
+}
 
-        const today = new Date().toISOString().split('T')[0];
-        const claimRef = db.collection('task_claims').doc(`${username}_${id}_${today}`);
+async function login() {
+    const loginInput = document.getElementById('login-id').value.trim();
+    const pass = document.getElementById('login-pass').value.trim();
+    const btn = document.getElementById('login-btn');
 
-        try {
-            const existing = await claimRef.get();
-            if (existing.exists) {
-                alert("Ka riga ka yi wannan task yau! Sai gobe.");
+    btn.innerText = "CONNECTING...";
+    btn.disabled = true;
+
+    try {
+        let email = loginInput;
+
+        // 1. Nemo Email daga Username (Firestore Check)
+        if (!loginInput.includes('@')) {
+            const userRef = db.collection("users").doc(loginInput.toLowerCase());
+            const doc = await userRef.get();
+            if (doc.exists) {
+                email = doc.data().email;
+            } else {
+                showTopNotif("Username not found in protocol.", "error");
+                btn.innerText = "ACCESS PROTOCOL";
+                btn.disabled = false;
                 return;
             }
+        } // <--- WANNAN SHI NE RUFEWAR DA TAKE RASHI A CODE DIN KA
 
-            await claimRef.set({
-                username: username,
-                taskId: id,
-                taskTitle: task.title,
-                reward: task.reward,
-                date: today,
-                claimedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+        // 2. Tabbatar da Authentication (Firebase Auth)
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
+        const user = userCredential.user;
 
-            await db.collection('users').doc(username).update({
-                points: firebase.firestore.FieldValue.increment(task.reward)
-            });
-
-            alert(`Nasara! +${task.reward} pts an ƙara wa account ɗinka.`);
-            location.reload();
-
-        } catch (e) {
-            console.error("finishTask error:", e);
-            alert("Error: " + e.message);
-        }
-    }
-
-    function deployTaskNode(id) {
-        const selectedTask = MasterTaskRepository.find(t => t.id === id);
-        const btn = event.currentTarget;
-
-        window.open(selectedTask.link, '_blank');
-
-        const startTime = Date.now();
-        const targetSecs = 20;
-
-        if (window.taskTimer) clearInterval(window.taskTimer);
-
-        btn.disabled = true;
-        btn.innerText = "Waiting...";
-
-        window.taskTimer = setInterval(() => {
-            if (document.visibilityState === 'hidden') return;
-
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-
-            if (elapsed >= targetSecs) {
-                clearInterval(window.taskTimer);
-                btn.innerText = "CLAIM REWARD";
-                btn.disabled = false;
-                btn.style.background = '#00ff88';
-                btn.style.color = '#000';
-                btn.onclick = () => finishTask(id);
-            } else {
-                clearInterval(window.taskTimer);
-                btn.innerText = "RESUME";
-                btn.disabled = false;
-                btn.style.background = '#ffffff';
-                btn.style.color = '#000';
-                btn.onclick = () => deployTaskNode(id);
-            }
-        }, 1000);
-    }
-
-    async function startSleekAggregator() {
-        MasterTaskRepository = [];
-
-        const techTitles = [
-            "⚡ Activate Core Quantum Mining Node",
-            "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
-            "🌐 Decentralized Web3 Protocol Verification Check",
-            "🧠 Train Neural Interface Model - Pattern Recognition",
-            "🔐 Secure Quantum Ledger Authentication Validation",
-            "💎 Shard Processing Node Verification Check",
-            "🚀 Cloud Compute Optimisation Task (Beta Node)",
-            "📊 Distributed Data Pipeline Structuring Process",
-            "🧬 Validate Bio-Metric Encrypted Data Link",
-            "🛡️ Cyber Security Firewall Penetration Log",
-            "📡 Signal Uplink Stability Calibration",
-            "🔋 Nano-Grid Energy Flow Optimization"
-        ];
-
-        for (let i = 1; i <= 12; i++) {
-            MasterTaskRepository.push({
-                id: `ad_node_${i}`,
-                title: `[NODE-${1000 + i}] ${techTitles[(i - 1) % techTitles.length]}`,
-                reward: parseFloat((0.10 + (i * 0.003)).toFixed(2)),
-                slots: 'Continuous',
-                link: 'https://fluffy-machine.com/o8laPe'
-            });
-        }
-
-        await new Promise(r => setTimeout(r, 1000));
-        await renderTaskMatrix();
-    }
-
-    async function renderTaskMatrix() {
-        const target = document.getElementById('tasks-grid-target');
-        target.innerHTML = '';
-
-        for (const task of MasterTaskRepository) {
-            const isClaimed = await checkIfClaimed(task.id);
-
-            const btnHtml = isClaimed
-                ? `<button disabled class="px-5 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-[10px] tracking-[1px] cursor-not-allowed" style="font-family: 'Syncopate', sans-serif;">DONE TODAY</button>`
-                : `<button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">DO TASK</button>`;
-
-            target.insertAdjacentHTML('beforeend', `
-                <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-start gap-4 w-full">
-                        <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-                        <div class="space-y-1 w-full">
-                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">${task.title}</h3>
-                            <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
-                                <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
-                        <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
-                        ${btnHtml}
-                    </div>
-                </div>
-            `);
-        }
-
-        document.getElementById('board-loader').classList.add('hidden');
-        target.classList.remove('opacity-0');
-    }
-
-    window.onload = async () => {
-        if (!getCurrentUsername()) {
-            window.location.href = 'index.html';
+        // 3. Duba Email Verification
+        if (!user.emailVerified) {
+            showTopNotif("Please verify your email first.", "error");
+            btn.innerText = "ACCESS PROTOCOL";
+            btn.disabled = false;
             return;
         }
-        await startSleekAggregator();
-    };
 
+        // 4. SABON GYARA: Nemo ainihin Username (Document ID)
+        let finalUsername = "";
+        const usersSnapshot = await db.collection("users").where("email", "==", email.toLowerCase()).get();
+
+        if (!usersSnapshot.empty) {
+            finalUsername = usersSnapshot.docs[0].id; 
+            localStorage.setItem('synergy_user', finalUsername);
+        } else {
+            localStorage.setItem('synergy_user', loginInput.toLowerCase());
+        }
+
+        // 5. Tura shi Dashboard
+        showTopNotif("Access Granted! Connecting...", "success");
+        setTimeout(() => { 
+            window.location.href = "dashboard.html"; 
+        }, 1200);
+
+    } catch (error) {
+        console.error("Firebase Error:", error.code, error.message);
+        if (error.code === "auth/user-not-found" || error.code === "auth/invalid-credential") {
+            showTopNotif("Invalid credentials. Try again.", "error");
+        } else if (error.code === "auth/wrong-password") {
+            showTopNotif("Incorrect password.", "error");
+        } else {
+            showTopNotif("Error: " + error.message, "error");
+        }
+        btn.innerText = "ACCESS PROTOCOL";
+        btn.disabled = false;
+    }
+}
+
+function forgotPassword() {
+    const email = prompt("Please enter your registered Email address:");
+    if (email) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(() => { alert("Password reset link sent!"); })
+            .catch((error) => { alert("Error: " + error.message); });
+    }
+        }
+    
     
 
     </script>
