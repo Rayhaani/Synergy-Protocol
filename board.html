@@ -8,11 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script> 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* ASALIN BACKGROUND COLOUR DA TEXTURE SUNA NAN 100% */
         :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
         body { 
             background: var(--bg); color: #fff; 
@@ -21,11 +19,9 @@
             background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); 
             min-height: 100vh;
         }
-
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; }
         .digits-terminal { font-family: 'Roboto Mono', monospace; font-weight: 700; }
         
-        /* SLEEK ULTRA-MINIMAL MICRO CARDS */
         .zynta-sleek-card { 
             background: rgba(255, 255, 255, 0.01);
             border: 1px solid rgba(255, 255, 255, 0.04);
@@ -41,14 +37,10 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             transform: translateX(4px);
         }
-
-        /* 3D PERSPECTIVE CONTAINER FOR REAL SLOPES */
         .futuristic-3d-bar {
             perspective: 150px;
             perspective-origin: top;
         }
-
-        /* REAL 3D TUDU/SLOPE SHAPE */
         .slope-3d-btn {
             transform: rotateX(15deg);
             transform-origin: bottom;
@@ -59,8 +51,6 @@
             transform: rotateX(5deg) translateY(-1px);
             background-color: rgba(255, 255, 255, 0.04);
         }
-
-        /* Minimal Shimmer Loading */
         .shimmer {
             background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0) 100%);
             background-size: 200% 100%;
@@ -78,48 +68,33 @@
         
         <header class="w-full flex items-center justify-between border-b border-white/[0.04] pb-6 relative">
             <div class="flex-none z-20">
-                <button onclick="window.history.back()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-cyan-400 transition-all duration-300 shadow-md focus:outline-none" aria-label="Go back">
+                <button onclick="window.history.back()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-cyan-400 transition-all duration-300 shadow-md focus:outline-none">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                 </button>
             </div>
-
             <div class="absolute inset-x-0 flex justify-center items-center pointer-events-none px-10">
                 <h1 class="orbitron text-sm md:text-base text-white font-bold tracking-[1px] text-center pointer-events-auto">
                     Zynta Task Board
                 </h1>
             </div>
-            
             <div class="w-8 h-8 opacity-0 flex-none pointer-events-none"></div>
         </header>
 
         <div class="futuristic-3d-bar w-full bg-slate-950/20 border border-white/[0.04] rounded-xl p-2 grid grid-cols-4 gap-1.5 sm:gap-3 backdrop-blur-md overflow-hidden">
-            
             <button class="slope-3d-btn bg-cyan-500/[0.03] border-b-2 border-cyan-400/40 rounded-b-md py-3 px-1 focus:outline-none">
-                <div class="text-cyan-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
-                    Ongoing
-                </div>
+                <div class="text-cyan-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">Ongoing</div>
             </button>
-            
             <button class="slope-3d-btn bg-yellow-500/[0.03] border-b-2 border-yellow-400/40 rounded-b-md py-3 px-1 focus:outline-none">
-                <div class="text-yellow-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
-                    Completed
-                </div>
+                <div class="text-yellow-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">Completed</div>
             </button>
-            
             <button class="slope-3d-btn bg-emerald-500/[0.03] border-b-2 border-emerald-400/40 rounded-b-md py-3 px-1 focus:outline-none">
-                <div class="text-emerald-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
-                    Approved
-                </div>
+                <div class="text-emerald-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">Approved</div>
             </button>
-            
             <button class="slope-3d-btn bg-rose-500/[0.03] border-b-2 border-rose-400/40 rounded-b-md py-3 px-1 focus:outline-none">
-                <div class="text-rose-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">
-                    Rejected
-                </div>
+                <div class="text-rose-400 text-[9px] sm:text-[11px] font-bold orbitron tracking-wider text-center truncate">Rejected</div>
             </button>
-
         </div>
 
         <section class="relative pt-2">
@@ -127,9 +102,7 @@
                 <div class="zynta-sleek-card rounded-2xl p-6 h-24 shimmer"></div>
                 <div class="zynta-sleek-card rounded-2xl p-6 h-24 shimmer"></div>
             </div>
-
-            <div id="tasks-grid-target" class="space-y-4 opacity-0 transition-opacity duration-500">
-            </div>
+            <div id="tasks-grid-target" class="space-y-4 opacity-0 transition-opacity duration-500"></div>
         </section>
 
     </div>
@@ -137,192 +110,207 @@
     <script>
     let MasterTaskRepository = [];
 
+    // ✅ FIREBASE CONFIG - CIKAKKE
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
-        projectId: "synergy-protocol"
+        databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+        projectId: "synergy-protocol",
+        storageBucket: "synergy-protocol.firebasestorage.app",
+        messagingSenderId: "179647543031",
+        appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
     };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    window.onload = async () => {
-        await startSleekAggregator();
-    };
-
-    async function startSleekAggregator() {
+    // ✅ KARANTA USERNAME DAGA LOCALSTORAGE - BABU FIREBASE AUTH
+    function getCurrentUsername() {
+        const session = localStorage.getItem('nexus_user_session');
+        if (!session) return null;
         try {
-            MasterTaskRepository = [];
-            
-            const techTitles = [
-                "⚡ Activate Core Quantum Mining Node",
-                "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
-                "🌐 Decentralized Web3 Protocol Verification Check",
-                "🧠 Train Neural Interface Model - Pattern Recognition",
-                "🔐 Secure Quantum Ledger Authentication Validation",
-                "💎 Shard Processing Node Verification Check",
-                "🚀 Cloud Compute Optimisation Task (Beta Node)",
-                "📊 Distributed Data Pipeline Structuring Process",
-                "🧬 Validate Bio-Metric Encrypted Data Link",
-                "🛡️ Cyber Security Firewall Penetration Log",
-                "📡 Signal Uplink Stability Calibration",
-                "🔋 Nano-Grid Energy Flow Optimization"
-            ];
-
-            for (let i = 1; i <= 12; i++) {
-                let titleIndex = (i - 1) % techTitles.length;
-                let baseTitle = techTitles[titleIndex];
-                let randomReward = (0.10 + (i * 0.003)).toFixed(2);
-
-                MasterTaskRepository.push({
-                    id: `ad_node_${i}`,
-                    title: `[NODE-${1000 + i}] ${baseTitle}`,
-                    reward: parseFloat(randomReward),
-                    slots: 'Continuous',
-                    link: 'https://fluffy-machine.com/o8laPe' 
-                });
-            }
-            
-            await new Promise(r => setTimeout(r, 1000));
-            renderTaskMatrix();
-        } catch (err) {
-            console.error("Aggregation Error:", err);
+            const parsed = JSON.parse(session);
+            return parsed.username || null;
+        } catch (e) {
+            return null;
         }
     }
 
+    // ✅ CHECK IF TASK CLAIMED - USING USERNAME
+    async function checkIfClaimed(taskId) {
+        const username = getCurrentUsername();
+        if (!username) return false;
+        const today = new Date().toISOString().split('T')[0];
+        try {
+            const doc = await db.collection('task_claims').doc(`${username}_${taskId}_${today}`).get();
+            return doc.exists;
+        } catch (e) {
+            return false;
+        }
+    }
 
-        const firebaseConfig = {
-    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
-    authDomain: "synergy-protocol.firebaseapp.com",
-    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
-    projectId: "synergy-protocol",
-    storageBucket: "synergy-protocol.firebasestorage.app",
-    messagingSenderId: "179647543031",
-    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
-};
+    // ✅ FINISH TASK - SAVE TO FIRESTORE USING USERNAME
+    async function finishTask(id) {
+        const task = MasterTaskRepository.find(t => t.id === id);
+        const username = getCurrentUsername();
 
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-const db = firebase.firestore();
-
-async function checkIfClaimed(taskId) {
-    const user = firebase.auth().currentUser;
-    if (!user) return false;
-    const today = new Date().toISOString().split('T')[0];
-    const doc = await db.collection('task_claims').doc(`${user.uid}_${taskId}_${today}`).get();
-    return doc.exists;
-}
-
-async function finishTask(id) {
-    const task = MasterTaskRepository.find(t => t.id === id);
-    const user = firebase.auth().currentUser;
-    if (!user) { alert("Da fari ka shiga account ɗinka!"); return; }
-
-    const today = new Date().toISOString().split('T')[0];
-    const claimRef = db.collection('task_claims').doc(`${user.uid}_${id}_${today}`);
-
-    try {
-        const existing = await claimRef.get();
-        if (existing.exists) {
-            alert("Kin riga ka yi wannan task yau! Sai gobe.");
+        if (!username) {
+            alert("Da fari ka shiga account ɗinka!");
+            window.location.href = 'index.html';
             return;
         }
 
-        await claimRef.set({
-            userId: user.uid,
-            taskId: id,
-            date: today,
-            claimedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        const today = new Date().toISOString().split('T')[0];
+        const claimRef = db.collection('task_claims').doc(`${username}_${id}_${today}`);
 
-        await db.collection('users').doc(user.uid).update({
-            points: firebase.firestore.FieldValue.increment(task.reward)
-        });
-
-        alert(`Nasara! +${task.reward} pts an saka.`);
-        location.reload();
-
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-}
-
-async function renderTaskMatrix() {
-    const target = document.getElementById('tasks-grid-target');
-    target.innerHTML = '';
-
-    for (const task of MasterTaskRepository) {
-        const isClaimed = await checkIfClaimed(task.id);
-        const btnHtml = isClaimed
-            ? `<button disabled class="px-5 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-[10px] tracking-[1px] cursor-not-allowed" style="font-family: 'Syncopate', sans-serif;">DONE TODAY</button>`
-            : `<button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">DO TASK</button>`;
-
-        const rowHtml = `
-            <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start gap-4 w-full">
-                    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-                    <div class="space-y-1 w-full">
-                        <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
-                            ${task.title}
-                        </h3>
-                        <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
-                            <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
-                    <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
-                    ${btnHtml}
-                </div>
-            </div>
-        `;
-        target.insertAdjacentHTML('beforeend', rowHtml);
-    }
-
-    document.getElementById('board-loader').classList.add('hidden');
-    target.classList.remove('opacity-0');
+        try {
+            const existing = await claimRef.get();
+            if (existing.exists) {
+                alert("Ka riga ka yi wannan task yau! Sai gobe.");
+                return;
             }
 
+            // ✅ SAVE CLAIM RECORD
+            await claimRef.set({
+                username: username,
+                taskId: id,
+                taskTitle: task.title,
+                reward: task.reward,
+                date: today,
+                claimedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
 
-      // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
-         function deployTaskNode(id) {
-    const selectedTask = MasterTaskRepository.find(t => t.id === id);
-    const btn = event.target;
-    
-    window.open(selectedTask.link, '_blank');
-    
-    const startTime = Date.now();
-    const target = 20;
-    
-    if (window.taskTimer) clearInterval(window.taskTimer);
-    
-    btn.disabled = true;
-    btn.innerText = "Waiting...";
+            // ✅ UPDATE USER POINTS - DOCUMENT KEY = USERNAME
+            await db.collection('users').doc(username).update({
+                points: firebase.firestore.FieldValue.increment(task.reward)
+            });
 
-    window.taskTimer = setInterval(() => {
-        if (document.visibilityState === 'hidden') return;
-        
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        
-        if (elapsed >= target) {
-            clearInterval(window.taskTimer);
-            btn.innerText = "CLAIM REWARD";
-            btn.disabled = false;
-            btn.style.background = '#00ff88';
-            btn.style.color = '#000';
-            btn.onclick = () => finishTask(id);
-        } else {
-            clearInterval(window.taskTimer);
-            btn.innerText = "RESUME";
-            btn.disabled = false;
-            btn.style.background = '#ffffff';
-            btn.style.color = '#000';
-            btn.onclick = () => deployTaskNode(id);
+            alert(`Nasara! +${task.reward} pts an ƙara wa account ɗinka.`);
+            location.reload();
+
+        } catch (e) {
+            console.error("finishTask error:", e);
+            alert("Error: " + e.message);
         }
-    }, 1000);
-         }
-    
+    }
 
-    
+    // ✅ DEPLOY TASK NODE - TIMER LOGIC
+    function deployTaskNode(id) {
+        const selectedTask = MasterTaskRepository.find(t => t.id === id);
+        const btn = event.currentTarget;
         
+        window.open(selectedTask.link, '_blank');
+        
+        const startTime = Date.now();
+        const target = 20;
+        
+        if (window.taskTimer) clearInterval(window.taskTimer);
+        
+        btn.disabled = true;
+        btn.innerText = "Waiting...";
+
+        window.taskTimer = setInterval(() => {
+            if (document.visibilityState === 'hidden') return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            
+            if (elapsed >= target) {
+                clearInterval(window.taskTimer);
+                btn.innerText = "CLAIM REWARD";
+                btn.disabled = false;
+                btn.style.background = '#00ff88';
+                btn.style.color = '#000';
+                btn.onclick = () => finishTask(id);
+            } else {
+                clearInterval(window.taskTimer);
+                btn.innerText = "RESUME";
+                btn.disabled = false;
+                btn.style.background = '#ffffff';
+                btn.style.color = '#000';
+                btn.onclick = () => deployTaskNode(id);
+            }
+        }, 1000);
+    }
+
+    // ✅ BUILD TASK LIST
+    async function startSleekAggregator() {
+        MasterTaskRepository = [];
+        
+        const techTitles = [
+            "⚡ Activate Core Quantum Mining Node",
+            "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
+            "🌐 Decentralized Web3 Protocol Verification Check",
+            "🧠 Train Neural Interface Model - Pattern Recognition",
+            "🔐 Secure Quantum Ledger Authentication Validation",
+            "💎 Shard Processing Node Verification Check",
+            "🚀 Cloud Compute Optimisation Task (Beta Node)",
+            "📊 Distributed Data Pipeline Structuring Process",
+            "🧬 Validate Bio-Metric Encrypted Data Link",
+            "🛡️ Cyber Security Firewall Penetration Log",
+            "📡 Signal Uplink Stability Calibration",
+            "🔋 Nano-Grid Energy Flow Optimization"
+        ];
+
+        for (let i = 1; i <= 12; i++) {
+            let titleIndex = (i - 1) % techTitles.length;
+            MasterTaskRepository.push({
+                id: `ad_node_${i}`,
+                title: `[NODE-${1000 + i}] ${techTitles[titleIndex]}`,
+                reward: parseFloat((0.10 + (i * 0.003)).toFixed(2)),
+                slots: 'Continuous',
+                link: 'https://fluffy-machine.com/o8laPe'
+            });
+        }
+
+        await new Promise(r => setTimeout(r, 1000));
+        await renderTaskMatrix();
+    }
+
+    // ✅ RENDER - NUNA DONE TODAY IDAN AN RIGA AN CLAIM
+    async function renderTaskMatrix() {
+        const target = document.getElementById('tasks-grid-target');
+        target.innerHTML = '';
+
+        for (const task of MasterTaskRepository) {
+            const isClaimed = await checkIfClaimed(task.id);
+            
+            const btnHtml = isClaimed
+                ? `<button disabled class="px-5 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-[10px] tracking-[1px] cursor-not-allowed" style="font-family: 'Syncopate', sans-serif;">DONE TODAY</button>`
+                : `<button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">DO TASK</button>`;
+
+            const rowHtml = `
+                <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4 w-full">
+                        <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
+                        <div class="space-y-1 w-full">
+                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
+                                ${task.title}
+                            </h3>
+                            <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
+                                <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
+                        <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
+                        ${btnHtml}
+                    </div>
+                </div>
+            `;
+            target.insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        document.getElementById('board-loader').classList.add('hidden');
+        target.classList.remove('opacity-0');
+    }
+
+    window.onload = async () => {
+        // ✅ REDIRECT IDAN BA A LOGIN BA
+        if (!getCurrentUsername()) {
+            window.location.href = 'index.html';
+            return;
+        }
+        await startSleekAggregator();
+    };
     </script>
 </body>
 </html>
