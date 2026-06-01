@@ -137,7 +137,6 @@
     <script>
     let MasterTaskRepository = [];
 
-    // Saita Firebase Config dinka na asali
     const firebaseConfig = { 
         apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
         authDomain: "synergy-protocol.firebaseapp.com", 
@@ -150,7 +149,6 @@
         await startSleekAggregator();
     };
 
-    // Wannan function din zai samar da ayyuka 60 gaba daya ta amfani da Loop
     async function startSleekAggregator() {
         try {
             MasterTaskRepository = [];
@@ -165,26 +163,25 @@
                 "🚀 Cloud Compute Optimisation Task (Beta Node)",
                 "📊 Distributed Data Pipeline Structuring Process",
                 "🧬 Validate Bio-Metric Encrypted Data Link",
-                "🛡️ Cyber Security Firewall Penetration Log"
+                "🛡️ Cyber Security Firewall Penetration Log",
+                "📡 Signal Uplink Stability Calibration",
+                "🔋 Nano-Grid Energy Flow Optimization"
             ];
 
-                        // Generating 60 tasks automatically
-for (let i = 1; i <= 60; i++) {
-    let titleIndex = i % techTitles.length;
-    let baseTitle = techTitles[titleIndex];
-    let randomReward = (0.10 + (i * 0.003)).toFixed(2);
+            for (let i = 1; i <= 12; i++) {
+                let titleIndex = (i - 1) % techTitles.length;
+                let baseTitle = techTitles[titleIndex];
+                let randomReward = (0.10 + (i * 0.003)).toFixed(2);
 
-    MasterTaskRepository.push({
-        id: `ad_node_${i}`,
-        title: `[NODE-${1000 + i}] ${baseTitle}`,
-        reward: parseFloat(randomReward),
-        slots: 'Continuous',
-        // Anan na saka sabon link din naka
-        link: 'https://fluffy-machine.com/o8laPe' 
-    });
-}
+                MasterTaskRepository.push({
+                    id: `ad_node_${i}`,
+                    title: `[NODE-${1000 + i}] ${baseTitle}`,
+                    reward: parseFloat(randomReward),
+                    slots: 'Continuous',
+                    link: 'https://fluffy-machine.com/o8laPe' 
+                });
+            }
             
-            // Dan tsayawa na sakan 1 don loading shimmer ya nuna
             await new Promise(r => setTimeout(r, 1000));
             renderTaskMatrix();
         } catch (err) {
@@ -196,7 +193,6 @@ for (let i = 1; i <= 60; i++) {
         const target = document.getElementById('tasks-grid-target');
         target.innerHTML = '';
 
-        // Idan loop din yana aiki, nan zai gina katuna guda 60 gaba daya
         MasterTaskRepository.forEach(task => {
             const rowHtml = `
                 <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -234,25 +230,34 @@ for (let i = 1; i <= 60; i++) {
         if (!selectedTask) return;
 
         window.open(selectedTask.link, '_blank');
-        alert("Task Node Deployed! Don Allah tsaya a shafin da ya bude na tsawon sakan 15 don samun maki.");
+        
+        let timeLeft = 30;
+        alert("Node an bude! Don Allah ka tsaya a shafin na tsawon 30 seconds don tabbatar da valid engagement.");
 
-        setTimeout(async () => {
-            try {
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    const userRef = db.collection('users').doc(user.uid);
-                    await userRef.update({
-                        points: firebase.firestore.FieldValue.increment(selectedTask.reward)
-                    });
-                    alert(`An kammala aiki lafiya! +${selectedTask.reward} Points an saka a asusunka.`);
+        const timerInterval = setInterval(async () => {
+            if (document.visibilityState === 'visible') {
+                if (timeLeft > 0) {
+                    timeLeft--;
                 } else {
-                    alert(`Gwajin Nasara: Node dinka ya cika sharadin sakan 15! (Login don ceton maki).`);
+                    clearInterval(timerInterval);
+                    try {
+                        const user = firebase.auth().currentUser;
+                        if (user) {
+                            const userRef = db.collection('users').doc(user.uid);
+                            await userRef.update({
+                                points: firebase.firestore.FieldValue.increment(selectedTask.reward)
+                            });
+                            alert(`Aikin ya zama Valid! +${selectedTask.reward} Points an saka a asusunka.`);
+                        } else {
+                            alert(`Gwajin Nasara: Node dinka ya cika sharadin! (Login don ceton maki).`);
+                        }
+                    } catch (error) {
+                        console.error("Firebase Update Error:", error);
+                        alert("An samu matsala wajen tura maki ga database.");
+                    }
                 }
-            } catch (error) {
-                console.error("Firebase Update Error:", error);
-                alert("An samu matsala wajen tura maki ga database.");
             }
-        }, 15000); 
+        }, 1000);
     }
    
     </script>
