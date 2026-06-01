@@ -259,7 +259,12 @@
             btn.onclick = () => finishTask(id);
             
         } else {
-            btn.innerText = `Jira: ${remaining}s`;
+    clearInterval(window.taskTimer);
+    btn.innerText = "RESUME";
+    btn.disabled = false;
+    btn.style.background = '#ffffff';
+    btn.style.color = '#000';
+    btn.onclick = () => deployTaskNode(id);
         }
     }, 500);
          }
