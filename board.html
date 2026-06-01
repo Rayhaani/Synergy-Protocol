@@ -227,47 +227,48 @@
 
 
       // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
-
-    function deployTaskNode(id) {
-        const selectedTask = MasterTaskRepository.find(t => t.id === id);
-        if (!selectedTask) return;
-
-        // Bude shafin tallar
-        window.open(selectedTask.link, '_blank');
+        function deployTaskNode(id) {
+        const task = MasterTaskRepository.find(t => t.id === id);
+        const btn = event.target;
         
-        let timeLeft = 20;
-        const btn = event.target; // Wannan yana nufin button din da aka danna
+        // 1. Auna lokacin da aka fara (Start time)
+        const startTime = Date.now();
+        const duration = 20000; // 20 seconds
+        
+        window.open(task.link, '_blank');
+        
+        const checkInterval = setInterval(() => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime; // Lokacin da aka kashe a zahiri
 
-        const timerInterval = setInterval(() => {
-            // Idan shafin yana "visible" (mutum yana kallon talla)
             if (document.visibilityState === 'visible') {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    btn.innerText = `Jira: ${timeLeft}s`;
-                    btn.disabled = true;
-                } else {
-                    // Lokaci ya cika!
-                    clearInterval(timerInterval);
+                if (elapsed >= duration) {
+                    // Lokaci ya cika
+                    clearInterval(checkInterval);
                     btn.innerText = "CLAIM REWARD";
                     btn.disabled = false;
                     btn.onclick = () => finishTask(id);
+                } else {
+                    // Lokaci bai cika ba
+                    const remaining = Math.ceil((duration - elapsed) / 1000);
+                    btn.innerText = `Jira: ${remaining}s`;
+                    btn.disabled = true;
                 }
             } else {
-                // Idan ya fita daga shafin kafin 20s
-                if (timeLeft > 0) {
-                    btn.innerText = "RESUME";
-                    btn.disabled = false;
-                    btn.onclick = () => {
-                        window.open(selectedTask.link, '_blank');
-                        // Ci gaba da timer daga inda ya tsaya
-                        deployTaskNode(id);
-                    };
-                    // Dakatar da timer din tunda mutum ya fita
-                    clearInterval(timerInterval);
-                }
+                // Idan mutum ya fita daga shafin
+                btn.innerText = "RESUME";
+                btn.disabled = false;
+                btn.onclick = () => {
+                    // Idan ya danna resume, ya sake buɗe tallar kuma ya cigaba da lissafawa
+                    window.open(task.link, '_blank');
+                    deployTaskNode(id);
+                };
+                clearInterval(checkInterval);
             }
-        }, 1000);
-    }
+        }, 500); // Muna duba kowane rabin sakan don ƙarin inganci
+        }
+        
+    
 
     async function finishTask(id) {
         const task = MasterTaskRepository.find(t => t.id === id);
