@@ -227,7 +227,6 @@
 
 
       // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
-         
          function deployTaskNode(id) {
     const selectedTask = MasterTaskRepository.find(t => t.id === id);
     const btn = event.target;
@@ -236,6 +235,7 @@
     
     const target = 20;
     const startTime = Date.now();
+    let completed = false; // Flag don sanin ko ya cika
     
     if (window.taskTimer) clearInterval(window.taskTimer);
     if (window._visHandler) document.removeEventListener('visibilitychange', window._visHandler);
@@ -251,6 +251,7 @@
         if (remaining <= 0) {
             clearInterval(window.taskTimer);
             document.removeEventListener('visibilitychange', window._visHandler);
+            completed = true; // Ya cika!
             
             btn.innerText = "CLAIM REWARD";
             btn.disabled = false;
@@ -262,28 +263,24 @@
         }
     }, 500);
 
-    // Idan ya fita kafin ya cika — TSAYAR DA KOMAI nan take
     window._visHandler = function() {
-        if (document.visibilityState === 'hidden') {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        if (document.visibilityState === 'hidden' && !completed) {
+            // Kawai idan bai cika 20s ba
+            clearInterval(window.taskTimer);
+            document.removeEventListener('visibilitychange', window._visHandler);
             
-            if (elapsed < target) {
-                // Bai cika ba — kashe timer, nuna Resume
-                clearInterval(window.taskTimer);
-                document.removeEventListener('visibilitychange', window._visHandler);
-                
-                btn.innerText = "RESUME";
-                btn.disabled = false;
-                btn.style.background = '#ffffff';
-                btn.style.color = '#000';
-                btn.onclick = () => deployTaskNode(id);
-            }
-            // Idan elapsed >= target, bai shiga nan ba — timer ya riga ya gama
+            btn.innerText = "RESUME";
+            btn.disabled = false;
+            btn.style.background = '#ffffff';
+            btn.style.color = '#000';
+            btn.onclick = () => deployTaskNode(id);
         }
     };
     
     document.addEventListener('visibilitychange', window._visHandler);
-         }  
+         }
+         
+
         
     </script>
 </body>
