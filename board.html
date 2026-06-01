@@ -236,6 +236,7 @@
     const target = 20;
     const startTime = Date.now();
     
+    // Tsaftace tsoffin timers
     if (window.taskTimer) clearInterval(window.taskTimer);
     if (window._visHandler) document.removeEventListener('visibilitychange', window._visHandler);
     
@@ -243,6 +244,7 @@
     btn.onclick = null;
     btn.innerText = `Jira: ${target}s`;
 
+    // Timer yana tafiya koyaushe — baya tsayawa saboda tab change
     window.taskTimer = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         const remaining = target - elapsed;
@@ -260,23 +262,6 @@
             btn.innerText = `Jira: ${remaining}s`;
         }
     }, 500);
-
-    // ƙarin sashe kawai — baya taba timer din da ke aiki
-    window._visHandler = function() {
-        if (document.visibilityState === 'hidden') {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            if (elapsed < target) {
-                clearInterval(window.taskTimer);
-                document.removeEventListener('visibilitychange', window._visHandler);
-                btn.innerText = "RESUME";
-                btn.disabled = false;
-                btn.style.background = '#ffffff';
-                btn.style.color = '#000';
-                btn.onclick = () => deployTaskNode(id);
-            }
-        }
-    };
-    document.addEventListener('visibilitychange', window._visHandler);
          }
         
     </script>
