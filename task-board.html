@@ -137,134 +137,314 @@
     <script>
     let MasterTaskRepository = [];
 
-    const firebaseConfig = { 
-        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
-        authDomain: "synergy-protocol.firebaseapp.com", 
-        projectId: "synergy-protocol"
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+        authDomain: "synergy-protocol.firebaseapp.com",
+        databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+        projectId: "synergy-protocol",
+        storageBucket: "synergy-protocol.firebasestorage.app",
+        messagingSenderId: "179647543031",
+        appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
     };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
-    window.onload = async () => {
-        await startSleekAggregator();
-    };
+    function getCurrentUsername() {
+        return localStorage.getItem('synergy_user') || null;
+    }
 
-    async function startSleekAggregator() {
+    // ✅ ADANA TIMER STATE A LOCALSTORAGE
+    function saveTimerState(taskId, startTime) {
+        localStorage.setItem(`timer_${taskId}`, startTime.toString());
+    }
+
+    function getTimerState(taskId) {
+        const val = localStorage.getItem(`timer_${taskId}`);
+        return val ? parseInt(val) : null;
+    }
+
+    function clearTimerState(taskId) {
+        localStorage.removeItem(`timer_${taskId}`);
+    }
+
+    async function checkIfClaimed(taskId) {
+        const username = getCurrentUsername();
+        if (!username) return false;
+        const today = new Date().toISOString().split('T')[0];
         try {
-            MasterTaskRepository = [];
-            
-            const techTitles = [
-                "⚡ Activate Core Quantum Mining Node",
-                "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
-                "🌐 Decentralized Web3 Protocol Verification Check",
-                "🧠 Train Neural Interface Model - Pattern Recognition",
-                "🔐 Secure Quantum Ledger Authentication Validation",
-                "💎 Shard Processing Node Verification Check",
-                "🚀 Cloud Compute Optimisation Task (Beta Node)",
-                "📊 Distributed Data Pipeline Structuring Process",
-                "🧬 Validate Bio-Metric Encrypted Data Link",
-                "🛡️ Cyber Security Firewall Penetration Log",
-                "📡 Signal Uplink Stability Calibration",
-                "🔋 Nano-Grid Energy Flow Optimization"
-            ];
-
-            for (let i = 1; i <= 12; i++) {
-                let titleIndex = (i - 1) % techTitles.length;
-                let baseTitle = techTitles[titleIndex];
-                let randomReward = (0.10 + (i * 0.003)).toFixed(2);
-
-                MasterTaskRepository.push({
-                    id: `ad_node_${i}`,
-                    title: `[NODE-${1000 + i}] ${baseTitle}`,
-                    reward: parseFloat(randomReward),
-                    slots: 'Continuous',
-                    link: 'https://fluffy-machine.com/o8laPe' 
-                });
-            }
-            
-            await new Promise(r => setTimeout(r, 1000));
-            renderTaskMatrix();
-        } catch (err) {
-            console.error("Aggregation Error:", err);
+            const doc = await db.collection('task_claims').doc(`${username}_${taskId}_${today}`).get();
+            return doc.exists;
+        } catch (e) {
+            return false;
         }
     }
 
-    function renderTaskMatrix() {
+    async function finishTask(taskId, btnEl) {
+        const task = MasterTaskRepository.find(t => t.id === taskId);
+        const username = getCurrentUsername();
+
+        if (!username) {
+            alert("Da fari ka shiga account ɗinka!");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Disable button nan take kafin anything
+        btnEl.disabled = true;
+        btnEl.innerText = "SAVING...";
+        btnEl.style.background = '#444';
+        btnEl.style.color = '#aaa';
+
+        const today = new Date().toISOString().split('T')[0];
+        const claimRef = db.collection('task_claims').doc(`${username}_${taskId}_${today}`);
+
+        try {
+            const existing = await claimRef.get();
+            if (existing.exists) {
+                btnEl.innerText = "DONE TODAY";
+                btnEl.style.background = '#374151';
+                btnEl.style.color = '#6b7280';
+                btnEl.disabled = true;
+                clearTimerState(taskId);
+                return;
+            }
+
+            await claimRef.set({
+                username: username,
+                taskId: taskId,
+                taskTitle: task.title,
+                reward: task.reward,
+                date: today,
+                claimedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            await db.collection('users').doc(username).update({
+                points: firebase.firestore.FieldValue.increment(task.reward)
+            });
+
+            // ✅ BUTTON YA ZAMA DONE TODAY PERMANENTLY
+            btnEl.innerText = "DONE TODAY";
+            btnEl.style.background = '#374151';
+            btnEl.style.color = '#6b7280';
+            btnEl.disabled = true;
+            btnEl.onclick = null;
+            clearTimerState(taskId);
+
+            // Nuna success notification
+            showSuccess(`+${task.reward} pts an ƙara wa account ɗinka!`);
+
+        } catch (e) {
+            console.error("finishTask error:", e);
+            alert("Error: " + e.message);
+            // Restore button idan error
+            btnEl.disabled = false;
+            btnEl.innerText = "CLAIM REWARD";
+            btnEl.style.background = '#00ff88';
+            btnEl.style.color = '#000';
+        }
+    }
+
+    function showSuccess(msg) {
+        const el = document.createElement('div');
+        el.style = `
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #0c2d21; border: 1px solid #00ff88; color: #00ff88;
+            padding: 12px 24px; border-radius: 50px; font-size: 13px;
+            font-weight: bold; z-index: 9999; white-space: nowrap;
+            animation: fadeInUp 0.4s ease;
+        `;
+        el.innerText = '✅ ' + msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    // ✅ DEPLOY TASK - PASS BTN ELEMENT DIRECTLY
+    function deployTaskNode(taskId, btnEl) {
+        const selectedTask = MasterTaskRepository.find(t => t.id === taskId);
+
+        window.open(selectedTask.link, '_blank');
+
+        const startTime = Date.now();
+        const targetSecs = 20;
+
+        // Adana start time a localStorage
+        saveTimerState(taskId, startTime);
+
+        if (window.taskTimer) clearInterval(window.taskTimer);
+
+        btnEl.disabled = true;
+        btnEl.innerText = "Waiting...";
+        btnEl.style.background = '#ffffff';
+        btnEl.style.color = '#000';
+
+        startCountdown(taskId, btnEl, startTime, targetSecs);
+    }
+
+    function startCountdown(taskId, btnEl, startTime, targetSecs) {
+        if (window.taskTimer) clearInterval(window.taskTimer);
+
+        window.taskTimer = setInterval(() => {
+            if (document.visibilityState === 'hidden') return;
+
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remaining = targetSecs - elapsed;
+
+            if (elapsed >= targetSecs) {
+                clearInterval(window.taskTimer);
+                btnEl.innerText = "CLAIM REWARD";
+                btnEl.disabled = false;
+                btnEl.style.background = '#00ff88';
+                btnEl.style.color = '#000';
+                // ✅ PASS btnEl DIRECTLY - babu event.target matsala
+                btnEl.onclick = () => finishTask(taskId, btnEl);
+            } else {
+                btnEl.innerText = `WAIT ${remaining}s`;
+                btnEl.disabled = true;
+                btnEl.style.background = '#1e293b';
+                btnEl.style.color = '#64748b';
+            }
+        }, 1000);
+    }
+
+    async function startSleekAggregator() {
+        MasterTaskRepository = [];
+
+        const techTitles = [
+            "⚡ Activate Core Quantum Mining Node",
+            "🛰️ Synchronize Satellite Data & Verify AI Sub-Network",
+            "🌐 Decentralized Web3 Protocol Verification Check",
+            "🧠 Train Neural Interface Model - Pattern Recognition",
+            "🔐 Secure Quantum Ledger Authentication Validation",
+            "💎 Shard Processing Node Verification Check",
+            "🚀 Cloud Compute Optimisation Task (Beta Node)",
+            "📊 Distributed Data Pipeline Structuring Process",
+            "🧬 Validate Bio-Metric Encrypted Data Link",
+            "🛡️ Cyber Security Firewall Penetration Log",
+            "📡 Signal Uplink Stability Calibration",
+            "🔋 Nano-Grid Energy Flow Optimization"
+        ];
+
+        for (let i = 1; i <= 12; i++) {
+            MasterTaskRepository.push({
+                id: `ad_node_${i}`,
+                title: `[NODE-${1000 + i}] ${techTitles[(i - 1) % techTitles.length]}`,
+                reward: parseFloat((0.10 + (i * 0.003)).toFixed(2)),
+                slots: 'Continuous',
+                link: 'https://fluffy-machine.com/o8laPe'
+            });
+        }
+
+        await new Promise(r => setTimeout(r, 800));
+        await renderTaskMatrix();
+    }
+
+    async function renderTaskMatrix() {
         const target = document.getElementById('tasks-grid-target');
         target.innerHTML = '';
 
-        MasterTaskRepository.forEach(task => {
-            const rowHtml = `
+        for (const task of MasterTaskRepository) {
+            const isClaimed = await checkIfClaimed(task.id);
+            const savedStartTime = getTimerState(task.id);
+            const targetSecs = 20;
+
+            // Determine button state
+            let btnHtml = '';
+            let btnState = 'default'; // default | timer | ready | claimed
+
+            if (isClaimed) {
+                btnState = 'claimed';
+            } else if (savedStartTime) {
+                const elapsed = Math.floor((Date.now() - savedStartTime) / 1000);
+                if (elapsed >= targetSecs) {
+                    btnState = 'ready'; // Timer don — CLAIM REWARD
+                } else {
+                    btnState = 'timer'; // Timer yana tafiya
+                }
+            }
+
+            // Build button based on state
+            if (btnState === 'claimed') {
+                btnHtml = `<button disabled 
+                    class="px-5 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-[10px] tracking-[1px] cursor-not-allowed" 
+                    style="font-family: 'Syncopate', sans-serif;">
+                    DONE TODAY
+                </button>`;
+            } else if (btnState === 'ready') {
+                btnHtml = `<button 
+                    data-taskid="${task.id}"
+                    class="task-btn px-5 py-2 rounded-full font-bold text-[10px] tracking-[1px] transition-all duration-300 shadow-md" 
+                    style="font-family: 'Syncopate', sans-serif; background: #00ff88; color: #000;">
+                    CLAIM REWARD
+                </button>`;
+            } else if (btnState === 'timer') {
+                const elapsed = Math.floor((Date.now() - savedStartTime) / 1000);
+                const remaining = targetSecs - elapsed;
+                btnHtml = `<button disabled
+                    data-taskid="${task.id}"
+                    class="task-btn px-5 py-2 rounded-full font-bold text-[10px] tracking-[1px]" 
+                    style="font-family: 'Syncopate', sans-serif; background: #1e293b; color: #64748b;">
+                    WAIT ${remaining}s
+                </button>`;
+            } else {
+                btnHtml = `<button 
+                    data-taskid="${task.id}"
+                    class="task-btn px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" 
+                    style="font-family: 'Syncopate', sans-serif;">
+                    DO TASK
+                </button>`;
+            }
+
+            target.insertAdjacentHTML('beforeend', `
                 <div class="zynta-sleek-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-start gap-4 w-full">
                         <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-                        
                         <div class="space-y-1 w-full">
-                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">
-                                ${task.title}
-                            </h3>
+                            <h3 class="text-[14px] font-medium text-gray-200 tracking-tight leading-snug text-justify w-full">${task.title}</h3>
                             <div class="flex items-center gap-3 text-[10px] text-gray-500 uppercase tracking-wider">
                                 <span>Status: <span class="text-cyan-400">${task.slots}</span></span>
                             </div>
                         </div>
                     </div>
-
                     <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-white/[0.03] pt-3 sm:pt-0 shrink-0">
                         <span class="digits-terminal text-base text-[#00ff88] sm:mb-2">+${task.reward.toFixed(2)} pts</span>
-                        
-                        <button onclick="deployTaskNode('${task.id}')" class="px-5 py-2 rounded-full bg-white text-black font-bold text-[10px] tracking-[1px] hover:bg-cyan-400 transition-all duration-300 shadow-md" style="font-family: 'Syncopate', sans-serif;">
-                            DO TASK
-                        </button>
+                        ${btnHtml}
                     </div>
                 </div>
-            `;
-            target.insertAdjacentHTML('beforeend', rowHtml);
+            `);
+        }
+
+        // ✅ ATTACH EVENTS BAYAN HTML YA SHIGA DOM
+        document.querySelectorAll('.task-btn').forEach(btn => {
+            const taskId = btn.dataset.taskid;
+            const savedStartTime = getTimerState(taskId);
+            const targetSecs = 20;
+
+            if (btn.innerText.trim() === 'DO TASK') {
+                btn.addEventListener('click', () => deployTaskNode(taskId, btn));
+
+            } else if (btn.innerText.trim() === 'CLAIM REWARD') {
+                btn.addEventListener('click', () => finishTask(taskId, btn));
+
+            } else if (savedStartTime) {
+                // Timer yana tafiya — resume countdown
+                const elapsed = Math.floor((Date.now() - savedStartTime) / 1000);
+                if (elapsed < targetSecs) {
+                    startCountdown(taskId, btn, savedStartTime, targetSecs);
+                }
+            }
         });
 
         document.getElementById('board-loader').classList.add('hidden');
         target.classList.remove('opacity-0');
     }
 
-
-      // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
-         function deployTaskNode(id) {
-    const selectedTask = MasterTaskRepository.find(t => t.id === id);
-    const btn = event.target;
-    
-    window.open(selectedTask.link, '_blank');
-    
-    const startTime = Date.now();
-    const target = 20;
-    
-    if (window.taskTimer) clearInterval(window.taskTimer);
-    
-    btn.disabled = true;
-    btn.innerText = "Waiting...";
-
-    window.taskTimer = setInterval(() => {
-        if (document.visibilityState === 'hidden') return;
-        
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        
-        if (elapsed >= target) {
-            clearInterval(window.taskTimer);
-            btn.innerText = "CLAIM REWARD";
-            btn.disabled = false;
-            btn.style.background = '#00ff88';
-            btn.style.color = '#000';
-            btn.onclick = () => finishTask(id);
-        } else {
-            clearInterval(window.taskTimer);
-            btn.innerText = "RESUME";
-            btn.disabled = false;
-            btn.style.background = '#ffffff';
-            btn.style.color = '#000';
-            btn.onclick = () => deployTaskNode(id);
+    window.onload = async () => {
+        if (!getCurrentUsername()) {
+            window.location.href = 'index.html';
+            return;
         }
-    }, 1000);
-         }
-    
-
+        await startSleekAggregator();
+    };
     
         
     </script>
