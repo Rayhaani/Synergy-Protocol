@@ -227,7 +227,8 @@
 
 
       // A cikin <script> ɗinka, maye gurbin deployTaskNode da wannan:
-        function deployTaskNode(id) {
+         
+           function deployTaskNode(id) {
     const selectedTask = MasterTaskRepository.find(t => t.id === id);
     const btn = event.target;
     
@@ -242,14 +243,15 @@
     
     btn.disabled = true;
     btn.onclick = null;
-    
+    btn.innerText = `Jira: ${target}s`;
+
+    // Timer yana tafiya koyaushe — baya tsayawa saboda tab change
     window.taskTimer = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         const remaining = target - elapsed;
         
         if (remaining <= 0) {
             clearInterval(window.taskTimer);
-            document.removeEventListener('visibilitychange', window._visHandler);
             
             btn.innerText = "CLAIM REWARD";
             btn.disabled = false;
@@ -261,27 +263,7 @@
             btn.innerText = `Jira: ${remaining}s`;
         }
     }, 500);
-    
-    // Idan ya fita kafin ya cika
-    window._visHandler = function() {
-        if (document.visibilityState === 'hidden') {
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            
-            if (elapsed < target) {
-                clearInterval(window.taskTimer);
-                document.removeEventListener('visibilitychange', window._visHandler);
-                
-                btn.innerText = "RESUME";
-                btn.disabled = false;
-                btn.style.background = '#ffffff';
-                btn.style.color = '#000';
-                btn.onclick = () => deployTaskNode(id);
-            }
-        }
-    };
-    
-    document.addEventListener('visibilitychange', window._visHandler);
-        }   
+                } 
         
     </script>
 </body>
