@@ -248,11 +248,13 @@
     window.taskTimer = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         const remaining = target - elapsed;
-        
+
         if (remaining <= 0) {
-            clearInterval(window.taskTimer);
-            
-            btn.innerText = "CLAIM REWARD";
+    clearInterval(window.taskTimer);
+    document.removeEventListener('visibilitychange', window._visHandler);
+    
+    btn.innerText = "CLAIM REWARD";
+        
             btn.disabled = false;
             btn.style.background = '#00ff88';
             btn.style.color = '#000';
