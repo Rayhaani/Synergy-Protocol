@@ -763,81 +763,124 @@ document.addEventListener("visibilitychange", function() {
 
 // CODE OVERLAY - CODE KAWAI, mai sauqi
 function showCodeOnlyOverlay(id, task) {
-    // Hana double overlay
     if (document.getElementById('code-reveal-overlay')) return;
+
+    const code = localStorage.getItem(`nodeCode_${id}`) || task.code;
 
     const overlay = document.createElement('div');
     overlay.id = 'code-reveal-overlay';
     overlay.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(2, 6, 23, 0.98);
-        backdrop-filter: blur(20px);
+        background: rgba(2, 6, 23, 0.92);
+        backdrop-filter: blur(24px);
         z-index: 999999;
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
-        gap: 20px;
-        animation: fadeInOverlay 0.5s ease;
+        animation: fadeInOverlay 0.4s ease;
     `;
 
     overlay.innerHTML = `
         <style>
-            @keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
+            @keyframes fadeInOverlay { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
             @keyframes codeGlow {
-                0%   { text-shadow: 0 0 10px rgba(0,242,254,0.4); }
-                100% { text-shadow: 0 0 30px rgba(0,242,254,0.9), 0 0 60px rgba(0,242,254,0.4); }
+                0%   { text-shadow: 0 0 10px rgba(0,242,254,0.3); }
+                100% { text-shadow: 0 0 25px rgba(0,242,254,0.9), 0 0 50px rgba(0,242,254,0.3); }
+            }
+            @keyframes badgePop {
+                0% { transform: scale(0.8); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes scanline {
+                0% { transform: translateY(-100%); }
+                100% { transform: translateY(400%); }
             }
         </style>
 
-        <!-- Label -->
-        <p style="font-family:'Syncopate',sans-serif; font-size:8px; color:rgba(0,242,254,0.5); 
-                  letter-spacing:5px; text-transform:uppercase; text-align:center;">
-            SECURITY HASH CODE
-        </p>
-
-        <!-- CODE KAWAI -->
+        <!-- MAIN CARD -->
         <div style="
-            font-family:'Roboto Mono',monospace;
-            font-size: 3.5rem;
-            font-weight: 400;
-            color: #00f2fe;
-            letter-spacing: 18px;
-            animation: codeGlow 1.5s ease-in-out infinite alternate;
-            padding: 35px 55px;
+            background: linear-gradient(145deg, rgba(0,242,254,0.04), rgba(112,0,255,0.04));
             border: 1px solid rgba(0,242,254,0.15);
-            border-top: 3px solid #00f2fe;
-            border-radius: 28px;
-            background: rgba(0,242,254,0.02);
+            border-top: 2px solid rgba(0,242,254,0.6);
+            border-radius: 36px;
+            padding: 48px 52px;
             text-align: center;
-            min-width: 300px;
+            max-width: 360px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,242,254,0.08), 0 40px 80px rgba(0,0,0,0.6);
         ">
-           ${localStorage.getItem(`nodeCode_${id}`) || task.code} 
+            <!-- Scanline Effect -->
+            <div style="
+                position: absolute; top: 0; left: 0; width: 100%; height: 40px;
+                background: linear-gradient(transparent, rgba(0,242,254,0.03), transparent);
+                animation: scanline 3s linear infinite;
+                pointer-events: none;
+            "></div>
+
+            <!-- Top Badge -->
+            <div style="
+                display: inline-flex; align-items: center; gap: 8px;
+                background: rgba(0,242,254,0.07);
+                border: 1px solid rgba(0,242,254,0.2);
+                border-radius: 50px;
+                padding: 6px 18px;
+                margin-bottom: 28px;
+                animation: badgePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            ">
+                <div style="width:6px; height:6px; border-radius:50%; background:#00f2fe; box-shadow: 0 0 8px #00f2fe;"></div>
+                <span style="font-family:'Syncopate',sans-serif; font-size:7px; color:rgba(0,242,254,0.7); letter-spacing:3px; text-transform:uppercase;">Security Hash Code</span>
+            </div>
+
+            <!-- Task Title -->
+            <p style="font-family:'Space Grotesk',sans-serif; font-size:11px; color:rgba(255,255,255,0.3); letter-spacing:2px; text-transform:uppercase; margin-bottom:20px;">
+                ${task.title}
+            </p>
+
+            <!-- CODE -->
+            <div style="
+                font-family:'Roboto Mono',monospace;
+                font-size: 3rem;
+                font-weight: 400;
+                color: #00f2fe;
+                letter-spacing: 16px;
+                padding-left: 16px;
+                animation: codeGlow 1.8s ease-in-out infinite alternate;
+                margin-bottom: 28px;
+            ">
+                ${code}
+            </div>
+
+            <!-- Divider -->
+            <div style="height:1px; background: linear-gradient(90deg, transparent, rgba(0,242,254,0.2), transparent); margin-bottom:24px;"></div>
+
+            <!-- Instruction -->
+            <p style="font-family:'Space Grotesk',sans-serif; font-size:10px; color:rgba(255,255,255,0.2); letter-spacing:1px; margin-bottom:32px; line-height:1.6;">
+                Memorize this code carefully,<br>then enter it on the dashboard below.
+            </p>
+
+            <!-- GOT IT Button -->
+            <button onclick="closeCodeOverlay('${id}')" style="
+                width: 100%;
+                padding: 16px;
+                border-radius: 18px;
+                background: linear-gradient(135deg, #00f2fe, #0060ff);
+                color: black;
+                font-family: 'Syncopate', sans-serif;
+                font-weight: 700;
+                font-size: 10px;
+                letter-spacing: 3px;
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 8px 24px rgba(0,242,254,0.25);
+                transition: all 0.3s;
+                text-transform: uppercase;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(0,242,254,0.4)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,242,254,0.25)';">
+                Got It →
+            </button>
         </div>
-
-        <!-- Instruction -->
-        <p style="font-family:'Space Grotesk',sans-serif; font-size:10px; 
-                  color:rgba(255,255,255,0.25); text-align:center; margin-top:5px; letter-spacing:1px;">
-            Memorize this code, then enter it below
-        </p>
-
-        <!-- Close button -->
-        <button onclick="closeCodeOverlay('${id}')" style="
-            margin-top: 10px;
-            padding: 14px 50px;
-            border-radius: 18px;
-            background: white;
-            color: black;
-            font-family: 'Syncopate', sans-serif;
-            font-weight: 700;
-            font-size: 10px;
-            letter-spacing: 2px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s;
-        "
-        onmouseover="this.style.background='#00f2fe'"
-        onmouseout="this.style.background='white'">
-            GOT IT
-        </button>
     `;
 
     document.body.appendChild(overlay);
@@ -1164,22 +1207,23 @@ async function addEarningsToFirebase(amount) {
     `;
     }
     
-        
-    async function handleSuccess(id, amount) {
+    
+   async function handleSuccess(id, amount) {
     const username = localStorage.getItem('synergy_user');
     const userRef = db.collection("users").doc(username);
 
     try {
-        // 1. Aika kudi zuwa Firebase
+        // 1. Aika kudi + Mark completed - duka cikin update ɗaya
         await userRef.update({
             videoBalance: firebase.firestore.FieldValue.increment(amount),
-            videosWatchedToday: firebase.firestore.FieldValue.increment(1)
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            [`nodeProgress.${id}.status`]: "completed"
         });
         
         // 2. Nuna Alert
         showSynergyAlert(`SUCCESS: ₦${amount} EARNED`, "success");
         
-        // 3. Kashe wannan Node din tunda an riga an biya kudin
+        // 3. Kashe wannan Node din
         const nodeElement = document.getElementById(`node-${id}`);
         const btnElement = document.getElementById(`btn-${id}`);
 
@@ -1187,15 +1231,16 @@ async function addEarningsToFirebase(amount) {
         if (btnElement) {
             btnElement.innerText = "SECURED";
             btnElement.disabled = true;
-            btnElement.style.background = "#10b981"; // Green color
+            btnElement.style.background = "#10b981";
+            btnElement.style.color = "black";
+            btnElement.onclick = null;
         }
         
     } catch (error) {
         console.error(error);
         showSynergyAlert("DATABASE ERROR", "error");
     }
-    }
-
+   } 
 
 
 function renderToDashboard(id, task) {
@@ -1253,8 +1298,8 @@ function fetchAndRenderNodes() {
 
     nodesRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        nodesList = data || {}; // Adana bayanan a nan don amfanin wasu functions din
-        container.innerHTML = ""; 
+        nodesList = data || {};
+        container.innerHTML = "";
 
         if (!data) {
             container.innerHTML = "<p class='text-center text-gray-500 text-[10px] orbitron'>NO ACTIVE NODES FOUND</p>";
@@ -1272,7 +1317,7 @@ function fetchAndRenderNodes() {
                         </div>
                         <div id="info-area-${key}" class="flex-1">
                             <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                         </div>
+                        </div>
                         <button id="btn-${key}" onclick="processNodeViaSearch('${key}')" 
                             class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
                     </div>
@@ -1280,12 +1325,39 @@ function fetchAndRenderNodes() {
             `;
             container.insertAdjacentHTML('beforeend', nodeHtml);
         });
+
+        // ✅ Restore state - CIKIN callback, bayan nodes sun render
+        const username = localStorage.getItem('synergy_user');
+        if (username) {
+            db.collection("users").doc(username).get().then(doc => {
+                if (!doc.exists) return;
+                const progress = doc.data().nodeProgress || {};
+
+                Object.keys(progress).forEach(nodeId => {
+                    const nodeData = progress[nodeId];
+                    const btn = document.getElementById(`btn-${nodeId}`);
+                    const task = nodesList[nodeId];
+                    if (!btn || !task) return;
+
+                    if (nodeData.status === "completed") {
+                        btn.innerText = "SECURED";
+                        btn.disabled = true;
+                        btn.style.background = "#10b981";
+                        btn.style.color = "black";
+                        btn.onclick = null;
+
+                    } else if (nodeData.status === "watching") {
+                        localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
+                        localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
+                    }
+                });
+            });
+        }
+
     });
 }
-    
-    
-       
 
+    
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
     const task = nodesList[id];
@@ -1395,6 +1467,16 @@ function processNodeViaSearch(id) {
     const now = Math.floor(Date.now() / 1000);
     localStorage.setItem(`startTime_${id}`, now);
     localStorage.setItem(`nodeCode_${id}`, uniqueCode); // Unique code!
+  
+    // Save "in-progress" zuwa Firebase
+const username = localStorage.getItem('synergy_user');
+if (username) {
+    db.collection("users").doc(username).update({
+        [`nodeProgress.${id}.startTime`]: Math.floor(Date.now() / 1000),
+        [`nodeProgress.${id}.code`]: uniqueCode,
+        [`nodeProgress.${id}.status`]: "watching"
+    });
+}
 
     // 3. Buɗe YouTube APP (ba web ba - fix Opera Mini)
     openYouTubeApp(task.title);
