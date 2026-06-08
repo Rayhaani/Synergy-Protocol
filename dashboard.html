@@ -721,9 +721,7 @@ function processNodeViaSearch(id) {
 
 // Wannan zai maye gurbin visibilitychange listener GABA DAYA
 document.addEventListener("visibilitychange", function() {
-    if (document.hidden) return; // Ya fita - babu komai
-
-    // Ya dawo dashboard - duba kowane node
+    if (document.hidden) return;
     if (!nodesList) return;
 
     const currentTime = Math.floor(Date.now() / 1000);
@@ -732,63 +730,31 @@ document.addEventListener("visibilitychange", function() {
         const task = nodesList[id];
         const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
 
-        if (storedStart === 0) return; // Node din bai fara ba
+        if (storedStart === 0) return;
 
         const timeSpent = currentTime - storedStart;
 
         if (timeSpent >= task.duration) {
-            // ✅ LOKACI YA CIKA - Nuna overlay da code kawai
+            // ✅ LOKACI YA CIKA - Nuna overlay
             showCodeOnlyOverlay(id, task);
 
         } else {
-            // ⏳ BAI CIKA BA - Nuna Resume button, BABU input/verify
-            const remaining = task.duration - timeSpent;
+            // ⏳ BAI CIKA BA - RESET gaba daya, ba Resume ba
+            localStorage.removeItem(`startTime_${id}`);
+            localStorage.removeItem(`nodeCode_${id}`);
+
             const btn = document.getElementById(`btn-${id}`);
             const infoArea = document.getElementById(`info-area-${id}`);
 
-            // Nuna remaining time a info area
             if (infoArea) {
-                const mins = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                infoArea.innerHTML = `
-                    <div class="flex flex-col gap-1">
-                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                        <span class="text-[9px] text-yellow-400 orbitron animate-pulse">
-                            ⏱ ${mins}m ${secs}s REMAINING
-                        </span>
-                    </div>
-                `;
+                infoArea.innerHTML = `<h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>`;
             }
 
-            // RESUME button kawai - babu input, babu verify
             if (btn) {
-                btn.innerText = "RESUME";
-                btn.className = "px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all";
-                btn.style.background = "#eab308";
-                btn.style.color = "black";
-                btn.onclick = () => {
-                    // Reset startTime daga farko idan ya danna Resume
-                    const now = Math.floor(Date.now() / 1000);
-                    localStorage.setItem(`startTime_${id}`, now);
-
-                    // Bude YouTube
-                    const searchQuery = `"${task.title.trim()}"`;
-                    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
-
-                    // Canza button zuwa "WATCHING..."
-                    btn.innerText = "WATCHING...";
-                    btn.style.background = "rgba(0,242,254,0.1)";
-                    btn.style.color = "#00f2fe";
-                    btn.style.border = "1px solid rgba(0,242,254,0.3)";
-                    btn.onclick = null;
-
-                    // Reset info area
-                    if (infoArea) {
-                        infoArea.innerHTML = `
-                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                        `;
-                    }
-                };
+                btn.innerText = "START";
+                btn.className = "px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all";
+                btn.style = "";
+                btn.onclick = () => processNodeViaSearch(id);
             }
         }
     });
@@ -844,7 +810,7 @@ function showCodeOnlyOverlay(id, task) {
             text-align: center;
             min-width: 300px;
         ">
-            ${task.code}
+           ${localStorage.getItem(`nodeCode_${id}`) || task.code} 
         </div>
 
         <!-- Instruction -->
