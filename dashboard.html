@@ -826,11 +826,21 @@ function showCodeOnlyOverlay(id, task) {
                 Memorize this code,<br>then enter it below.
             </p>
 
-            <button onclick="closeCodeOverlay('${id}')" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
-            onmouseover="this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.transform='translateY(0)'">
-                Got It →
-            </button>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+    <button onclick="
+        navigator.clipboard.writeText('${code}');
+        this.innerText='✓ COPIED!';
+        this.style.background='#10b981';
+        setTimeout(()=>{ this.innerText='COPY CODE'; this.style.background='rgba(0,242,254,0.08)'; },2000);
+    " style="width:100%;padding:13px;border-radius:14px;background:rgba(0,242,254,0.08);color:#00f2fe;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;">
+        COPY CODE
+    </button>
+    <button onclick="closeCodeOverlay('${id}')" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
+    onmouseover="this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        Got It →
+    </button>
+</div>
         </div>
     `;
 
@@ -1164,35 +1174,33 @@ async function addEarningsToFirebase(amount) {
     const userRef = db.collection("users").doc(username);
 
     try {
-        // 1. Aika kudi + Mark completed - duka cikin update ɗaya
+        // 1. Aika kudi + Mark completed
         await userRef.update({
-            // Sabon
-pointsBalance: firebase.firestore.FieldValue.increment(amount),
+            pointsBalance: firebase.firestore.FieldValue.increment(amount),
             videosWatchedToday: firebase.firestore.FieldValue.increment(1),
             [`nodeProgress.${id}.status`]: "completed"
         });
         
         // 2. Nuna Alert
-showSynergyAlert(`Success: ${amount} pts earned`, "success");
-        // 3. Kashe wannan Node din
-        const nodeElement = document.getElementById(`node-${id}`);
-        const btnElement = document.getElementById(`btn-${id}`);
-
-        if (nodeElement) nodeElement.style.opacity = "0.4";
-        if (btnElement) {
-            btnElement.innerText = "Secured";
-            btnElement.disabled = true;
-            btnElement.style.background = "#10b981";
-            btnElement.style.color = "black";
-            btnElement.onclick = null;
-        }
+        showSynergyAlert(`Success: ${amount} pts earned`, "success");
+        
+        // 3. Ɓoye node gaba ɗaya bayan an gama
+        setTimeout(() => {
+            const nodeElement = document.getElementById(`node-${id}`);
+            if (nodeElement) {
+                nodeElement.style.transition = "all 0.5s ease";
+                nodeElement.style.opacity = "0";
+                nodeElement.style.transform = "translateY(-10px)";
+                setTimeout(() => nodeElement.remove(), 500);
+            }
+        }, 1500);
         
     } catch (error) {
         console.error(error);
         showSynergyAlert("Database error", "error");
     }
-   } 
-
+   }
+    
 
 function renderToDashboard(id, task) {
     let container;
@@ -1291,22 +1299,14 @@ function fetchAndRenderNodes() {
                     if (!btn || !task) return;
 
                     if (nodeData.status === "completed") {
-                        btn.innerText = "SECURED";
-                        btn.disabled = true;
-                        btn.style.background = "#10b981";
-                        btn.style.color = "black";
-                        btn.onclick = null;
+    // Ɓoye node gaba ɗaya - babu wani aiki
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    if (nodeElement) nodeElement.remove();
 
-                    } else if (nodeData.status === "watching") {
-                        localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
-                        localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
+} else if (nodeData.status === "watching") {
+    localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
+    localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
                     }
-                });
-            });
-        }
-
-    });
-}
 
     
 // 2. Function na duba lokaci da tabbatar da Code
