@@ -691,19 +691,247 @@ async function loadNextVideoWithoutPlaying() {
     }
 
     // SYNERGY TAB PROTECTION ENGINE
-document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-        // Idan mamba ya fita daga shafin
-        if (player && typeof player.pauseVideo === 'function') {
-            player.pauseVideo(); 
-            showSynergyAlert("SECURITY: SESSION PAUSED (DON'T LEAVE THE PAGE)", "info");
-        }
-    } else {
-        // Idan ya dawo shafin
-        showSynergyAlert("SESSION RESUMED", "success");
-        
+function processNodeViaSearch(id) {
+    if (!nodesList || !nodesList[id]) return;
+
+    const task = nodesList[id];
+    
+    // Adana startTime - kawai idan babu ɗaya da ke running
+    const existingStart = localStorage.getItem(`startTime_${id}`);
+    if (!existingStart) {
+        const now = Math.floor(Date.now() / 1000);
+        localStorage.setItem(`startTime_${id}`, now);
     }
+
+    // Bude YouTube
+    const searchQuery = `"${task.title.trim()}"`;
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+
+    // Canza button zuwa "WATCHING..."
+    const btn = document.getElementById(`btn-${id}`);
+    if (btn) {
+        btn.innerText = "WATCHING...";
+        btn.style.background = "rgba(0,242,254,0.1)";
+        btn.style.color = "#00f2fe";
+        btn.style.border = "1px solid rgba(0,242,254,0.3)";
+        btn.onclick = null; // Kashe click har sai ya dawo
+    }
+}
+
+
+// Wannan zai maye gurbin visibilitychange listener GABA DAYA
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) return; // Ya fita - babu komai
+
+    // Ya dawo dashboard - duba kowane node
+    if (!nodesList) return;
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    Object.keys(nodesList).forEach((id) => {
+        const task = nodesList[id];
+        const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+
+        if (storedStart === 0) return; // Node din bai fara ba
+
+        const timeSpent = currentTime - storedStart;
+
+        if (timeSpent >= task.duration) {
+            // ✅ LOKACI YA CIKA - Nuna overlay da code kawai
+            showCodeOnlyOverlay(id, task);
+
+        } else {
+            // ⏳ BAI CIKA BA - Nuna Resume button, BABU input/verify
+            const remaining = task.duration - timeSpent;
+            const btn = document.getElementById(`btn-${id}`);
+            const infoArea = document.getElementById(`info-area-${id}`);
+
+            // Nuna remaining time a info area
+            if (infoArea) {
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                infoArea.innerHTML = `
+                    <div class="flex flex-col gap-1">
+                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                        <span class="text-[9px] text-yellow-400 orbitron animate-pulse">
+                            ⏱ ${mins}m ${secs}s REMAINING
+                        </span>
+                    </div>
+                `;
+            }
+
+            // RESUME button kawai - babu input, babu verify
+            if (btn) {
+                btn.innerText = "RESUME";
+                btn.className = "px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all";
+                btn.style.background = "#eab308";
+                btn.style.color = "black";
+                btn.onclick = () => {
+                    // Reset startTime daga farko idan ya danna Resume
+                    const now = Math.floor(Date.now() / 1000);
+                    localStorage.setItem(`startTime_${id}`, now);
+
+                    // Bude YouTube
+                    const searchQuery = `"${task.title.trim()}"`;
+                    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+
+                    // Canza button zuwa "WATCHING..."
+                    btn.innerText = "WATCHING...";
+                    btn.style.background = "rgba(0,242,254,0.1)";
+                    btn.style.color = "#00f2fe";
+                    btn.style.border = "1px solid rgba(0,242,254,0.3)";
+                    btn.onclick = null;
+
+                    // Reset info area
+                    if (infoArea) {
+                        infoArea.innerHTML = `
+                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                        `;
+                    }
+                };
+            }
+        }
+    });
 });
+
+
+// CODE OVERLAY - CODE KAWAI, mai sauqi
+function showCodeOnlyOverlay(id, task) {
+    // Hana double overlay
+    if (document.getElementById('code-reveal-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'code-reveal-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(2, 6, 23, 0.98);
+        backdrop-filter: blur(20px);
+        z-index: 999999;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 20px;
+        animation: fadeInOverlay 0.5s ease;
+    `;
+
+    overlay.innerHTML = `
+        <style>
+            @keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
+            @keyframes codeGlow {
+                0%   { text-shadow: 0 0 10px rgba(0,242,254,0.4); }
+                100% { text-shadow: 0 0 30px rgba(0,242,254,0.9), 0 0 60px rgba(0,242,254,0.4); }
+            }
+        </style>
+
+        <!-- Label -->
+        <p style="font-family:'Syncopate',sans-serif; font-size:8px; color:rgba(0,242,254,0.5); 
+                  letter-spacing:5px; text-transform:uppercase; text-align:center;">
+            SECURITY HASH CODE
+        </p>
+
+        <!-- CODE KAWAI -->
+        <div style="
+            font-family:'Roboto Mono',monospace;
+            font-size: 3.5rem;
+            font-weight: 400;
+            color: #00f2fe;
+            letter-spacing: 18px;
+            animation: codeGlow 1.5s ease-in-out infinite alternate;
+            padding: 35px 55px;
+            border: 1px solid rgba(0,242,254,0.15);
+            border-top: 3px solid #00f2fe;
+            border-radius: 28px;
+            background: rgba(0,242,254,0.02);
+            text-align: center;
+            min-width: 300px;
+        ">
+            ${task.code}
+        </div>
+
+        <!-- Instruction -->
+        <p style="font-family:'Space Grotesk',sans-serif; font-size:10px; 
+                  color:rgba(255,255,255,0.25); text-align:center; margin-top:5px; letter-spacing:1px;">
+            Memorize this code, then enter it below
+        </p>
+
+        <!-- Close button -->
+        <button onclick="closeCodeOverlay('${id}')" style="
+            margin-top: 10px;
+            padding: 14px 50px;
+            border-radius: 18px;
+            background: white;
+            color: black;
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        "
+        onmouseover="this.style.background='#00f2fe'"
+        onmouseout="this.style.background='white'">
+            GOT IT
+        </button>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+
+// Rufe overlay - nuna verify box
+function closeCodeOverlay(id) {
+    const overlay = document.getElementById('code-reveal-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.4s';
+        setTimeout(() => overlay.remove(), 400);
+    }
+
+    // Yanzu nuna input + verify a node din
+    const task = nodesList[id];
+    const infoArea = document.getElementById(`info-area-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+
+    if (infoArea) {
+        infoArea.innerHTML = `
+            <div class="flex flex-col gap-1 w-full">
+                <span class="text-[8px] text-cyan-500 orbitron uppercase font-bold">ENTER CODE</span>
+                <input type="text" id="code-input-${id}" maxlength="6"
+                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none focus:border-cyan-400" 
+                placeholder="••••••">
+            </div>
+        `;
+    }
+
+    if (btn) {
+        btn.innerText = "VERIFY";
+        btn.style.background = "#00f2fe";
+        btn.style.color = "black";
+        btn.style.border = "none";
+        btn.onclick = () => verifyNodeCode(id);
+    }
+}
+
+
+// VERIFY - bayan overlay ya rufe
+async function verifyNodeCode(id) {
+    const task = nodesList[id];
+    const inputEl = document.getElementById(`code-input-${id}`);
+    
+    if (!inputEl) return;
+    
+    const inputVal = inputEl.value.toUpperCase().trim();
+
+    if (inputVal === task.code) {
+        localStorage.removeItem(`startTime_${id}`);
+        await handleSuccess(id, task.amount);
+    } else {
+        showSynergyAlert("INVALID HASH CODE", "error");
+        inputEl.style.borderColor = '#f87171';
+        inputEl.value = "";
+        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
+    }
+            }
     
     
 
