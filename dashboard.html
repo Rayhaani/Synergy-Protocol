@@ -691,20 +691,181 @@ async function loadNextVideoWithoutPlaying() {
     }
 
     // SYNERGY TAB PROTECTION ENGINE
+// Saka wannan a cikin document.addEventListener("visibilitychange", ...)
+// Maye gurbin na yanzu
+
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
-        // Idan mamba ya fita daga shafin
         if (player && typeof player.pauseVideo === 'function') {
-            player.pauseVideo(); 
-            showSynergyAlert("SECURITY: SESSION PAUSED (DON'T LEAVE THE PAGE)", "info");
+            player.pauseVideo();
+            showSynergyAlert("SECURITY: SESSION PAUSED", "info");
         }
     } else {
-        // Idan ya dawo shafin
-        showSynergyAlert("SESSION RESUMED", "success");
-        
+        // User ya dawo - duba kowane node
+        checkAllNodesOnReturn();
     }
 });
 
+window.addEventListener('focus', checkAllNodesOnReturn);
+
+function checkAllNodesOnReturn() {
+    if (!nodesList) return;
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    Object.keys(nodesList).forEach((id) => {
+        const task = nodesList[id];
+        const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+        
+        // Idan wannan node yana running (startTime yana nan)
+        if (storedStart === 0) return;
+        
+        const timeSpent = currentTime - storedStart;
+        
+        // Idan lokacin ya kai
+        if (timeSpent >= task.duration) {
+            showCodeOverlayForNode(id, task);
+        } else {
+            // Nuna masa nawa ya rage
+            const remaining = task.duration - timeSpent;
+            showSynergyAlert(`NODE ${id}: ${remaining}s REMAINING`, "info");
+        }
+    });
+}
+
+function showCodeOverlayForNode(id, task) {
+    // Cire tsohon overlay idan yana nan
+    const existingOverlay = document.getElementById('code-reveal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'code-reveal-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(2, 6, 23, 0.95);
+        backdrop-filter: blur(20px);
+        z-index: 999999;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 30px;
+        animation: fadeInOverlay 0.6s ease;
+    `;
+
+    overlay.innerHTML = `
+        <style>
+            @keyframes fadeInOverlay {
+                from { opacity: 0; transform: scale(0.97); }
+                to   { opacity: 1; transform: scale(1); }
+            }
+            @keyframes codeReveal {
+                0%   { letter-spacing: 20px; opacity: 0; }
+                100% { letter-spacing: 12px; opacity: 1; }
+            }
+        </style>
+
+        <!-- Title -->
+        <div style="text-align:center;">
+            <p style="font-family:'Syncopate',sans-serif; font-size:9px; color:#00f2fe; 
+                      letter-spacing:4px; text-transform:uppercase; opacity:0.6; margin-bottom:8px;">
+                SECURITY HASH UNLOCKED
+            </p>
+            <p style="font-family:'Space Grotesk',sans-serif; font-size:11px; color:#ffffff80;">
+                ${task.title}
+            </p>
+        </div>
+
+        <!-- CODE Display -->
+        <div style="
+            font-family:'Roboto Mono',monospace;
+            font-size: 3rem;
+            font-weight: 400;
+            color: #00f2fe;
+            letter-spacing: 12px;
+            text-shadow: 0 0 20px rgba(0,242,254,0.6), 0 0 40px rgba(0,242,254,0.3);
+            animation: codeReveal 1s ease forwards;
+            padding: 30px 40px;
+            border: 1px solid rgba(0,242,254,0.2);
+            border-top: 3px solid #00f2fe;
+            border-radius: 24px;
+            background: rgba(0,242,254,0.03);
+            min-width: 280px;
+            text-align: center;
+        ">
+            ${task.code}
+        </div>
+
+        <!-- Input + Verify -->
+        <div style="width: 100%; max-width: 320px; display:flex; flex-direction:column; gap:14px;">
+            <input type="text" id="overlay-code-input-${id}" maxlength="6"
+                style="
+                    background: rgba(255,255,255,0.03);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 20px;
+                    color: white;
+                    font-size: 1.4rem;
+                    text-align: center;
+                    padding: 18px;
+                    width: 100%;
+                    outline: none;
+                    font-family: 'Roboto Mono', monospace;
+                    letter-spacing: 4px;
+                "
+                placeholder="••••••"
+            >
+            <button onclick="submitFromOverlay('${id}')"
+                style="
+                    width: 100%;
+                    padding: 18px;
+                    border-radius: 20px;
+                    background: white;
+                    color: black;
+                    font-family: 'Syncopate', sans-serif;
+                    font-weight: 700;
+                    font-size: 11px;
+                    letter-spacing: 2px;
+                    cursor: pointer;
+                    border: none;
+                    transition: all 0.3s;
+                "
+                onmouseover="this.style.background='#00f2fe'"
+                onmouseout="this.style.background='white'"
+            >
+                VERIFY TRANSACTION
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+async function submitFromOverlay(id) {
+    const task = nodesList[id];
+    const inputVal = document.getElementById(`overlay-code-input-${id}`)?.value.toUpperCase();
+
+    if (inputVal === task.code) {
+        // Goge startTime domin hana double submission
+        localStorage.removeItem(`startTime_${id}`);
+
+        // Rufe overlay
+        const overlay = document.getElementById('code-reveal-overlay');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.5s';
+            setTimeout(() => overlay.remove(), 500);
+        }
+
+        // Aika kudi Firebase
+        await handleSuccess(id, task.amount);
+
+    } else {
+        showSynergyAlert("INVALID CODE", "error");
+        const input = document.getElementById(`overlay-code-input-${id}`);
+        if (input) {
+            input.style.borderColor = '#f87171';
+            setTimeout(() => input.style.borderColor = 'rgba(255,255,255,0.1)', 1500);
+        }
+    }
+}
 
     // MULTI-LOGIN & CONSOLE PROTECTION
 const currentSessionId = Math.random().toString(36).substring(7);
