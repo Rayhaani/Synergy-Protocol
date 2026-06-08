@@ -342,7 +342,7 @@
     <div class="master-card rounded-[35px] p-8 text-center border-t-2 border-cyan-500/30">
         <p class="orbitron text-[9px] text-gray-400 mb-2 tracking-[3px]">Total Cumulative Yield</p>
         <h1 class="digits-terminal text-5xl text-white">
-            <span class="text-gray-500 text-2xl">₦</span><span id="total-balance-main">0</span>
+            <span class="text-gray-500 text-2xl">pts</span>
         </h1>
     </div>
 
@@ -539,9 +539,10 @@ if (currentActiveUser) {
             const data = doc.data();
             
             // 1. Kudi
-            const vBal = data.videoBalance || 0;
-            const sBal = data.shareBalance || 0;
-            const total = vBal + sBal;
+            // Sabon
+const vBal = data.pointsBalance || 0;
+const sBal = data.shareBalance || 0;
+const total = vBal + sBal;
             
             // 2. Saita Limit na 5 Units don Dashboard
             const watchedRaw = data.videosWatchedToday || 0;
@@ -567,9 +568,7 @@ if (currentActiveUser) {
                 progressBar.style.width = percent + "%";
             }
             
-            // 5. Monthly Yield (Maida lissafin ₦36,000 dinka)
-            // Idan baka kalla ba (0), zai nuna 0. Idan ka kalla 5, zai nuna 22,500 ko 36,000 dangane da rate dinka.
-            // Bari mu sanya lissafin ya zama (watched * 150 * 30)
+                   // Bari mu sanya lissafin ya zama (watched * 150 * 30)
             const estimatedMonthly = watchedRaw * 150 * 30;
             const estElement = document.getElementById('est-earnings');
             if(estElement) {
@@ -608,7 +607,7 @@ const watchedToday = parseInt(currentCountText) || 0;
 
 // 2. Idan ya riga ya kai 5, tsayar da shi anan
 if (watchedToday >= 5) {
-    showSynergyAlert("LIMIT REACHED: 5/5 UNITS COMPLETED", "info");
+    showSynergyAlert("Limit reached: 5/5 units completed", "info");
      p.style.opacity = "0";
 p.style.pointerEvents = "none";
 p.style.transform = "translateY(40px)";
@@ -618,13 +617,13 @@ p.classList.remove('is-visible-now');
 }
             
             await userRef.update({
-                videoBalance: firebase.firestore.FieldValue.increment(150),
+pointsBalance: firebase.firestore.FieldValue.increment(100),
                 videosWatchedToday: firebase.firestore.FieldValue.increment(1),
                 lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
             });
             
-            showSynergyAlert("SUCCESS: ₦150 EARNED", "success");
-
+showSynergyAlert("Success: 100 pts earned", "success");
+            
             // 2. Boye Panel din nan take (Ba tare da jinkiri ba)
             if(p) {
                 p.style.opacity = "0";
@@ -649,11 +648,11 @@ p.classList.remove('is-visible-now');
             loadNextVideoWithoutPlaying();
 
         } catch (error) {
-            showSynergyAlert("DATABASE ERROR", "error");
+            showSynergyAlert("Database error", "error");
             console.error(error);
         }
     } else {
-        showSynergyAlert("INVALID CODE", "error");
+        showSynergyAlert("Invalid code", "error");
     }
  }
     
@@ -685,8 +684,8 @@ async function loadNextVideoWithoutPlaying() {
     async function secureShareAndEarn(videoId) {
         try {
             await navigator.share({ title: 'Synergy Protocol', url: 'https://youtu.be/' + videoId });
-            await db.collection("users").doc(currentUser).update({ shareBalance: firebase.firestore.FieldValue.increment(50) });
-            showSynergyAlert("SHARE REWARD ADDED", "success");
+            await db.collection("users").doc(currentUser).update({ shareBalance: firebase.firestore.FieldValue.increment(0) });
+            showSynergyAlert("Share reward earned", "success");
         } catch(e) {}
     }
 
@@ -887,7 +886,7 @@ async function verifyNodeCode(id) {
         localStorage.removeItem(`startTime_${id}`);
         await handleSuccess(id, task.amount);
     } else {
-        showSynergyAlert("INVALID HASH CODE", "error");
+        showSynergyAlert("Invalid hash code", "error");
         inputEl.style.borderColor = '#f87171';
         inputEl.value = "";
         setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
@@ -1089,11 +1088,11 @@ async function loadNewTask() {
 
 // Bayanan aikin kowane Node
 const nodeTasks = {
-    1: { title: "AI Wealth Academy", duration: 600, code: "XA99", amount: 150 },
-    2: { title: "Global Wealth Secret", duration: 420, code: "BZ44", amount: 150 },
-    3: { title: "Urban Vision 2050", duration: 540, code: "UV50", amount: 150 },
-    4: { title: "Zenith Nature 4K", duration: 300, code: "ZN4K", amount: 150 },
-    5: { title: "Cosmic Horizon", duration: 480, code: "CH05", amount: 150 }
+    1: { title: "AI Wealth Academy", duration: 600, code: "XA99", amount: 100 },
+    2: { title: "Global Wealth Secret", duration: 420, code: "BZ44", amount: 100 },
+    3: { title: "Urban Vision 2050", duration: 540, code: "UV50", amount: 100 },
+    4: { title: "Zenith Nature 4K", duration: 300, code: "ZN4K", amount: 100 },
+    5: { title: "Cosmic Horizon", duration: 480, code: "CH05", amount: 100 }
 };
     
 
@@ -1167,21 +1166,21 @@ async function addEarningsToFirebase(amount) {
     try {
         // 1. Aika kudi + Mark completed - duka cikin update ɗaya
         await userRef.update({
-            videoBalance: firebase.firestore.FieldValue.increment(amount),
+            // Sabon
+pointsBalance: firebase.firestore.FieldValue.increment(amount),
             videosWatchedToday: firebase.firestore.FieldValue.increment(1),
             [`nodeProgress.${id}.status`]: "completed"
         });
         
         // 2. Nuna Alert
-        showSynergyAlert(`SUCCESS: ₦${amount} EARNED`, "success");
-        
+showSynergyAlert(`Success: ${amount} pts earned`, "success");
         // 3. Kashe wannan Node din
         const nodeElement = document.getElementById(`node-${id}`);
         const btnElement = document.getElementById(`btn-${id}`);
 
         if (nodeElement) nodeElement.style.opacity = "0.4";
         if (btnElement) {
-            btnElement.innerText = "SECURED";
+            btnElement.innerText = "Secured";
             btnElement.disabled = true;
             btnElement.style.background = "#10b981";
             btnElement.style.color = "black";
@@ -1190,7 +1189,7 @@ async function addEarningsToFirebase(amount) {
         
     } catch (error) {
         console.error(error);
-        showSynergyAlert("DATABASE ERROR", "error");
+        showSynergyAlert("Database error", "error");
     }
    } 
 
@@ -1356,7 +1355,7 @@ async function verifyNodeCode(id) {
         localStorage.removeItem(`nodeCode_${id}`); // Goge code bayan an yi amfani
         handleSuccess(id, task.amount);
     } else {
-        showSynergyAlert("INVALID HASH CODE", "error");
+        showSynergyAlert("Invalid hash code", "error");
         const input = document.getElementById(`code-input-${id}`);
         if (input) {
             input.style.borderColor = '#f87171';
