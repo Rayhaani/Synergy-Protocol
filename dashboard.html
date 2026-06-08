@@ -1307,7 +1307,11 @@ function fetchAndRenderNodes() {
     localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
     localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
                     }
-
+                    });
+            });
+        }
+    });
+}
     
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
