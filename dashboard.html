@@ -342,18 +342,18 @@
     <div class="master-card rounded-[35px] p-8 text-center border-t-2 border-cyan-500/30">
         <p class="orbitron text-[9px] text-gray-400 mb-2 tracking-[3px]">Total Cumulative Yield</p>
         <h1 class="digits-terminal text-5xl text-white">
-            <span class="text-gray-500 text-2xl">pts</span>
+    <span id="total-balance-main">0</span><span class="text-gray-500 text-2xl ml-2">pts</span>
         </h1>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
         <div class="master-card rounded-[24px] p-4 bg-white/[0.02]">
             <p class="orbitron text-[7px] text-gray-500 mb-1">Video Vault</p>
-            <h4 class="digits-terminal text-lg text-cyan-400">₦<span id="video-balance-sub">0</span></h4>
+            <h4 class="digits-terminal text-lg text-cyan-400"><span id="video-balance-sub">0</span> pts</h4>
         </div>
         <div class="master-card rounded-[24px] p-4 bg-white/[0.02]">
             <p class="orbitron text-[7px] text-gray-500 mb-1">Share Vault</p>
-            <h4 class="digits-terminal text-lg text-green-400">₦<span id="share-balance-sub">0</span></h4>
+            <h4 class="digits-terminal text-lg text-green-400"><span id="share-balance-sub">0</span> pts</h4>
         </div>
     </div>
 </section>
@@ -892,7 +892,7 @@ async function verifyNodeCode(id) {
     
     const inputVal = inputEl.value.toUpperCase().trim();
 
-    if (inputVal === task.code) {
+    if (inputVal === storedCode && storedCode !== "") {
         localStorage.removeItem(`startTime_${id}`);
         await handleSuccess(id, task.amount);
     } else {
