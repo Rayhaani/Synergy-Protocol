@@ -720,46 +720,99 @@ function processNodeViaSearch(id) {
 
 
 // Wannan zai maye gurbin visibilitychange listener GABA DAYA
-document.addEventListener("visibilitychange", function() {
-    if (document.hidden) return;
-    if (!nodesList) return;
+function fetchAndRenderNodes() {
+    const container = document.getElementById('synergy-nodes-container');
+    if (!container) return;
 
-    const currentTime = Math.floor(Date.now() / 1000);
+    const nodesRef = firebase.database().ref('nodes');
 
-    Object.keys(nodesList).forEach((id) => {
-        const task = nodesList[id];
-        const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+    nodesRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        nodesList = data || {};
+        container.innerHTML = "";
 
-        if (storedStart === 0) return;
+        if (!data) {
+            container.innerHTML = "<p class='text-center text-gray-500 text-[10px] orbitron'>NO ACTIVE NODES FOUND</p>";
+            return;
+        }
 
-        const timeSpent = currentTime - storedStart;
+        // Fara karbo progress na user daga Firestore don sanin wadanda ya kammala
+        const username = localStorage.getItem('synergy_user');
+        if (username) {
+            db.collection("users").doc(username).get().then(doc => {
+                const progress = doc.exists ? (doc.data().nodeProgress || {}) : {};
+                
+                // Jera keys na nodes din daki-daki (Node 1, Node 2, etc.)
+                const nodeKeys = Object.keys(data).sort(); 
 
-        if (timeSpent >= task.duration) {
-            // ✅ LOKACI YA CIKA - Nuna overlay
-            showCodeOnlyOverlay(id, task);
+                nodeKeys.forEach((key, index) => {
+                    const task = data[key];
+                    
+                    // Duba ko wannan shi ne node na farko gaba daya
+                    const isFirstNode = index === 0;
+                    
+                    // Duba ko node din da yake gaban wannan ya zama "completed"
+                    const previousNodeKey = index > 0 ? nodeKeys[index - 1] : null;
+                    const isPreviousCompleted = previousNodeKey ? (progress[previousNodeKey] && progress[previousNodeKey].status === "completed") : false;
+                    
+                    // Duba halin da wannan takamaiman node din yake ciki
+                    const currentProgress = progress[key] || {};
+                    const isCompleted = currentProgress.status === "completed";
 
-        } else {
-            // ⏳ BAI CIKA BA - RESET gaba daya, ba Resume ba
-            localStorage.removeItem(`startTime_${id}`);
-            localStorage.removeItem(`nodeCode_${id}`);
+                    let nodeHtml = "";
 
-            const btn = document.getElementById(`btn-${id}`);
-            const infoArea = document.getElementById(`info-area-${id}`);
+                    if (isCompleted) {
+                        // Idan an riga an gama wannan node din, za mu boye shi gaba daya kamar yadda ka tsara a baya
+                        return;
+                    }
 
-            if (infoArea) {
-                infoArea.innerHTML = `<h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>`;
-            }
+                    // Idan shi ne na farko, ko kuma na gaban sa ya kammala, to wannan yana BUƊE (UNLOCKED)
+                    if (isFirstNode || isPreviousCompleted) {
+                        nodeHtml = `
+                            <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4">
+                                <div class="flex items-center gap-4 w-full">
+                                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
+                                       <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93 Bell.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                    </div>
+                                    <div id="info-area-${key}" class="flex-1">
+                                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                                    </div>
+                                    <button id="btn-${key}" onclick="processNodeViaSearch('${key}')" 
+                                        class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Idan na gaban sa bai gama ba, to wannan node din yana KULLE (LOCKED)
+                        nodeHtml = `
+                            <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between opacity-40 transition-all mb-4 select-none">
+                                <div class="flex items-center gap-4 w-full">
+                                    <div class="w-12 h-12 rounded-2xl bg-gray-500/10 border border-white/5 flex items-center justify-center text-gray-500 font-bold orbitron">
+                                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="orbitron text-[11px] text-gray-500 tracking-wider uppercase">${task.title}</h4>
+                                        <p class="text-[8px] text-cyan-500/50 orbitron tracking-widest mt-0.5">LOCKED — COMPLETE PREVIOUS NODE</p>
+                                    </div>
+                                    <button disabled class="px-6 py-2.5 rounded-xl bg-white/5 text-gray-600 orbitron text-[9px] font-black tracking-widest cursor-not-allowed border border-white/5">LOCKED</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    container.insertAdjacentHTML('beforeend', nodeHtml);
 
-            if (btn) {
-                btn.innerText = "START";
-                btn.className = "px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all";
-                btn.style = "";
-                btn.onclick = () => processNodeViaSearch(id);
-            }
+                    // Maido da state idan mamba yana tsakiyar kallo (watching)
+                    if (currentProgress.status === "watching") {
+                        localStorage.setItem(`startTime_${key}`, currentProgress.startTime);
+                        localStorage.setItem(`nodeCode_${key}`, currentProgress.code);
+                    }
+                });
+            });
         }
     });
-});
-
+}
+    
 
 // CODE OVERLAY - CODE KAWAI, mai sauqi
 function showCodeOnlyOverlay(id, task) {
@@ -1170,7 +1223,6 @@ async function addEarningsToFirebase(amount) {
     }
     
     
-   
   async function handleSuccess(id, amount) {
     const username = localStorage.getItem('synergy_user');
     const userRef = db.collection("users").doc(username);
@@ -1209,7 +1261,7 @@ async function addEarningsToFirebase(amount) {
     }
   }
     
-
+  
     
 
 function renderToDashboard(id, task) {
