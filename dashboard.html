@@ -1303,6 +1303,44 @@ function unlockAllNodes() {
     });
 }
 
+
+    // ✅ SABON FUNCTION - Restore lock state a page load
+function restoreLockedState() {
+    // Nemo duk wani node da ke "watching" a localStorage
+    const activeNodeId = Object.keys(nodesList).find(id => {
+        return localStorage.getItem(`startTime_${id}`) !== null;
+    });
+
+    if (!activeNodeId) return; // Babu pending node — duk sun free
+
+    const task = nodesList[activeNodeId];
+
+    // Lock duk sauran nodes nan take
+    lockAllOtherNodes(activeNodeId);
+
+    // Saita Active node button zuwa "VERIFY" 
+    const btn = document.getElementById(`btn-${activeNodeId}`);
+    const infoArea = document.getElementById(`info-area-${activeNodeId}`);
+
+    if (infoArea) {
+        infoArea.innerHTML = `
+            <div class="flex flex-col gap-1">
+                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
+            </div>
+        `;
+    }
+
+    if (btn) {
+        btn.innerText = "VERIFY";
+        btn.style.background = "#00f2fe";
+        btn.style.color = "black";
+        btn.style.border = "none";
+        btn.disabled = false;
+        btn.onclick = () => verifyNodeCode(activeNodeId);
+    }
+}
+
     
 function fetchAndRenderNodes() {
     const container = document.getElementById('synergy-nodes-container');
@@ -1340,7 +1378,7 @@ function fetchAndRenderNodes() {
             container.insertAdjacentHTML('beforeend', nodeHtml);
         });
 
-        // ✅ Restore state - CIKIN callback, bayan nodes sun render
+        // ✅ Restore completed nodes from Firebase
         const username = localStorage.getItem('synergy_user');
         if (username) {
             db.collection("users").doc(username).get().then(doc => {
@@ -1349,29 +1387,20 @@ function fetchAndRenderNodes() {
 
                 Object.keys(progress).forEach(nodeId => {
                     const nodeData = progress[nodeId];
-                    const btn = document.getElementById(`btn-${nodeId}`);
-                    const task = nodesList[nodeId];
-                    if (!btn || !task) return;
-
                     if (nodeData.status === "completed") {
-    // Ɓoye node gaba ɗaya - babu wani aiki
-    const nodeElement = document.getElementById(`node-${nodeId}`);
-    if (nodeElement) nodeElement.remove();
-   
-                    } else if (nodeData.status === "watching") {
-    // Reset - ba za a restore watching state ba
-    db.collection("users").doc(username).update({
-        [`nodeProgress.${nodeId}.status`]: "idle"
-   
-       }
+                        const nodeElement = document.getElementById(`node-${nodeId}`);
+                        if (nodeElement) nodeElement.remove();
+                    }
+                });
 
-                    
-                    });
-    });
+                // ✅ GYARA: Bayan an gama restore, sai a check pending nodes
+                restoreLockedState();
             });
+        } else {
+            restoreLockedState();
         }
     });
-}
+}   
     
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
