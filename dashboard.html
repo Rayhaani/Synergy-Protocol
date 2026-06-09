@@ -743,6 +743,9 @@ document.addEventListener("visibilitychange", function() {
             localStorage.removeItem(`startTime_${id}`);
             localStorage.removeItem(`nodeCode_${id}`);
 
+            // Unlock nodes idan timer ya reset
+unlockAllNodes();
+
             const btn = document.getElementById(`btn-${id}`);
             const infoArea = document.getElementById(`info-area-${id}`);
 
@@ -1184,8 +1187,11 @@ async function addEarningsToFirebase(amount) {
         
         // 2. Nuna Alert
         showSynergyAlert(`Success: ${amount} pts earned`, "success");
+
+        // 3. Unlock nodes bayan an gama
+        unlockAllNodes();
         
-        // 3. Ɓoye node gaba ɗaya bayan an gama
+        // 4. Ɓoye node gaba ɗaya bayan an gama
         setTimeout(() => {
             const nodeElement = document.getElementById(`node-${id}`);
             if (nodeElement) {
@@ -1248,8 +1254,49 @@ function renderToDashboard(id, task) {
 window.onload = () => {
     fetchAndRenderNodes();
 };
-    
 
+
+function lockAllOtherNodes(activeId) {
+    Object.keys(nodesList).forEach((id) => {
+        if (id === activeId) return; // Bar active node
+        
+        const btn = document.getElementById(`btn-${id}`);
+        const nodeEl = document.getElementById(`node-${id}`);
+        
+        if (btn) {
+            btn.innerText = "LOCKED";
+            btn.style.background = "rgba(255,255,255,0.05)";
+            btn.style.color = "rgba(255,255,255,0.2)";
+            btn.style.border = "1px solid rgba(255,255,255,0.05)";
+            btn.onclick = null;
+            btn.disabled = true;
+        }
+        if (nodeEl) {
+            nodeEl.style.opacity = "0.3";
+        }
+    });
+}
+
+function unlockAllNodes() {
+    Object.keys(nodesList).forEach((id) => {
+        const btn = document.getElementById(`btn-${id}`);
+        const nodeEl = document.getElementById(`node-${id}`);
+        
+        if (btn && btn.innerText === "LOCKED") {
+            btn.innerText = "START";
+            btn.style.background = "white";
+            btn.style.color = "black";
+            btn.style.border = "none";
+            btn.disabled = false;
+            btn.onclick = () => processNodeViaSearch(id);
+        }
+        if (nodeEl) {
+            nodeEl.style.opacity = "1";
+        }
+    });
+}
+
+    
 function fetchAndRenderNodes() {
     const container = document.getElementById('synergy-nodes-container');
     if (!container) return;
@@ -1436,6 +1483,9 @@ if (username) {
 
     // 3. Buɗe YouTube APP (ba web ba - fix Opera Mini)
     openYouTubeApp(task.title);
+
+    // Lock dukkan sauran nodes
+lockAllOtherNodes(id);
 
     // 4. Update UI - nuna code din a infoArea
     const infoArea = document.getElementById(`info-area-${id}`);
