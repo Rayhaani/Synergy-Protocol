@@ -1408,58 +1408,33 @@ function fetchAndRenderNodes() {
 // 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
     const task = nodesList[id];
-    const currentTime = Math.floor(Date.now() / 1000);
+    const inputEl = document.getElementById(`code-input-${id}`);
     
-    const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+    if (!inputEl) return;
     
-    // GYARA: Karanta unique code daga localStorage, ba daga task.code ba
+    // 1. Karanta abin da mamba ya rubuta
+    const inputVal = inputEl.value.toUpperCase().trim();
+    
+    // 2. Dauko ainihin Code din da muka ajiye masa a localStorage
     const storedCode = localStorage.getItem(`nodeCode_${id}`) || "";
 
-    if (storedStart === 0) {
-        showSynergyAlert("Security Error: Please click START again.", "error");
-        return;
-    }
-
-    const timeSpent = currentTime - storedStart;
-
-    if (timeSpent < task.duration) {
-        const remaining = task.duration - timeSpent;
-        const mins = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        showSynergyAlert(`⏱ ${mins}m ${secs}s REMAINING - Keep Watching!`, "error");
-
-        const btn = document.getElementById(`btn-${id}`);
-        if (btn) {
-            btn.innerText = "RESUME";
-            btn.style.background = "#eab308";
-            btn.style.color = "black";
-            btn.onclick = () => {
-                openYouTubeApp(task.title);
-                btn.innerText = "VERIFY";
-                btn.style.background = "#00f2fe";
-                btn.onclick = () => verifyNodeCode(id);
-            };
-        }
-        return;
-    }
-
-    const inputVal = (document.getElementById(`code-input-${id}`)?.value || "").toUpperCase().trim();
-    
-    // GYARA: Kwatanta da stored unique code, ba task.code ba
+    // 3. Kwatanta su muga idan sun yi daidai
     if (inputVal === storedCode && storedCode !== "") {
+        // Idan yayi daidai, goge tarkacen lokaci da code
         localStorage.removeItem(`startTime_${id}`);
-        localStorage.removeItem(`nodeCode_${id}`); // Goge code bayan an yi amfani
-        handleSuccess(id, task.amount);
+        localStorage.removeItem(`nodeCode_${id}`); 
+        
+        // Sannan a bashi pts dinsa!
+        await handleSuccess(id, task.amount);
     } else {
+        // Idan kuma ba daidai ba ne, nuna kuskure
         showSynergyAlert("Invalid hash code", "error");
-        const input = document.getElementById(`code-input-${id}`);
-        if (input) {
-            input.style.borderColor = '#f87171';
-            input.value = "";
-            setTimeout(() => input.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
-        }
+        inputEl.style.borderColor = '#f87171';
+        inputEl.value = "";
+        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
     }
-                }
+}
+    
     
 
 
@@ -1536,35 +1511,29 @@ function processNodeViaSearch(id) {
 }
     
     
-
 document.addEventListener("visibilitychange", function() {
     if (!nodesList) return;
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // Idan ya FITA dashboard - YANZU ne za mu adana leftAt
+    // Idan ya FITA dashboard - Kawai mu bar shi ya tafi, ba sai mun canza leftAt ba anan
     if (document.hidden) {
-        Object.keys(nodesList).forEach((id) => {
-            const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
-            if (storedStart === 0) return;
-            localStorage.setItem(`leftAt_${id}`, currentTime); // ✅ Lokacin fita GASKIYA
-        });
-        return;
+        return; 
     }
 
-    // Idan ya DAWO
+    // ✅ Idan ya DAWO - A nan ne za mu lissafi ainihin lokacin da aka dauka a waje
     Object.keys(nodesList).forEach((id) => {
         const task = nodesList[id];
         const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
         const uniqueCode = localStorage.getItem(`nodeCode_${id}`) || "";
-        const leftAt = parseInt(localStorage.getItem(`leftAt_${id}`)) || 0;
 
-        if (storedStart === 0 || leftAt === 0) return;
+        if (storedStart === 0) return;
 
-        const timeOnYouTube = leftAt - storedStart; // Lokacin da ya yi a YouTube
+        // Ainihin lokacin da ya dauka tun daga danna START har dawowarsa yanzu
+        const totalTimeSpent = currentTime - storedStart; 
 
-        if (timeOnYouTube >= task.duration) {
-            // Lokaci ya cika - nuna code
+        if (totalTimeSpent >= task.duration) {
+            // Lokaci ya cika gaba daya - Nuna masa Code dinsa na gaskiya!
             const infoArea = document.getElementById(`info-area-${id}`);
             const btn = document.getElementById(`btn-${id}`);
 
@@ -1594,32 +1563,28 @@ document.addEventListener("visibilitychange", function() {
             }
 
         } else {
-            // Lokaci bai cika ba - RESET
-            localStorage.removeItem(`startTime_${id}`);
-            localStorage.removeItem(`nodeCode_${id}`);
-            localStorage.removeItem(`leftAt_${id}`);
+            // Idan lokaci bai cika ba tukuna - Tsarin "RESUME" maimakon Reset gaba daya
+            const remaining = task.duration - totalTimeSpent;
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            
+            showSynergyAlert(`⏱ ${mins}m ${secs}s REMAINING - Go back and finish!`, "error");
 
             const btn = document.getElementById(`btn-${id}`);
             if (btn) {
-                btn.innerText = "START";
-                btn.style.background = "white";
+                btn.innerText = "RESUME";
+                btn.style.background = "#eab308"; // Yellow color ga resume
                 btn.style.color = "black";
-                btn.style.border = "none";
-                btn.onclick = () => processNodeViaSearch(id);
+                btn.onclick = () => {
+                    openYouTubeApp(task.title);
+                    btn.innerText = "WATCHING...";
+                    btn.style.background = "rgba(0,242,254,0.1)";
+                    btn.style.color = "#00f2fe";
+                };
             }
-
-            const infoArea = document.getElementById(`info-area-${id}`);
-            if (infoArea) {
-                infoArea.innerHTML = `
-                    <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                `;
-            }
-
-            showSynergyAlert("Watch time reset — complete the full video!", "error");
         }
     });
 });
-
     
 
     // Function don goge tsoffin submissions bayan sun shiga Dashboard
