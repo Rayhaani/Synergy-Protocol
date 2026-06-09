@@ -1507,15 +1507,13 @@ function processNodeViaSearch(id) {
 
     const task = nodesList[id];
     
-    // 1. Generate UNIQUE code - ba shared ba
     const uniqueCode = generateUniqueCode();
     
-    // 2. Ajiye lokacin farawa da code a localStorage
     const now = Math.floor(Date.now() / 1000);
     localStorage.setItem(`startTime_${id}`, now);
     localStorage.setItem(`nodeCode_${id}`, uniqueCode);
+    localStorage.setItem(`leftAt_${id}`, now); // ✅ SABO
 
-    // Sabunta Firebase zuwa "watching"
     const username = localStorage.getItem('synergy_user');
     if (username) {
         db.collection("users").doc(username).update({
@@ -1525,38 +1523,49 @@ function processNodeViaSearch(id) {
         });
     }
 
-    // 3. Buɗe YouTube APP kai tsaye
     openYouTubeApp(task.title);
 
-    // 4. KAWAI BIYAR DA UI ZUWA WATCHING... (Ba za a nuna code ko input field ba anan!)
     const btn = document.getElementById(`btn-${id}`);
     if (btn) {
         btn.innerText = "WATCHING...";
         btn.style.background = "rgba(0,242,254,0.1)";
         btn.style.color = "#00f2fe";
         btn.style.border = "1px solid rgba(0,242,254,0.3)";
-        btn.onclick = null; // Hana sake dannawa lokacin da ake kallo
+        btn.onclick = null;
     }
-}
+        }
+    
     
 
 document.addEventListener("visibilitychange", function() {
-    if (document.hidden) return;
     if (!nodesList) return;
 
     const currentTime = Math.floor(Date.now() / 1000);
 
+    // Idan ya FITA - Adana lokacin fita kawai
+    if (document.hidden) {
+        Object.keys(nodesList).forEach((id) => {
+            const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+            if (storedStart === 0) return;
+            localStorage.setItem(`leftAt_${id}`, currentTime);
+        });
+        return;
+    }
+
+    // Idan ya DAWO
     Object.keys(nodesList).forEach((id) => {
         const task = nodesList[id];
         const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
         const uniqueCode = localStorage.getItem(`nodeCode_${id}`) || "";
+        const leftAt = parseInt(localStorage.getItem(`leftAt_${id}`)) || 0;
 
-        if (storedStart === 0) return;
+        if (storedStart === 0 || leftAt === 0) return;
 
-        const timeSpent = currentTime - storedStart;
+        // Lokacin da ya yi a YouTube (daga fita zuwa dawo)
+        const timeOnYouTube = leftAt - storedStart;
 
-        // A. IDAN LOKACI YA CIKA - Anan ne kaɗai za mu canza UI ya koma irin na hoton 1001007733.jpg
-        if (timeSpent >= task.duration) {
+        // ✅ IDAN YA CIKA - Nuna code
+        if (timeOnYouTube >= task.duration) {
             const infoArea = document.getElementById(`info-area-${id}`);
             const btn = document.getElementById(`btn-${id}`);
 
@@ -1584,22 +1593,31 @@ document.addEventListener("visibilitychange", function() {
                 btn.style.border = "none";
                 btn.onclick = () => verifyNodeCode(id);
             }
-        } 
-        // B. IDAN LOKACI BAI CIKA BA - Canza button zuwa RESUME kuma idan an danna ya goge komai afresh!
-        else {
+
+        // ✅ IDAN BAI CIKA BA - RESET GABA DAYA, ba RESUME
+        } else {
+            // Goge duk bayanan lokaci - zai koma sifiri
+            localStorage.removeItem(`startTime_${id}`);
+            localStorage.removeItem(`nodeCode_${id}`);
+            localStorage.removeItem(`leftAt_${id}`);
+
             const btn = document.getElementById(`btn-${id}`);
             if (btn) {
-                btn.innerText = "RESUME";
-                btn.style.background = "#eab308";
+                btn.innerText = "START";
+                btn.style.background = "white";
                 btn.style.color = "black";
                 btn.style.border = "none";
-                
-                btn.onclick = () => {
-                    localStorage.removeItem(`startTime_${id}`);
-                    localStorage.removeItem(`nodeCode_${id}`);
-                    processNodeViaSearch(id); // Sake gudanarwa daga farko afresh!
-                };
+                btn.onclick = () => processNodeViaSearch(id);
             }
+
+            const infoArea = document.getElementById(`info-area-${id}`);
+            if (infoArea) {
+                infoArea.innerHTML = `
+                    <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                `;
+            }
+
+            showSynergyAlert("Watch time reset — complete the full video!", "error");
         }
     });
 });
