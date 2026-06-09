@@ -1512,7 +1512,7 @@ function processNodeViaSearch(id) {
     const now = Math.floor(Date.now() / 1000);
     localStorage.setItem(`startTime_${id}`, now);
     localStorage.setItem(`nodeCode_${id}`, uniqueCode);
-    localStorage.setItem(`leftAt_${id}`, now); // ✅ SABO
+    // leftAt - BABU ANAN, zai saita kansa lokacin fita
 
     const username = localStorage.getItem('synergy_user');
     if (username) {
@@ -1533,7 +1533,7 @@ function processNodeViaSearch(id) {
         btn.style.border = "1px solid rgba(0,242,254,0.3)";
         btn.onclick = null;
     }
-        }
+}
     
     
 
@@ -1542,12 +1542,12 @@ document.addEventListener("visibilitychange", function() {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // Idan ya FITA - Adana lokacin fita kawai
+    // Idan ya FITA dashboard - YANZU ne za mu adana leftAt
     if (document.hidden) {
         Object.keys(nodesList).forEach((id) => {
             const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
             if (storedStart === 0) return;
-            localStorage.setItem(`leftAt_${id}`, currentTime);
+            localStorage.setItem(`leftAt_${id}`, currentTime); // ✅ Lokacin fita GASKIYA
         });
         return;
     }
@@ -1561,11 +1561,10 @@ document.addEventListener("visibilitychange", function() {
 
         if (storedStart === 0 || leftAt === 0) return;
 
-        // Lokacin da ya yi a YouTube (daga fita zuwa dawo)
-        const timeOnYouTube = leftAt - storedStart;
+        const timeOnYouTube = leftAt - storedStart; // Lokacin da ya yi a YouTube
 
-        // ✅ IDAN YA CIKA - Nuna code
         if (timeOnYouTube >= task.duration) {
+            // Lokaci ya cika - nuna code
             const infoArea = document.getElementById(`info-area-${id}`);
             const btn = document.getElementById(`btn-${id}`);
 
@@ -1594,9 +1593,8 @@ document.addEventListener("visibilitychange", function() {
                 btn.onclick = () => verifyNodeCode(id);
             }
 
-        // ✅ IDAN BAI CIKA BA - RESET GABA DAYA, ba RESUME
         } else {
-            // Goge duk bayanan lokaci - zai koma sifiri
+            // Lokaci bai cika ba - RESET
             localStorage.removeItem(`startTime_${id}`);
             localStorage.removeItem(`nodeCode_${id}`);
             localStorage.removeItem(`leftAt_${id}`);
