@@ -1363,10 +1363,6 @@ function fetchAndRenderNodes() {
     db.collection("users").doc(username).update({
         [`nodeProgress.${nodeId}.status`]: "idle"
     });
-                    }
-
-                    
-                    });
             });
         }
     });
