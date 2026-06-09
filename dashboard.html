@@ -777,151 +777,8 @@ unlockAllNodes();
     });
 });
 
-
-// CODE OVERLAY - CODE KAWAI, mai sauqi
-function showCodeOnlyOverlay(id, task) {
-    if (document.getElementById('code-reveal-overlay')) return;
-
-    const code = localStorage.getItem(`nodeCode_${id}`) || task.code;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'code-reveal-overlay';
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(2, 6, 23, 0.92);
-        backdrop-filter: blur(24px);
-        z-index: 999999;
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        animation: fadeInOverlay 0.4s ease;
-    `;
-
-    overlay.innerHTML = `
-        <style>
-            @keyframes fadeInOverlay { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
-            @keyframes codeGlow {
-                0%   { text-shadow: 0 0 10px rgba(0,242,254,0.3); }
-                100% { text-shadow: 0 0 25px rgba(0,242,254,0.9), 0 0 50px rgba(0,242,254,0.3); }
-            }
-            @keyframes badgePop {
-                0% { transform: scale(0.8); opacity: 0; }
-                100% { transform: scale(1); opacity: 1; }
-            }
-            @keyframes scanline {
-                0% { transform: translateY(-100%); }
-                100% { transform: translateY(400%); }
-            }
-        </style>
-
-        <!-- MAIN CARD -->
-        <div style="
-            background: rgba(5, 10, 21, 0.95);
-            border: 1px solid rgba(0,242,254,0.12);
-            border-top: 2px solid #00f2fe;
-            border-radius: 28px;
-            padding: 32px 36px;
-            text-align: center;
-            max-width: 300px;
-            width: 88%;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,242,254,0.06), 0 30px 60px rgba(0,0,0,0.5);
-        ">
-            <div style="position:absolute;top:0;left:0;width:100%;height:30px;background:linear-gradient(transparent,rgba(0,242,254,0.02),transparent);animation:scanline 3s linear infinite;pointer-events:none;"></div>
-
-            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);border-radius:50px;padding:5px 14px;margin-bottom:20px;">
-                <div style="width:5px;height:5px;border-radius:50%;background:#00f2fe;box-shadow:0 0 6px #00f2fe;"></div>
-                <span style="font-family:'Syncopate',sans-serif;font-size:6px;color:rgba(0,242,254,0.6);letter-spacing:3px;text-transform:uppercase;">Hash Code</span>
-            </div>
-
-            <div style="font-family:'Roboto Mono',monospace;font-size:2.2rem;font-weight:400;color:#00f2fe;letter-spacing:12px;padding-left:12px;animation:codeGlow 1.8s ease-in-out infinite alternate;margin-bottom:20px;">
-                ${code}
-            </div>
-
-            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,242,254,0.15),transparent);margin-bottom:16px;"></div>
-
-            <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:1px;margin-bottom:24px;line-height:1.7;">
-                Memorize this code,<br>then enter it below.
-            </p>
-
-            <div style="display:flex;flex-direction:column;gap:10px;">
-    <button onclick="
-        navigator.clipboard.writeText('${code}');
-        this.innerText='✓ COPIED!';
-        this.style.background='#10b981';
-        setTimeout(()=>{ this.innerText='COPY CODE'; this.style.background='rgba(0,242,254,0.08)'; },2000);
-    " style="width:100%;padding:13px;border-radius:14px;background:rgba(0,242,254,0.08);color:#00f2fe;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;">
-        COPY CODE
-    </button>
-    <button onclick="closeCodeOverlay('${id}')" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
-    onmouseover="this.style.transform='translateY(-2px)'"
-    onmouseout="this.style.transform='translateY(0)'">
-        Got It →
-    </button>
-</div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-}
-            
-
-// Rufe overlay - nuna verify box
-function closeCodeOverlay(id) {
-    const overlay = document.getElementById('code-reveal-overlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.4s';
-        setTimeout(() => overlay.remove(), 400);
-    }
-
-    // Yanzu nuna input + verify a node din
-    const task = nodesList[id];
-    const infoArea = document.getElementById(`info-area-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-
-    if (infoArea) {
-        infoArea.innerHTML = `
-            <div class="flex flex-col gap-1 w-full">
-                <span class="text-[8px] text-cyan-500 orbitron uppercase font-bold">ENTER CODE</span>
-                <input type="text" id="code-input-${id}" maxlength="6"
-                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none focus:border-cyan-400" 
-                placeholder="••••••">
-            </div>
-        `;
-    }
-
-    if (btn) {
-        btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe";
-        btn.style.color = "black";
-        btn.style.border = "none";
-        btn.onclick = () => verifyNodeCode(id);
-    }
-}
-
-
-// VERIFY - bayan overlay ya rufe
-async function verifyNodeCode(id) {
-    const task = nodesList[id];
-    const inputEl = document.getElementById(`code-input-${id}`);
     
-    if (!inputEl) return;
-    
-    const inputVal = inputEl.value.toUpperCase().trim();
 
-    if (inputVal === storedCode && storedCode !== "") {
-        localStorage.removeItem(`startTime_${id}`);
-        await handleSuccess(id, task.amount);
-    } else {
-        showSynergyAlert("Invalid hash code", "error");
-        inputEl.style.borderColor = '#f87171';
-        inputEl.value = "";
-        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
-    }
-            }
-    
-    
 
     // MULTI-LOGIN & CONSOLE PROTECTION
 const currentSessionId = Math.random().toString(36).substring(7);
@@ -1187,40 +1044,7 @@ async function addEarningsToFirebase(amount) {
     }
     
     
-   async function handleSuccess(id, amount) {
-    const username = localStorage.getItem('synergy_user');
-    const userRef = db.collection("users").doc(username);
-
-    try {
-        // 1. Aika kudi + Mark completed
-        await userRef.update({
-            pointsBalance: firebase.firestore.FieldValue.increment(amount),
-            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-            [`nodeProgress.${id}.status`]: "completed"
-        });
-        
-        // 2. Nuna Alert
-        showSynergyAlert(`Success: ${amount} pts earned`, "success");
-
-        // 3. Unlock nodes bayan an gama
-        unlockAllNodes();
-        
-        // 4. Ɓoye node gaba ɗaya bayan an gama
-        setTimeout(() => {
-            const nodeElement = document.getElementById(`node-${id}`);
-            if (nodeElement) {
-                nodeElement.style.transition = "all 0.5s ease";
-                nodeElement.style.opacity = "0";
-                nodeElement.style.transform = "translateY(-10px)";
-                setTimeout(() => nodeElement.remove(), 500);
-            }
-        }, 1500);
-        
-    } catch (error) {
-        console.error(error);
-        showSynergyAlert("Database error", "error");
-    }
-   }
+   
     
 
 function renderToDashboard(id, task) {
@@ -1269,84 +1093,6 @@ window.onload = () => {
     fetchAndRenderNodes();
 };
 
-
-function lockAllOtherNodes(activeId) {
-    Object.keys(nodesList).forEach((id) => {
-        if (id === activeId) return; // Bar active node
-        
-        const btn = document.getElementById(`btn-${id}`);
-        const nodeEl = document.getElementById(`node-${id}`);
-        
-        if (btn) {
-            btn.innerText = "LOCKED";
-            btn.style.background = "rgba(255,255,255,0.05)";
-            btn.style.color = "rgba(255,255,255,0.2)";
-            btn.style.border = "1px solid rgba(255,255,255,0.05)";
-            btn.onclick = null;
-            btn.disabled = true;
-        }
-        if (nodeEl) {
-            nodeEl.style.opacity = "0.3";
-        }
-    });
-}
-
-function unlockAllNodes() {
-    Object.keys(nodesList).forEach((id) => {
-        const btn = document.getElementById(`btn-${id}`);
-        const nodeEl = document.getElementById(`node-${id}`);
-        
-        if (btn && btn.innerText === "LOCKED") {
-            btn.innerText = "START";
-            btn.style.background = "white";
-            btn.style.color = "black";
-            btn.style.border = "none";
-            btn.disabled = false;
-            btn.onclick = () => processNodeViaSearch(id);
-        }
-        if (nodeEl) {
-            nodeEl.style.opacity = "1";
-        }
-    });
-}
-
-
-    // ✅ SABON FUNCTION - Restore lock state a page load
-function restoreLockedState() {
-    // Nemo duk wani node da ke "watching" a localStorage
-    const activeNodeId = Object.keys(nodesList).find(id => {
-        return localStorage.getItem(`startTime_${id}`) !== null;
-    });
-
-    if (!activeNodeId) return; // Babu pending node — duk sun free
-
-    const task = nodesList[activeNodeId];
-
-    // Lock duk sauran nodes nan take
-    lockAllOtherNodes(activeNodeId);
-
-    // Saita Active node button zuwa "VERIFY" 
-    const btn = document.getElementById(`btn-${activeNodeId}`);
-    const infoArea = document.getElementById(`info-area-${activeNodeId}`);
-
-    if (infoArea) {
-        infoArea.innerHTML = `
-            <div class="flex flex-col gap-1">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
-            </div>
-        `;
-    }
-
-    if (btn) {
-        btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe";
-        btn.style.color = "black";
-        btn.style.border = "none";
-        btn.disabled = false;
-        btn.onclick = () => verifyNodeCode(activeNodeId);
-    }
-}
 
 
 function fetchAndRenderNodes() {
@@ -1556,85 +1302,442 @@ function openYouTubeApp(videoTitle) {
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 }
 
-function processNodeViaSearch(id) {
-    if (!nodesList || !nodesList[id]) return;
 
-    // ✅ Check Firebase-based lock, ba localStorage kawai ba
-    const hasActiveNode = Object.keys(nodesList).some(nodeId => {
-        return localStorage.getItem(`startTime_${nodeId}`) !== null;
+    // ==========================================
+// SYNERGY NODE SYSTEM - SABON TSARI
+// ==========================================
+
+let nodesList = {};
+let activeNodeId = null; // Node daya kawai zai iya zama active
+
+// RENDER NODES
+function fetchAndRenderNodes() {
+    const container = document.getElementById('synergy-nodes-container');
+    if (!container) return;
+
+    const username = localStorage.getItem('synergy_user');
+    const nodesRef = firebase.database().ref('nodes');
+
+    nodesRef.on('value', async (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            container.innerHTML = "<p class='text-center text-gray-500 text-[10px] orbitron'>NO ACTIVE NODES</p>";
+            return;
+        }
+
+        nodesList = data;
+        container.innerHTML = "";
+
+        // Karanta state daga Firebase
+        const userDoc = await db.collection("users").doc(username).get();
+        const userData = userDoc.data() || {};
+        const progress = userData.nodeProgress || {};
+        const completedNodes = [];
+
+        // Nemo completed nodes
+        Object.keys(progress).forEach(id => {
+            if (progress[id].status === "completed") completedNodes.push(id);
+        });
+
+        // Nemo active node (idan akwai)
+        activeNodeId = userData.activeNodeId || null;
+
+        // Restore localStorage idan page reload
+        if (activeNodeId && progress[activeNodeId]) {
+            localStorage.setItem(`startTime_${activeNodeId}`, progress[activeNodeId].startTime);
+            localStorage.setItem(`nodeCode_${activeNodeId}`, progress[activeNodeId].code);
+        }
+
+        // Render kowane node
+        Object.keys(data).forEach(key => {
+            const task = data[key];
+
+            // Skip completed
+            if (completedNodes.includes(key)) return;
+
+            // Determine button state
+            let isLocked = activeNodeId && key !== activeNodeId;
+            let isActive = key === activeNodeId;
+
+            const nodeHtml = `
+                <div id="node-${key}" 
+                     class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4"
+                     style="${isLocked ? 'opacity:0.3;' : 'opacity:1;'}">
+                    
+                    <div class="flex items-center gap-4 w-full">
+                        
+                        <!-- Icon -->
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="red">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Info Area -->
+                        <div id="info-area-${key}" class="flex-1 min-w-0">
+                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase truncate">${task.title}</h4>
+                            ${isActive ? '<span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>' : ''}
+                        </div>
+
+                        <!-- Button -->
+                        <button 
+                            id="btn-${key}"
+                            class="px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all flex-shrink-0"
+                            ${isLocked ? 'disabled' : ''}
+                            style="${
+                                isLocked 
+                                ? 'background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); cursor:not-allowed;' 
+                                : isActive 
+                                    ? 'background:#00f2fe; color:black;' 
+                                    : 'background:white; color:black;'
+                            }"
+                            onclick="${
+                                isLocked 
+                                ? '' 
+                                : isActive 
+                                    ? `verifyNodeCode('${key}')` 
+                                    : `startNode('${key}')`
+                            }">
+                            ${isLocked ? 'LOCKED' : isActive ? 'VERIFY' : 'START'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', nodeHtml);
+        });
     });
-    if (hasActiveNode) {
+}
+
+
+// ==========================================
+// START NODE - Danna START button
+// ==========================================
+async function startNode(id) {
+    if (!nodesList[id]) return;
+
+    // Idan akwai wani node active, hana
+    if (activeNodeId) {
         showSynergyAlert("Complete current node first!", "error");
         return;
     }
 
     const task = nodesList[id];
+    const username = localStorage.getItem('synergy_user');
     const uniqueCode = generateUniqueCode();
     const now = Math.floor(Date.now() / 1000);
-    
-    // Adana a localStorage
+
+    // 1. Adana a localStorage
     localStorage.setItem(`startTime_${id}`, now);
     localStorage.setItem(`nodeCode_${id}`, uniqueCode);
 
-    // ✅ Adana a Firebase TARE DA timestamp
+    // 2. Adana a Firebase
+    await db.collection("users").doc(username).update({
+        activeNodeId: id,
+        [`nodeProgress.${id}.startTime`]: now,
+        [`nodeProgress.${id}.code`]: uniqueCode,
+        [`nodeProgress.${id}.status`]: "watching"
+    });
+
+    // 3. Set active
+    activeNodeId = id;
+
+    // 4. Lock sauran nodes KAN TAKE
+    lockAllExcept(id);
+
+    // 5. Update wannan node button zuwa VERIFY
+    updateNodeToVerify(id, task.title);
+
+    // 6. Bude YouTube
+    openYouTubeApp(task.title);
+}
+
+
+// ==========================================
+// VERIFY NODE - Danna VERIFY button
+// ==========================================
+async function verifyNodeCode(id) {
+    if (!nodesList[id]) return;
+
+    const task = nodesList[id];
     const username = localStorage.getItem('synergy_user');
-    if (username) {
-        db.collection("users").doc(username).update({
-            activeNodeId: id,
-            [`nodeProgress.${id}.startTime`]: now,
-            [`nodeProgress.${id}.code`]: uniqueCode,
-            [`nodeProgress.${id}.status`]: "watching"
-        });
+    const now = Math.floor(Date.now() / 1000);
+    const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+    const storedCode = localStorage.getItem(`nodeCode_${id}`) || "";
+
+    // Check 1: startTime ya wanzu?
+    if (storedStart === 0) {
+        showSynergyAlert("Please click START again.", "error");
+        return;
     }
 
-    lockAllOtherNodes(id);
-    openYouTubeApp(task.title);
+    // Check 2: Duration ta cika?
+    const timeSpent = now - storedStart;
+    if (timeSpent < task.duration) {
+        const remaining = task.duration - timeSpent;
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        showSynergyAlert(`⏱ ${mins}m ${secs}s remaining - Keep watching!`, "error");
+        return;
+    }
 
+    // Check 3: Code ya fito? Idan a'a, nuna overlay
+    const inputEl = document.getElementById(`code-input-${id}`);
+    if (!inputEl) {
+        // Nuna code overlay
+        showCodeOverlay(id, storedCode);
+        return;
+    }
+
+    // Check 4: Code ya dace?
+    const inputVal = inputEl.value.toUpperCase().trim();
+    if (inputVal === "") {
+        showSynergyAlert("Enter the hash code!", "error");
+        return;
+    }
+
+    if (inputVal !== storedCode) {
+        showSynergyAlert("Invalid hash code!", "error");
+        inputEl.style.borderColor = '#f87171';
+        inputEl.value = "";
+        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
+        return;
+    }
+
+    // ✅ DUKA YA PASS - Award points
+    await completeNode(id, task.amount, username);
+}
+
+
+// ==========================================
+// COMPLETE NODE - Award + Unlock
+// ==========================================
+async function completeNode(id, amount, username) {
+    try {
+        // 1. Goge localStorage
+        localStorage.removeItem(`startTime_${id}`);
+        localStorage.removeItem(`nodeCode_${id}`);
+
+        // 2. Update Firebase
+        await db.collection("users").doc(username).update({
+            pointsBalance: firebase.firestore.FieldValue.increment(amount),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            activeNodeId: firebase.firestore.FieldValue.delete(),
+            [`nodeProgress.${id}.status`]: "completed",
+            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
+        });
+
+        // 3. Reset activeNodeId
+        activeNodeId = null;
+
+        // 4. Nuna success
+        showSynergyAlert(`✅ ${amount} pts earned!`, "success");
+
+        // 5. Cire node din daga screen
+        const nodeEl = document.getElementById(`node-${id}`);
+        if (nodeEl) {
+            nodeEl.style.transition = "all 0.5s ease";
+            nodeEl.style.opacity = "0";
+            nodeEl.style.transform = "translateY(-10px)";
+            setTimeout(() => nodeEl.remove(), 500);
+        }
+
+        // 6. Unlock sauran nodes
+        setTimeout(() => unlockAllNodes(), 600);
+
+    } catch (error) {
+        console.error(error);
+        showSynergyAlert("Database error", "error");
+    }
+}
+
+
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
+
+function lockAllExcept(activeId) {
+    Object.keys(nodesList).forEach(id => {
+        if (id === activeId) return;
+        const btn = document.getElementById(`btn-${id}`);
+        const nodeEl = document.getElementById(`node-${id}`);
+        if (btn) {
+            btn.innerText = "LOCKED";
+            btn.disabled = true;
+            btn.style.cssText = "background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); cursor:not-allowed; padding: 10px 24px; border-radius: 12px;";
+            btn.onclick = null;
+        }
+        if (nodeEl) nodeEl.style.opacity = "0.3";
+    });
+}
+
+function unlockAllNodes() {
+    Object.keys(nodesList).forEach(id => {
+        const btn = document.getElementById(`btn-${id}`);
+        const nodeEl = document.getElementById(`node-${id}`);
+        if (btn && btn.innerText === "LOCKED") {
+            btn.innerText = "START";
+            btn.disabled = false;
+            btn.style.cssText = "background:white; color:black; padding: 10px 24px; border-radius: 12px;";
+            btn.onclick = () => startNode(id);
+        }
+        if (nodeEl) nodeEl.style.opacity = "1";
+    });
+}
+
+function updateNodeToVerify(id, title) {
     const infoArea = document.getElementById(`info-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
+    if (infoArea) {
+        infoArea.innerHTML = `
+            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${title}</h4>
+            <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
+        `;
+    }
+    if (btn) {
+        btn.innerText = "VERIFY";
+        btn.disabled = false;
+        btn.style.cssText = "background:#00f2fe; color:black; padding: 10px 24px; border-radius: 12px;";
+        btn.onclick = () => verifyNodeCode(id);
+    }
+}
+
+function showCodeOverlay(id, code) {
+    if (document.getElementById('code-reveal-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'code-reveal-overlay';
+    overlay.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(2,6,23,0.95); backdrop-filter:blur(24px);
+        z-index:999999; display:flex; align-items:center; justify-content:center;
+    `;
+    overlay.innerHTML = `
+        <div style="background:rgba(5,10,21,0.95); border:1px solid rgba(0,242,254,0.2); border-top:2px solid #00f2fe; border-radius:28px; padding:36px; text-align:center; max-width:300px; width:88%;">
+            
+            <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,242,254,0.06); border:1px solid rgba(0,242,254,0.15); border-radius:50px; padding:5px 14px; margin-bottom:20px;">
+                <div style="width:5px; height:5px; border-radius:50%; background:#00f2fe;"></div>
+                <span style="font-family:'Syncopate',sans-serif; font-size:6px; color:rgba(0,242,254,0.6); letter-spacing:3px;">HASH CODE</span>
+            </div>
+
+            <div style="font-family:'Roboto Mono',monospace; font-size:2.2rem; color:#00f2fe; letter-spacing:12px; padding-left:12px; margin-bottom:20px;">
+                ${code}
+            </div>
+
+            <p style="font-family:'Space Grotesk',sans-serif; font-size:9px; color:rgba(255,255,255,0.3); margin-bottom:24px;">
+                Memorize this code, then enter it below.
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="
+                    navigator.clipboard.writeText('${code}');
+                    this.innerText='✓ COPIED!';
+                    this.style.background='#10b981';
+                    setTimeout(()=>{ this.innerText='COPY CODE'; this.style.background='rgba(0,242,254,0.08)'; }, 2000);
+                " style="width:100%; padding:13px; border-radius:14px; background:rgba(0,242,254,0.08); color:#00f2fe; font-family:'Syncopate',sans-serif; font-size:9px; letter-spacing:3px; cursor:pointer; border:1px solid rgba(0,242,254,0.2);">
+                    COPY CODE
+                </button>
+                <button onclick="closeOverlayAndShowInput('${id}')" 
+                style="width:100%; padding:13px; border-radius:14px; background:linear-gradient(135deg,#00f2fe,#0060ff); color:black; font-family:'Syncopate',sans-serif; font-size:9px; letter-spacing:3px; cursor:pointer; border:none;">
+                    GOT IT →
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function closeOverlayAndShowInput(id) {
+    // 1. Rufe overlay
+    const overlay = document.getElementById('code-reveal-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s';
+        setTimeout(() => overlay.remove(), 300);
+    }
+
+    // 2. Nuna input field a node din
+    const infoArea = document.getElementById(`info-area-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+    const task = nodesList[id];
 
     if (infoArea) {
         infoArea.innerHTML = `
-            <div class="flex flex-col gap-1">
-                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
+            <div class="flex flex-col gap-1 w-full pr-2">
+                <span class="text-[8px] text-cyan-500 orbitron font-bold">ENTER CODE</span>
+                <input type="text" id="code-input-${id}" maxlength="6"
+                    class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[13px] outline-none"
+                    placeholder="••••••"
+                    style="letter-spacing:4px;"
+                    oninput="this.value=this.value.toUpperCase()">
             </div>
         `;
+        // Auto focus input
+        setTimeout(() => {
+            const input = document.getElementById(`code-input-${id}`);
+            if (input) input.focus();
+        }, 400);
     }
 
     if (btn) {
         btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe";
-        btn.style.color = "black";
-        btn.style.border = "none";
+        btn.style.cssText = "background:#00f2fe; color:black; padding:10px 24px; border-radius:12px;";
         btn.onclick = () => verifyNodeCode(id);
     }
 }
-    
-    // Function don goge tsoffin submissions bayan sun shiga Dashboard
-async function autoCleanupTasks() {
-    const currentUsername = localStorage.getItem('synergy_user');
-    if (!currentUsername) return;
 
-    try {
-        // Nema mana duk inda status din yake "approved" na wannan user din
-        const snap = await db.collection("task_submissions")
-            .where("username", "==", currentUsername)
-            .where("status", "==", "approved")
-            .get();
-
-        if (!snap.empty) {
-            const batch = db.batch();
-            snap.forEach(doc => {
-                batch.delete(doc.ref); // Goge record din bayan an tabbatar an riga an shiga Dashboard
-            });
-            await batch.commit();
-            console.log("An goge tsoffin task submissions domin tsaftace database.");
-        }
-    } catch (error) {
-        console.error("Kuskure wajen goge tasks:", error);
+function generateUniqueCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
+    return code;
 }
+
+function openYouTubeApp(videoTitle) {
+    const searchQuery = `"${videoTitle.trim()}"`;
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isAndroid) {
+        window.location.href = `intent://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return;
+    }
+    if (isIOS) {
+        window.location.href = `youtube://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+        return;
+    }
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+}
+
+
+// ==========================================
+// PAGE LOAD - Restore state
+// ==========================================
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) return;
+    if (!activeNodeId) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    const storedStart = parseInt(localStorage.getItem(`startTime_${activeNodeId}`)) || 0;
+    const storedCode = localStorage.getItem(`nodeCode_${activeNodeId}`) || "";
+    const task = nodesList[activeNodeId];
+
+    if (!task || storedStart === 0) return;
+
+    const timeSpent = now - storedStart;
+
+    if (timeSpent >= task.duration) {
+        // Lokaci ya cika - Nuna code overlay
+        showCodeOverlay(activeNodeId, storedCode);
+    }
+});
+
+
+window.onload = () => {
+    fetchAndRenderNodes();
+};
+    
 
 // Kira shi da zaran Dashboard ya bude
 window.addEventListener('load', autoCleanupTasks);
