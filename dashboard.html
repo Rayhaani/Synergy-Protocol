@@ -1354,8 +1354,9 @@ function fetchAndRenderNodes() {
     if (!container) return;
 
     const nodesRef = firebase.database().ref('nodes');
+    const username = localStorage.getItem('synergy_user');
 
-    nodesRef.on('value', (snapshot) => {
+    nodesRef.on('value', async (snapshot) => {
         const data = snapshot.val();
         nodesList = data || {};
         container.innerHTML = "";
@@ -1365,79 +1366,96 @@ function fetchAndRenderNodes() {
             return;
         }
 
-        // ✅ GYARA #1: Gano active node KAFIN render
-        const activeNodeId = Object.keys(nodesList).find(id => 
-            localStorage.getItem(`startTime_${id}`) !== null
-        );
+        // ✅ GYARA GASKIYA: Karanta activeNodeId daga Firebase
+        let activeNodeId = null;
+        let activeNodeCode = null;
+        let activeNodeStart = null;
 
-        Object.keys(data).forEach((key) => {
-            const task = data[key];
-            
-            // ✅ GYARA #2: Yanke shawara kan button state a render time
-            let btnStyle, btnText, btnOnclick, nodeOpacity;
-            
-            if (activeNodeId && key !== activeNodeId) {
-                // Wannan node ya kamata a lock nan take
-                btnStyle = `style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.05); cursor:not-allowed;"`;
-                btnText = "LOCKED";
-                btnOnclick = `onclick="showSynergyAlert('Complete current node first!', 'error')"`;
-                nodeOpacity = "opacity: 0.3;";
-            } else if (activeNodeId && key === activeNodeId) {
-                // Wannan shi ne active node - nuna VERIFY
-                btnStyle = `style="background:#00f2fe; color:black; border:none;"`;
-                btnText = "VERIFY";
-                btnOnclick = `onclick="verifyNodeCode('${key}')"`;
-                nodeOpacity = "opacity: 1;";
-            } else {
-                // Babu active node - duk free
-                btnStyle = `style="background:white; color:black; border:none;"`;
-                btnText = "START";
-                btnOnclick = `onclick="processNodeViaSearch('${key}')"`;
-                nodeOpacity = "opacity: 1;";
-            }
-            
-            const nodeHtml = `
-                <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4" style="${nodeOpacity}">
-                    <div class="flex items-center gap-4 w-full">
-                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
-                           <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                        </div>
-                        <div id="info-area-${key}" class="flex-1">
-                            ${activeNodeId && key === activeNodeId ? `
-                            <div class="flex flex-col gap-1">
-                                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                                <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
-                            </div>
-                            ` : `<h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>`}
-                        </div>
-                        <button id="btn-${key}" 
-                            ${btnOnclick}
-                            class="px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all"
-                            ${btnStyle}>
-                            ${btnText}
-                        </button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', nodeHtml);
-        });
-
-        // ✅ GYARA #3: Restore completed nodes daga Firebase
-        const username = localStorage.getItem('synergy_user');
         if (username) {
-            db.collection("users").doc(username).get().then(doc => {
-                if (!doc.exists) return;
-                const progress = doc.data().nodeProgress || {};
+            try {
+                const userDoc = await db.collection("users").doc(username).get();
+                const userData = userDoc.data() || {};
+                const progress = userData.nodeProgress || {};
+                const completedNodes = [];
+
+                // Nemo active node daga Firebase
                 Object.keys(progress).forEach(nodeId => {
+                    if (progress[nodeId].status === "watching") {
+                        activeNodeId = nodeId;
+                        activeNodeCode = progress[nodeId].code;
+                        activeNodeStart = progress[nodeId].startTime;
+                        
+                        // ✅ Dawo da localStorage daga Firebase (page reload fix)
+                        if (activeNodeCode) {
+                            localStorage.setItem(`startTime_${nodeId}`, activeNodeStart);
+                            localStorage.setItem(`nodeCode_${nodeId}`, activeNodeCode);
+                        }
+                    }
                     if (progress[nodeId].status === "completed") {
-                        const nodeElement = document.getElementById(`node-${nodeId}`);
-                        if (nodeElement) nodeElement.remove();
+                        completedNodes.push(nodeId);
                     }
                 });
-            });
+
+                // Render nodes tare da daidaitaccen state
+                Object.keys(data).forEach((key) => {
+                    const task = data[key];
+
+                    // Skip completed nodes - ba za a nuna su ba
+                    if (completedNodes.includes(key)) return;
+
+                    let btnStyle, btnText, btnOnclick, nodeOpacity;
+
+                    if (activeNodeId && key !== activeNodeId) {
+                        btnStyle = `style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.05); cursor:not-allowed; pointer-events:none;"`;
+                        btnText = "LOCKED";
+                        btnOnclick = ``;
+                        nodeOpacity = "opacity: 0.3;";
+                    } else if (activeNodeId && key === activeNodeId) {
+                        btnStyle = `style="background:#00f2fe; color:black; border:none;"`;
+                        btnText = "VERIFY";
+                        btnOnclick = `onclick="verifyNodeCode('${key}')"`;
+                        nodeOpacity = "opacity: 1;";
+                    } else {
+                        btnStyle = `style="background:white; color:black; border:none;"`;
+                        btnText = "START";
+                        btnOnclick = `onclick="processNodeViaSearch('${key}')"`;
+                        nodeOpacity = "opacity: 1;";
+                    }
+
+                    const nodeHtml = `
+                        <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4" style="${nodeOpacity}">
+                            <div class="flex items-center gap-4 w-full">
+                                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                </div>
+                                <div id="info-area-${key}" class="flex-1">
+                                    ${activeNodeId && key === activeNodeId ? `
+                                    <div class="flex flex-col gap-1">
+                                        <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                                        <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
+                                    </div>
+                                    ` : `<h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>`}
+                                </div>
+                                <button id="btn-${key}" 
+                                    ${btnOnclick}
+                                    class="px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all"
+                                    ${btnStyle}>
+                                    ${btnText}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', nodeHtml);
+                });
+
+            } catch(e) {
+                console.error("Render error:", e);
+            }
         }
     });
 }
+
+        
 
         
     
@@ -1541,7 +1559,7 @@ function openYouTubeApp(videoTitle) {
 function processNodeViaSearch(id) {
     if (!nodesList || !nodesList[id]) return;
 
-    // ✅ Hana clicking idan akwai active node
+    // ✅ Check Firebase-based lock, ba localStorage kawai ba
     const hasActiveNode = Object.keys(nodesList).some(nodeId => {
         return localStorage.getItem(`startTime_${nodeId}`) !== null;
     });
@@ -1551,26 +1569,25 @@ function processNodeViaSearch(id) {
     }
 
     const task = nodesList[id];
-    
     const uniqueCode = generateUniqueCode();
-    
     const now = Math.floor(Date.now() / 1000);
+    
+    // Adana a localStorage
     localStorage.setItem(`startTime_${id}`, now);
     localStorage.setItem(`nodeCode_${id}`, uniqueCode);
-  
+
+    // ✅ Adana a Firebase TARE DA timestamp
     const username = localStorage.getItem('synergy_user');
     if (username) {
         db.collection("users").doc(username).update({
-            [`nodeProgress.${id}.startTime`]: Math.floor(Date.now() / 1000),
+            activeNodeId: id,
+            [`nodeProgress.${id}.startTime`]: now,
             [`nodeProgress.${id}.code`]: uniqueCode,
             [`nodeProgress.${id}.status`]: "watching"
         });
     }
 
-    // ✅ Lock KAFIN bude YouTube
     lockAllOtherNodes(id);
-
-    // Bude YouTube
     openYouTubeApp(task.title);
 
     const infoArea = document.getElementById(`info-area-${id}`);
@@ -1593,9 +1610,7 @@ function processNodeViaSearch(id) {
         btn.onclick = () => verifyNodeCode(id);
     }
 }
-
     
-
     // Function don goge tsoffin submissions bayan sun shiga Dashboard
 async function autoCleanupTasks() {
     const currentUsername = localStorage.getItem('synergy_user');
