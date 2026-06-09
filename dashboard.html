@@ -472,6 +472,13 @@ const firebaseConfig = {
     
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
+
+    // Tsabtace dukkan tsoffin startTime a kowane load
+Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('startTime_') || key.startsWith('nodeCode_')) {
+        localStorage.removeItem(key);
+    }
+});
     
     // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
     let player, currentCode = "", lastTime = 0;
@@ -1350,11 +1357,15 @@ function fetchAndRenderNodes() {
     // Ɓoye node gaba ɗaya - babu wani aiki
     const nodeElement = document.getElementById(`node-${nodeId}`);
     if (nodeElement) nodeElement.remove();
-
-} else if (nodeData.status === "watching") {
-    localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
-    localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
+   
+                    } else if (nodeData.status === "watching") {
+    // Reset - ba za a restore watching state ba
+    db.collection("users").doc(username).update({
+        [`nodeProgress.${nodeId}.status`]: "idle"
+    });
                     }
+
+                    
                     });
             });
         }
