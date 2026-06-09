@@ -423,7 +423,7 @@
 
         
         <div class="flex items-baseline gap-2 mb-3">
-    <h3 id="est-earnings" class="text-2xl font-bold digits-terminal text-white">₦0</h3>
+    <h3 id="est-earnings" class="text-2xl font-bold digits-terminal text-white">0 pts</h3>
     <span class="text-[11px] orbitron text-gray-500 uppercase tracking-wider">Estimated</span>
         </div>
         
@@ -446,7 +446,7 @@
                 <polyline points="16 6 12 2 8 6"></polyline>
                 <line x1="12" y1="2" x2="12" y2="15"></line>
             </svg>
-            <span class="orbitron text-[11px] text-white font-bold tracking-[2px]">Viral Share (Earn ₦50)</span>
+            <span class="orbitron text-[11px] text-white font-bold tracking-[2px]">Viral Share (Earn 50 pts)</span>
         </button>
     </div>
     </div>
@@ -538,8 +538,8 @@ if (currentActiveUser) {
         if (doc.exists) {
             const data = doc.data();
             
-            // 1. Kudi
-            // Sabon
+        
+            //kudi
 const vBal = data.pointsBalance || 0;
 const sBal = data.shareBalance || 0;
 const total = vBal + sBal;
@@ -568,12 +568,13 @@ const total = vBal + sBal;
                 progressBar.style.width = percent + "%";
             }
             
-                   // Bari mu sanya lissafin ya zama (watched * 150 * 30)
-            const estimatedMonthly = watchedRaw * 150 * 30;
-            const estElement = document.getElementById('est-earnings');
-            if(estElement) {
-                estElement.innerText = "₦" + estimatedMonthly.toLocaleString();
-            }
+                  // Lissafin dynamic points na wata guda
+const estimatedMonthly = watchedRaw * 150 * 30; 
+const estElement = document.getElementById('est-earnings');
+if(estElement) {
+    estElement.innerText = estimatedMonthly.toLocaleString() + " pts";
+}
+            
             
             // 6. Outer Ring Animation
             const outerRing = document.getElementById('task-ring-outer');
