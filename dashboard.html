@@ -473,13 +473,20 @@ const firebaseConfig = {
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 
-    // Tsabtace dukkan tsoffin startTime a kowane load
-Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('startTime_') || key.startsWith('nodeCode_')) {
-        localStorage.removeItem(key);
-    }
-});
+   // ✅ Goge kawai idan user ya canza (logout/login)
+const savedUser = localStorage.getItem('_lastActiveUser');
+const currentUser = localStorage.getItem('synergy_user');
+if (savedUser && savedUser !== currentUser) {
+    // User ya canza - goge tsoffin state
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('startTime_') || key.startsWith('nodeCode_')) {
+            localStorage.removeItem(key);
+        }
+    });
+}
+localStorage.setItem('_lastActiveUser', currentUser); 
     
+   
     // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
     let player, currentCode = "", lastTime = 0;
 let tracker; // Wannan ne zai rike lissafin circle din
