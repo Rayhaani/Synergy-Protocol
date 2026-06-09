@@ -1461,43 +1461,48 @@ function openYouTubeApp(videoTitle) {
 function processNodeViaSearch(id) {
     if (!nodesList || !nodesList[id]) return;
 
+    // ✅ Hana clicking idan akwai active node
+    const hasActiveNode = Object.keys(nodesList).some(nodeId => {
+        return localStorage.getItem(`startTime_${nodeId}`) !== null;
+    });
+    if (hasActiveNode) {
+        showSynergyAlert("Complete current node first!", "error");
+        return;
+    }
+
     const task = nodesList[id];
     
-    // 1. Generate UNIQUE code - ba iri daya ba ga kowa
     const uniqueCode = generateUniqueCode();
     
-    // 2. Save code + startTime a localStorage (per-session, per-node)
     const now = Math.floor(Date.now() / 1000);
     localStorage.setItem(`startTime_${id}`, now);
-    localStorage.setItem(`nodeCode_${id}`, uniqueCode); // Unique code!
+    localStorage.setItem(`nodeCode_${id}`, uniqueCode);
   
-    // Save "in-progress" zuwa Firebase
-const username = localStorage.getItem('synergy_user');
-if (username) {
-    db.collection("users").doc(username).update({
-        [`nodeProgress.${id}.startTime`]: Math.floor(Date.now() / 1000),
-        [`nodeProgress.${id}.code`]: uniqueCode,
-        [`nodeProgress.${id}.status`]: "watching"
-    });
-}
+    const username = localStorage.getItem('synergy_user');
+    if (username) {
+        db.collection("users").doc(username).update({
+            [`nodeProgress.${id}.startTime`]: Math.floor(Date.now() / 1000),
+            [`nodeProgress.${id}.code`]: uniqueCode,
+            [`nodeProgress.${id}.status`]: "watching"
+        });
+    }
 
-    // 3. Buɗe YouTube APP (ba web ba - fix Opera Mini)
+    // ✅ Lock KAFIN bude YouTube
+    lockAllOtherNodes(id);
+
+    // Bude YouTube
     openYouTubeApp(task.title);
 
-    // Lock dukkan sauran nodes
-lockAllOtherNodes(id);
-
-    // 4. Update UI - nuna code din a infoArea
     const infoArea = document.getElementById(`info-area-${id}`);
     const btn = document.getElementById(`btn-${id}`);
 
     if (infoArea) {
-    infoArea.innerHTML = `
-        <div class="flex flex-col gap-1">
-            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-            <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
-        </div>
-    `;
+        infoArea.innerHTML = `
+            <div class="flex flex-col gap-1">
+                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
+            </div>
+        `;
     }
 
     if (btn) {
@@ -1507,7 +1512,7 @@ lockAllOtherNodes(id);
         btn.style.border = "none";
         btn.onclick = () => verifyNodeCode(id);
     }
-    }
+}
 
     
 
