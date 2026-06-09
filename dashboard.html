@@ -1362,6 +1362,11 @@ function fetchAndRenderNodes() {
     // Reset - ba za a restore watching state ba
     db.collection("users").doc(username).update({
         [`nodeProgress.${nodeId}.status`]: "idle"
+   
+       }
+
+                    
+                    });
     });
             });
         }
