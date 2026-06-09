@@ -458,12 +458,8 @@
 
     let nodesList = {}; // Wannan zai adana dukkan bayanan nodes din
     
+    // 1. INITIALIZATION
 
- // ==========================================
-// SYNERGY PROTOCOL - CLEAN SCRIPT
-// ==========================================
-
-// 1. FIREBASE CONFIG
 const firebaseConfig = { 
     apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E", 
     authDomain: "synergy-protocol.firebaseapp.com", 
@@ -471,146 +467,460 @@ const firebaseConfig = {
     storageBucket: "synergy-protocol.firebasestorage.app", 
     messagingSenderId: "179647543031", 
     appId: "1:179647543031:web:388da8a36e1bbbb55d85f2",
-    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com"
+    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com" // Sanya wannan layin
 };
-
+    
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
-
-// 2. GLOBAL VARIABLES
-let nodesList = {};
-let activeNodeId = null;
-const currentUser = localStorage.getItem('synergy_user');
-
-// Goge tsoffin localStorage idan user ya canza
-const savedUser = localStorage.getItem('_lastActiveUser');
-if (savedUser && savedUser !== currentUser) {
-    Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('startTime_') || key.startsWith('nodeCode_')) {
-            localStorage.removeItem(key);
-        }
-    });
-}
-localStorage.setItem('_lastActiveUser', currentUser);
+    
+    // 3. SAURAN VARIABLES (Ci gaban sauran code dinka na dashboard)
+    let player, currentCode = "", lastTime = 0;
+let tracker; // Wannan ne zai rike lissafin circle din
+let panelTriggered = false; // Wannan zai hana panel din hauka
+    
 
 
-// ==========================================
-// 3. TOAST ALERT
-// ==========================================
-function showSynergyAlert(msg, type = 'info') {
-    let toast = document.getElementById('custom-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'custom-toast';
-        document.body.appendChild(toast);
+    function startQuantumSession() { 
+        document.getElementById('shutter').style.opacity = "0"; 
+        setTimeout(() => document.getElementById('shutter').style.display = "none", 1000); 
+        player.playVideo(); 
     }
-    toast.className = 'synergy-toast';
 
-    let icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
-    if (type === 'success') {
+
+    // 3. UI & INTERACTION FUNCTIONS
+    function generateCode() { 
+        currentCode = Math.random().toString(36).substring(2,8).toUpperCase(); 
+        document.getElementById("generated-code-display").innerText = currentCode; 
+    }
+
+    function toggleGoogleMenu(event) {
+        event.stopPropagation();
+        document.getElementById('google-nav').classList.toggle('active');
+    }
+
+    window.onclick = () => {
+        const menu = document.getElementById('google-nav');
+        if(menu) menu.classList.remove('active');
+    };
+
+    function showSynergyAlert(msg, type = 'info') {
+    let toast = document.getElementById('custom-toast') || document.createElement('div');
+    toast.id = 'custom-toast'; 
+    toast.className = 'synergy-toast';
+    
+    // Zabi Icon dangane da sakon
+    let icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>'; // Warning icon
+    
+    if(type === 'success' || msg.includes('RESUMED')) {
         icon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
     }
 
-    toast.innerHTML = `${icon} <span class="neon-glow-text" style="font-size:11px;">${msg}</span>`;
+    toast.innerHTML = `${icon} <span class="neon-glow-text" style="font-size: 11px;">${msg}</span>`;
+    
+    if(!document.getElementById('custom-toast')) document.body.appendChild(toast);
+    
+    // Nuna shi
     setTimeout(() => toast.classList.add('show'), 100);
-    setTimeout(() => toast.classList.remove('show'), 3500);
+    
+    // Boye shi bayan sakan 3
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3500);
+    }
+    
+
+    
+// 4. DATA SYNC (FIREBASE) - GYARAN KARSHE
+const currentActiveUser = localStorage.getItem('synergy_user');
+
+if (currentActiveUser) {
+    db.collection("users").doc(currentActiveUser).onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+        
+            //kudi
+const vBal = data.pointsBalance || 0;
+const sBal = data.shareBalance || 0;
+const total = vBal + sBal;
+            
+            // 2. Saita Limit na 5 Units don Dashboard
+            const watchedRaw = data.videosWatchedToday || 0;
+            const dailyLimit = 5;
+            // Wannan zai sa dashboard ya nuna 0 idan 0 ne, ko 5 idan ya wuce 5
+            const displayWatched = watchedRaw > dailyLimit ? dailyLimit : watchedRaw;
+            
+            // 3. Update Dashboard Numbers
+            document.getElementById('total-balance-main').innerText = total.toLocaleString();
+            document.getElementById('video-balance-sub').innerText = vBal.toLocaleString();
+            document.getElementById('share-balance-sub').innerText = sBal.toLocaleString();
+            document.getElementById('display-name').innerText = data.username || "MEMBER";
+            
+            // 4. Progress Tracking (Daidaita x / 5 Units)
+            const percent = (displayWatched / dailyLimit) * 100;
+            const countElement = document.getElementById('daily-count');
+            if(countElement) {
+                countElement.innerHTML = `${displayWatched} <span class="text-[11px] text-gray-500 uppercase ml-1">/ 5 Units</span>`;
+            }
+            
+            const progressBar = document.getElementById('daily-progress-bar');
+            if(progressBar) {
+                progressBar.style.width = percent + "%";
+            }
+            
+                  // Lissafin dynamic points na wata guda
+const estimatedMonthly = watchedRaw * 150 * 30; 
+const estElement = document.getElementById('est-earnings');
+if(estElement) {
+    estElement.innerText = estimatedMonthly.toLocaleString() + " pts";
 }
+            
+            
+            // 6. Outer Ring Animation
+            const outerRing = document.getElementById('task-ring-outer');
+            if(outerRing) {
+                outerRing.style.background = `conic-gradient(#00f2fe ${percent * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
+            }
 
-
-// ==========================================
-// 4. NAV MENU
-// ==========================================
-function toggleGoogleMenu(event) {
-    event.stopPropagation();
-    document.getElementById('google-nav').classList.toggle('active');
-}
-window.onclick = () => {
-    const menu = document.getElementById('google-nav');
-    if (menu) menu.classList.remove('active');
-};
-
-
-// ==========================================
-// 5. FIREBASE BALANCE SYNC (onSnapshot)
-// ==========================================
-if (currentUser) {
-    db.collection("users").doc(currentUser).onSnapshot(doc => {
-        if (!doc.exists) return;
-        const data = doc.data();
-
-        const vBal = data.pointsBalance || 0;
-        const sBal = data.shareBalance || 0;
-        const total = vBal + sBal;
-        const watchedRaw = data.videosWatchedToday || 0;
-        const dailyLimit = 5;
-        const displayWatched = Math.min(watchedRaw, dailyLimit);
-        const percent = (displayWatched / dailyLimit) * 100;
-
-        // Display name
-        const nameEl = document.getElementById('display-name');
-        if (nameEl) nameEl.innerText = data.username || "MEMBER";
-
-        // Balances
-        const totalEl = document.getElementById('total-balance-main');
-        if (totalEl) totalEl.innerText = total.toLocaleString();
-        const vEl = document.getElementById('video-balance-sub');
-        if (vEl) vEl.innerText = vBal.toLocaleString();
-        const sEl = document.getElementById('share-balance-sub');
-        if (sEl) sEl.innerText = sBal.toLocaleString();
-
-        // Daily count
-        const countEl = document.getElementById('daily-count');
-        if (countEl) countEl.innerHTML = `${displayWatched} <span class="text-[11px] text-gray-500 uppercase ml-1">/ 5 Units</span>`;
-
-        // Progress bar
-        const bar = document.getElementById('daily-progress-bar');
-        if (bar) bar.style.width = percent + "%";
-
-        // Monthly estimate
-        const estEl = document.getElementById('est-earnings');
-        if (estEl) estEl.innerText = (watchedRaw * 150 * 30).toLocaleString() + " pts";
-
-        // Outer ring
-        const outerRing = document.getElementById('task-ring-outer');
-        if (outerRing) outerRing.style.background = `conic-gradient(#00f2fe ${percent * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
-
-        // Inner ring text
-        const ring = document.getElementById('ring');
-        if (ring) ring.innerText = Math.round(percent) + "%";
-
-        checkAndResetDailyStats(data);
+            checkAndResetDailyStats(data);
+        }
     });
 }
+    
+ async function executeVerification() {
+    const inputVal = document.getElementById('node-code').value.toUpperCase();
+    const p = document.getElementById('verifier-panel');
 
+    if(inputVal === currentCode && currentCode !== "") {
+        try {
+            // 1. Hana sake generating code nan take
+            currentCode = ""; 
+            
+            const currentActiveUser = localStorage.getItem('synergy_user');
+            const userRef = db.collection("users").doc(currentActiveUser);
+            
+           
+            
 
-// ==========================================
-// 6. DAILY RESET CHECK
-// ==========================================
-function checkAndResetDailyStats(userData) {
-    const today = new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' });
-    const lastDate = userData.lastActivityDate || "";
-    if (lastDate !== "" && today !== lastDate) {
-        db.collection("users").doc(currentUser).update({
-            videosWatchedToday: 0,
-            lastActivityDate: today
-        });
+            // 1. Fara duba nawa ya kalla a yau daga dashboard dinka
+const currentCountText = document.getElementById('daily-count').innerText;
+const watchedToday = parseInt(currentCountText) || 0;
+
+// 2. Idan ya riga ya kai 5, tsayar da shi anan
+if (watchedToday >= 5) {
+    showSynergyAlert("Limit reached: 5/5 units completed", "info");
+     p.style.opacity = "0";
+p.style.pointerEvents = "none";
+p.style.transform = "translateY(40px)";
+p.classList.remove('is-visible-now');
+    
+    return; // Wannan 'return' din shi ne zai hana kudin tafiya
+}
+            
+            await userRef.update({
+pointsBalance: firebase.firestore.FieldValue.increment(100),
+                videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+                lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
+            });
+            
+showSynergyAlert("Success: 100 pts earned", "success");
+            
+            // 2. Boye Panel din nan take (Ba tare da jinkiri ba)
+            if(p) {
+                p.style.opacity = "0";
+                p.style.pointerEvents = "none";
+                p.style.transform = "translateY(40px)";
+                
+                // Jira rabin sakan sannan a cire shi daga display
+                setTimeout(() => {
+                    p.classList.remove('is-visible-now');
+                    document.getElementById('node-code').value = "";
+                    // Bada damar panel din ya sake fitowa a bidiyo na gaba
+                    panelTriggered = false; 
+                }, 500);
+            }
+
+            // 3. Tsayar da bidiyon tukunna kafin loda wani
+            if (player && typeof player.pauseVideo === 'function') {
+                player.pauseVideo();
+            }
+
+            // 4. Loda sabon bidiyo
+            loadNextVideoWithoutPlaying();
+
+        } catch (error) {
+            showSynergyAlert("Database error", "error");
+            console.error(error);
+        }
+    } else {
+        showSynergyAlert("Invalid code", "error");
+    }
+ }
+    
+
+    
+
+// Wannan sabon function din zai loda bidiyo ba tare da ya yi Play ba
+async function loadNextVideoWithoutPlaying() {
+    try {
+        const snapshot = await db.collection("playlist").get();
+        let videoPool = [];
+        snapshot.forEach(doc => videoPool.push(doc.data().videoId));
+
+        if (videoPool.length > 0) {
+            const nextVid = videoPool[Math.floor(Math.random() * videoPool.length)];
+            
+            // CUE maimakon LOAD: Wannan zai loda thumbnail ne kawai, ba zai fara wasa ba
+            player.cueVideoById(nextVid); 
+            
+            // Dawo da Shutter din Play button domin mamba ya danna da kansa
+            document.getElementById('shutter').style.display = "flex";
+            document.getElementById('shutter').style.opacity = "1";
+        }
+    } catch (e) { console.log(e); }
+}
+    
+        
+
+    async function secureShareAndEarn(videoId) {
+        try {
+            await navigator.share({ title: 'Synergy Protocol', url: 'https://youtu.be/' + videoId });
+            await db.collection("users").doc(currentUser).update({ shareBalance: firebase.firestore.FieldValue.increment(0) });
+            showSynergyAlert("Share reward earned", "success");
+        } catch(e) {}
+    }
+
+    // SYNERGY TAB PROTECTION ENGINE
+function processNodeViaSearch(id) {
+    if (!nodesList || !nodesList[id]) return;
+
+    const task = nodesList[id];
+    
+    // Adana startTime - kawai idan babu ɗaya da ke running
+    const existingStart = localStorage.getItem(`startTime_${id}`);
+    if (!existingStart) {
+        const now = Math.floor(Date.now() / 1000);
+        localStorage.setItem(`startTime_${id}`, now);
+    }
+
+    // Bude YouTube
+    const searchQuery = `"${task.title.trim()}"`;
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
+
+    // Canza button zuwa "WATCHING..."
+    const btn = document.getElementById(`btn-${id}`);
+    if (btn) {
+        btn.innerText = "WATCHING...";
+        btn.style.background = "rgba(0,242,254,0.1)";
+        btn.style.color = "#00f2fe";
+        btn.style.border = "1px solid rgba(0,242,254,0.3)";
+        btn.onclick = null; // Kashe click har sai ya dawo
     }
 }
 
 
-// ==========================================
-// 7. MULTI-LOGIN PROTECTION
-// ==========================================
+// Wannan zai maye gurbin visibilitychange listener GABA DAYA
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) return;
+    if (!nodesList) return;
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    Object.keys(nodesList).forEach((id) => {
+        const task = nodesList[id];
+        const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+
+        if (storedStart === 0) return;
+
+        const timeSpent = currentTime - storedStart;
+
+        if (timeSpent >= task.duration) {
+            // ✅ LOKACI YA CIKA - Nuna overlay
+            showCodeOnlyOverlay(id, task);
+
+        } else {
+            // ⏳ BAI CIKA BA - RESET gaba daya, ba Resume ba
+            localStorage.removeItem(`startTime_${id}`);
+            localStorage.removeItem(`nodeCode_${id}`);
+
+            const btn = document.getElementById(`btn-${id}`);
+            const infoArea = document.getElementById(`info-area-${id}`);
+
+            if (infoArea) {
+                infoArea.innerHTML = `<h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>`;
+            }
+
+            if (btn) {
+                btn.innerText = "START";
+                btn.className = "px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all";
+                btn.style = "";
+                btn.onclick = () => processNodeViaSearch(id);
+            }
+        }
+    });
+});
+
+
+// CODE OVERLAY - CODE KAWAI, mai sauqi
+function showCodeOnlyOverlay(id, task) {
+    if (document.getElementById('code-reveal-overlay')) return;
+
+    const code = localStorage.getItem(`nodeCode_${id}`) || task.code;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'code-reveal-overlay';
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(2, 6, 23, 0.92);
+        backdrop-filter: blur(24px);
+        z-index: 999999;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        animation: fadeInOverlay 0.4s ease;
+    `;
+
+    overlay.innerHTML = `
+        <style>
+            @keyframes fadeInOverlay { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+            @keyframes codeGlow {
+                0%   { text-shadow: 0 0 10px rgba(0,242,254,0.3); }
+                100% { text-shadow: 0 0 25px rgba(0,242,254,0.9), 0 0 50px rgba(0,242,254,0.3); }
+            }
+            @keyframes badgePop {
+                0% { transform: scale(0.8); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            @keyframes scanline {
+                0% { transform: translateY(-100%); }
+                100% { transform: translateY(400%); }
+            }
+        </style>
+
+        <!-- MAIN CARD -->
+        <div style="
+            background: rgba(5, 10, 21, 0.95);
+            border: 1px solid rgba(0,242,254,0.12);
+            border-top: 2px solid #00f2fe;
+            border-radius: 28px;
+            padding: 32px 36px;
+            text-align: center;
+            max-width: 300px;
+            width: 88%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,242,254,0.06), 0 30px 60px rgba(0,0,0,0.5);
+        ">
+            <div style="position:absolute;top:0;left:0;width:100%;height:30px;background:linear-gradient(transparent,rgba(0,242,254,0.02),transparent);animation:scanline 3s linear infinite;pointer-events:none;"></div>
+
+            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);border-radius:50px;padding:5px 14px;margin-bottom:20px;">
+                <div style="width:5px;height:5px;border-radius:50%;background:#00f2fe;box-shadow:0 0 6px #00f2fe;"></div>
+                <span style="font-family:'Syncopate',sans-serif;font-size:6px;color:rgba(0,242,254,0.6);letter-spacing:3px;text-transform:uppercase;">Hash Code</span>
+            </div>
+
+            <div style="font-family:'Roboto Mono',monospace;font-size:2.2rem;font-weight:400;color:#00f2fe;letter-spacing:12px;padding-left:12px;animation:codeGlow 1.8s ease-in-out infinite alternate;margin-bottom:20px;">
+                ${code}
+            </div>
+
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,242,254,0.15),transparent);margin-bottom:16px;"></div>
+
+            <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:1px;margin-bottom:24px;line-height:1.7;">
+                Memorize this code,<br>then enter it below.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+    <button onclick="
+        navigator.clipboard.writeText('${code}');
+        this.innerText='✓ COPIED!';
+        this.style.background='#10b981';
+        setTimeout(()=>{ this.innerText='COPY CODE'; this.style.background='rgba(0,242,254,0.08)'; },2000);
+    " style="width:100%;padding:13px;border-radius:14px;background:rgba(0,242,254,0.08);color:#00f2fe;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;">
+        COPY CODE
+    </button>
+    <button onclick="closeCodeOverlay('${id}')" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
+    onmouseover="this.style.transform='translateY(-2px)'"
+    onmouseout="this.style.transform='translateY(0)'">
+        Got It →
+    </button>
+</div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+            
+
+// Rufe overlay - nuna verify box
+function closeCodeOverlay(id) {
+    const overlay = document.getElementById('code-reveal-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.4s';
+        setTimeout(() => overlay.remove(), 400);
+    }
+
+    // Yanzu nuna input + verify a node din
+    const task = nodesList[id];
+    const infoArea = document.getElementById(`info-area-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+
+    if (infoArea) {
+        infoArea.innerHTML = `
+            <div class="flex flex-col gap-1 w-full">
+                <span class="text-[8px] text-cyan-500 orbitron uppercase font-bold">ENTER CODE</span>
+                <input type="text" id="code-input-${id}" maxlength="6"
+                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none focus:border-cyan-400" 
+                placeholder="••••••">
+            </div>
+        `;
+    }
+
+    if (btn) {
+        btn.innerText = "VERIFY";
+        btn.style.background = "#00f2fe";
+        btn.style.color = "black";
+        btn.style.border = "none";
+        btn.onclick = () => verifyNodeCode(id);
+    }
+}
+
+
+// VERIFY - bayan overlay ya rufe
+async function verifyNodeCode(id) {
+    const task = nodesList[id];
+    const inputEl = document.getElementById(`code-input-${id}`);
+    
+    if (!inputEl) return;
+    
+    const inputVal = inputEl.value.toUpperCase().trim();
+
+    if (inputVal === storedCode && storedCode !== "") {
+        localStorage.removeItem(`startTime_${id}`);
+        await handleSuccess(id, task.amount);
+    } else {
+        showSynergyAlert("Invalid hash code", "error");
+        inputEl.style.borderColor = '#f87171';
+        inputEl.value = "";
+        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
+    }
+            }
+    
+    
+
+    // MULTI-LOGIN & CONSOLE PROTECTION
 const currentSessionId = Math.random().toString(36).substring(7);
 
 async function checkMultiLogin() {
-    if (!currentUser) return;
+    if(!currentUser) return;
     const sessionRef = db.collection("active_sessions").doc(currentUser);
+    
+    // Saita zaman yanzu
     await sessionRef.set({
         sessionId: currentSessionId,
         lastActive: firebase.firestore.FieldValue.serverTimestamp()
     });
-    sessionRef.onSnapshot(doc => {
+
+    // Lura da wasu login daban
+    sessionRef.onSnapshot((doc) => {
         if (doc.exists && doc.data().sessionId !== currentSessionId) {
             document.body.innerHTML = `
                 <div style="background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:30px;">
@@ -618,27 +928,335 @@ async function checkMultiLogin() {
                     <p style="color:white; margin-top:20px;">Multiple logins detected on this account.</p>
                     <button onclick="location.reload()" style="margin-top:30px; padding:15px 40px; background:#f87171; color:black; font-weight:bold; border-radius:10px;">RE-AUTHENTICATE</button>
                 </div>`;
+            if(player) player.pauseVideo();
         }
     });
 }
 
-// Right-click & DevTools protection
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.onkeydown = e => {
-    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
+// Kari: Kare shafin daga 'Right Click' da 'Inspect Element'
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.onkeydown = function(e) {
+    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0))) {
+        return false;
+    }
 };
 
+checkMultiLogin();
 
-// ==========================================
-// 8. FETCH & RENDER NODES
-// ==========================================
+
+    // Wannan zai kira bidiyo daga Firebase da zaran shafin ya buɗe
+loadVideosFromSynergyVault();
+    
+   function checkAndResetDailyStats(userData) {
+    // Agogon Nigeria
+    const options = { timeZone: 'Africa/Lagos', day: '2-digit', month: '2-digit', year: 'numeric' };
+    const today = new Date().toLocaleDateString('en-GB', options);
+    const lastActivityDate = userData.lastActivityDate || "";
+
+    // Idan ranar yau ta bambanta da ranar karshe da aka yi aiki
+    if (lastActivityDate !== "" && today !== lastActivityDate) {
+        db.collection("users").doc(currentActiveUser).update({
+            videosWatchedToday: 0,
+            lastActivityDate: today
+        }).then(() => {
+            console.log("Protocol Reset: Sabuwar rana ta shigo (0/5)");
+        });
+    }
+   }
+    
+
+    // SYNERGY SECURITY MODULE - ANTI-SKIP
+(function() {
+    // Wadannan variables din suna cikin wannan box din ne kawai
+    let internalStrikes = 0;
+    let internalLastTime = 0;
+    window.synergyTicker = null; 
+
+    window.setupSecurityTracker = function(playerInstance) {
+        if (window.synergyTicker) clearInterval(window.synergyTicker);
+
+        window.synergyTicker = setInterval(() => {
+            try {
+                if (!playerInstance || typeof playerInstance.getPlayerState !== 'function') return;
+                if (playerInstance.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+                let currentTime = playerInstance.getCurrentTime();
+
+                // ANTI-SKIP LOGIC
+                if (currentTime > internalLastTime + 2.5) { 
+                    internalStrikes++;
+                    playerInstance.seekTo(internalLastTime); 
+                    
+                    if (internalStrikes >= 3) {
+                        clearInterval(window.synergyTicker);
+                        document.body.innerHTML = `
+                            <div style='background:#020617; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f87171; font-family:Syncopate; text-align:center; padding:20px;'>
+                                <h1 style="font-size: 25px; letter-spacing:5px;">PROTOCOL BREACH</h1>
+                                <p style='color:white; margin-top:20px;'>Access suspended: Multiple skip attempts.</p>
+                            </div>`;
+                    } else {
+                        if (window.showSynergyAlert) {
+                            window.showSynergyAlert("STRIKE " + internalStrikes + "/3: NO SKIPPING!", "error");
+                        }
+                    }
+                } else {
+                    internalLastTime = currentTime;
+                }
+            } catch (err) {
+                // Kar mu bar kuskure ya kashe shafin
+            }
+        }, 1000);
+    };
+})();
+
+
+    // Wannan zai maye gurbin duk wani YouTube Fetching logic
+async function loadVideosFromSynergyVault() {
+    try {
+        const snapshot = await db.collection("playlist").get();
+        let videoPool = [];
+        
+        snapshot.forEach(doc => {
+            if (doc.data().videoId) {
+                videoPool.push(doc.data().videoId);
+            }
+        });
+
+        if (videoPool.length > 0) {
+            const randomVideo = videoPool[Math.floor(Math.random() * videoPool.length)];
+            
+            // GYARA: Mun sauya loadVideoById zuwa cueVideoById don hana auto-play
+            if (player && typeof player.cueVideoById === 'function') {
+                player.cueVideoById(randomVideo);
+            } else {
+                window.pendingVideoId = randomVideo;
+            }
+            console.log("Synergy Vault: Video Queued (No Auto-play)!");
+        }
+    } catch (error) {
+        console.error("Vault Error:", error);
+    }
+}
+    
+ 
+
+    
+// 1. ZAYYANA TASK DANGANE DA NODE NA RANAR
+async function loadNewTask() {
+    try {
+        const userDoc = await db.collection("users").doc(currentActiveUser).get();
+        const watchedToday = userDoc.data().videosWatchedToday || 0;
+        const currentNode = (watchedToday % 5) + 1; // Zai bamu 1 zuwa 5
+
+        // Idan ya riga ya gama 5, nuna masa ya huta
+        if (watchedToday >= 5) {
+            document.getElementById('task-keyword-display').innerText = "ALL NODES SECURED";
+            document.getElementById('node-badge-display').innerText = "LIMIT REACHED";
+            return;
+        }
+
+        const snapshot = await db.collection("playlist").get();
+        let tasks = [];
+        snapshot.forEach(doc => tasks.push(doc.data()));
+
+        if (tasks.length > 0) {
+            // Zabo bidiyo dangane da Node din da muke kai
+            const task = tasks[currentNode - 1] || tasks[0]; 
+            currentTaskKeyword = task.keyword || "Synergy Protocol";
+            currentCode = task.securityCode || ""; 
+            
+            document.getElementById('task-keyword-display').innerText = currentTaskKeyword;
+            document.getElementById('node-badge-display').innerText = `NODE ${currentNode}: ACTIVE TASK`;
+            document.getElementById("generated-code-display").innerText = "LOCKED";
+        }
+    } catch (e) { console.error("Vault Error:", e); }
+}
+
+
+    function updateUI(completed) {
+    const count = Math.min(completed.length, 5);
+    document.getElementById('nodes-count').innerText = `${count} / 5`;
+    document.getElementById('progress-bar').style.width = (count * 20) + "%";
+
+    completed.forEach(nodeId => {
+        const btn = document.getElementById(`btn-${nodeId}`);
+        const status = document.getElementById(`status-${nodeId}`);
+        
+        if(btn) {
+            btn.innerText = "SYNCHRONIZED";
+            btn.disabled = true;
+            btn.style.background = "rgba(255,255,255,0.1)";
+            btn.style.color = "rgba(255,255,255,0.4)";
+            btn.classList.add('cursor-not-allowed');
+        }
+        if(status) {
+            status.innerText = "Status: Protocol Active";
+            status.classList.replace('text-gray-500', 'text-green-400');
+        }
+    });
+    }
+
+
+// Bayanan aikin kowane Node
+const nodeTasks = {
+    1: { title: "AI Wealth Academy", duration: 600, code: "XA99", amount: 100 },
+    2: { title: "Global Wealth Secret", duration: 420, code: "BZ44", amount: 100 },
+    3: { title: "Urban Vision 2050", duration: 540, code: "UV50", amount: 100 },
+    4: { title: "Zenith Nature 4K", duration: 300, code: "ZN4K", amount: 100 },
+    5: { title: "Cosmic Horizon", duration: 480, code: "CH05", amount: 100 }
+};
+    
+
+let completedNodes = 0; // Don lura da Progress Ring
+    
+ let startTime = {}; 
+let cheatAttempts = {}; 
+
+
+                
+     
+
+// Function din cika Circle (Progress Ring)
+function updateProgressCircle(count) {
+    const percentage = (count / 5) * 100;
+    // Nemo text din cikin circle
+    const progressText = document.querySelector('.relative.z-10.flex.flex-col.items-center h2'); 
+    if (progressText) progressText.innerText = `${percentage}%`;
+    
+    // Idan kana amfani da SVG stroke-dasharray
+    const circle = document.querySelector('.progress-ring-circle');
+    if (circle) {
+        const radius = circle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius;
+        const offset = circumference - (percentage / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+    }
+}
+
+// Function din hada kudi a Firebase
+async function addEarningsToFirebase(amount) {
+    const userId = localStorage.getItem('userId'); // Tabbatar ka ajiye userId a login
+    if (!userId) return;
+
+    const userRef = db.collection("users").doc(userId);
+    
+    try {
+        await userRef.update({
+            balance: firebase.firestore.FieldValue.increment(amount),
+            nodesCompleted: firebase.firestore.FieldValue.increment(1),
+            lastActivity: firebase.firestore.Timestamp.now()
+        });
+        
+        // Refresh balance display a screen (Idan akwai)
+        fetchNewBalance(userId); 
+    } catch (error) {
+        console.error("Error updating balance:", error);
+    }
+                      }
+
+
+    function transformBarToInput(id) {
+    const textArea = document.getElementById(`text-area-${id}`);
+    
+    // Mun cire sunan bidiyon, mun saka Input Field a wurin
+    textArea.innerHTML = `
+        <div class="flex flex-col gap-1 w-full">
+            <span class="text-[8px] text-cyan-500 orbitron">ENTER CODE</span>
+            <input type="text" id="code-input-${id}" 
+            class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[14px] outline-none focus:border-cyan-500" 
+            placeholder="••••••">
+        </div>
+    `;
+    }
+    
+    
+   async function handleSuccess(id, amount) {
+    const username = localStorage.getItem('synergy_user');
+    const userRef = db.collection("users").doc(username);
+
+    try {
+        // 1. Aika kudi + Mark completed
+        await userRef.update({
+            pointsBalance: firebase.firestore.FieldValue.increment(amount),
+            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
+            [`nodeProgress.${id}.status`]: "completed"
+        });
+        
+        // 2. Nuna Alert
+        showSynergyAlert(`Success: ${amount} pts earned`, "success");
+        
+        // 3. Ɓoye node gaba ɗaya bayan an gama
+        setTimeout(() => {
+            const nodeElement = document.getElementById(`node-${id}`);
+            if (nodeElement) {
+                nodeElement.style.transition = "all 0.5s ease";
+                nodeElement.style.opacity = "0";
+                nodeElement.style.transform = "translateY(-10px)";
+                setTimeout(() => nodeElement.remove(), 500);
+            }
+        }, 1500);
+        
+    } catch (error) {
+        console.error(error);
+        showSynergyAlert("Database error", "error");
+    }
+   }
+    
+
+function renderToDashboard(id, task) {
+    let container;
+    
+    // Rarraba bidiyon zuwa madaidaitan akwatuna (Containers)
+    switch(task.channel) {
+        case 'ai-wealth-academy':
+            container = document.getElementById('ai-wealth-academy-container');
+            break;
+        case 'urban-vision-2050':
+            container = document.getElementById('urban-vision-container');
+            break;
+        case 'zenith-nature-4k':
+            container = document.getElementById('zenith-nature-container');
+            break;
+        case 'cosmic-horizon':
+            container = document.getElementById('cosmic-horizon-container');
+            break;
+        case 'global-wealth-secret':
+            container = document.getElementById('global-wealth-container');
+            break;
+        default:
+            console.log("Unknown channel node");
+    }
+
+    if (!container) return; 
+
+    const taskHtml = `
+        <div class="glass-panel p-4 rounded-xl mb-3 flex justify-between items-center border-l-2 border-cyan-500">
+            <div>
+                <h3 class="text-xs font-bold text-white uppercase">${task.title}</h3>
+                <p class="text-[9px] text-cyan-400">Reward: ₦${task.amount} | Target: ${task.duration}s</p>
+            </div>
+            <button onclick="processNode('${id}')" id="btn-${id}" class="btn-prime py-2 px-4 rounded-lg text-[10px]">
+                START
+            </button>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', taskHtml);
+}
+
+
+window.onload = () => {
+    fetchAndRenderNodes();
+};
+    
+
 function fetchAndRenderNodes() {
     const container = document.getElementById('synergy-nodes-container');
     if (!container) return;
 
     const nodesRef = firebase.database().ref('nodes');
 
-    nodesRef.on('value', async (snapshot) => {
+    nodesRef.on('value', (snapshot) => {
         const data = snapshot.val();
         nodesList = data || {};
         container.innerHTML = "";
@@ -648,312 +1266,125 @@ function fetchAndRenderNodes() {
             return;
         }
 
-        if (!currentUser) return;
-
-        try {
-            const userDoc = await db.collection("users").doc(currentUser).get();
-            const userData = userDoc.data() || {};
-            const progress = userData.nodeProgress || {};
-            const completedNodes = [];
-
-            // Nemo completed nodes
-            Object.keys(progress).forEach(id => {
-                if (progress[id].status === "completed") completedNodes.push(id);
-            });
-
-            // Nemo active node
-            activeNodeId = userData.activeNodeId || null;
-
-            // Restore localStorage daga Firebase idan page ya reload
-            if (activeNodeId && progress[activeNodeId]) {
-                localStorage.setItem(`startTime_${activeNodeId}`, progress[activeNodeId].startTime);
-                localStorage.setItem(`nodeCode_${activeNodeId}`, progress[activeNodeId].code);
-            }
-
-            // Render nodes
-            Object.keys(data).forEach(key => {
-                const task = data[key];
-                if (completedNodes.includes(key)) return; // Skip completed
-
-                const isLocked = activeNodeId && key !== activeNodeId;
-                const isActive = key === activeNodeId;
-
-                const nodeHtml = `
-                    <div id="node-${key}" 
-                         class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4"
-                         style="${isLocked ? 'opacity:0.3;' : 'opacity:1;'}">
-                        <div class="flex items-center gap-4 w-full">
-                            <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="red">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                </svg>
-                            </div>
-                            <div id="info-area-${key}" class="flex-1 min-w-0">
-                                <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
-                                ${isActive ? '<span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>' : ''}
-                            </div>
-                            <button id="btn-${key}"
-                                class="px-6 py-2.5 rounded-xl orbitron text-[9px] font-black tracking-widest transition-all flex-shrink-0"
-                                ${isLocked ? 'disabled' : ''}
-                                style="${isLocked ? 'background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.2);cursor:not-allowed;' : isActive ? 'background:#00f2fe;color:black;' : 'background:white;color:black;'}"
-                                onclick="${isLocked ? '' : isActive ? `verifyNodeCode('${key}')` : `startNode('${key}')`}">
-                                ${isLocked ? 'LOCKED' : isActive ? 'VERIFY' : 'START'}
-                            </button>
+        Object.keys(data).forEach((key) => {
+            const task = data[key];
+            
+            const nodeHtml = `
+                <div id="node-${key}" class="glass-premium p-5 rounded-[24px] border border-white/5 flex items-center justify-between transition-all mb-4">
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold orbitron">
+                           <svg width="16" height="16" viewBox="0 0 24 24" fill="red"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                         </div>
+                        <div id="info-area-${key}" class="flex-1">
+                            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${task.title}</h4>
+                        </div>
+                        <button id="btn-${key}" onclick="processNodeViaSearch('${key}')" 
+                            class="px-6 py-2.5 rounded-xl bg-white text-black orbitron text-[9px] font-black tracking-widest hover:bg-cyan-400 transition-all">START</button>
                     </div>
-                `;
-                container.insertAdjacentHTML('beforeend', nodeHtml);
-            });
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', nodeHtml);
+        });
 
-        } catch (e) {
-            console.error("Render error:", e);
+        // ✅ Restore state - CIKIN callback, bayan nodes sun render
+        const username = localStorage.getItem('synergy_user');
+        if (username) {
+            db.collection("users").doc(username).get().then(doc => {
+                if (!doc.exists) return;
+                const progress = doc.data().nodeProgress || {};
+
+                Object.keys(progress).forEach(nodeId => {
+                    const nodeData = progress[nodeId];
+                    const btn = document.getElementById(`btn-${nodeId}`);
+                    const task = nodesList[nodeId];
+                    if (!btn || !task) return;
+
+                    if (nodeData.status === "completed") {
+    // Ɓoye node gaba ɗaya - babu wani aiki
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    if (nodeElement) nodeElement.remove();
+
+} else if (nodeData.status === "watching") {
+    localStorage.setItem(`startTime_${nodeId}`, nodeData.startTime);
+    localStorage.setItem(`nodeCode_${nodeId}`, nodeData.code);
+                    }
+                    });
+            });
         }
     });
 }
-
-
-// ==========================================
-// 9. START NODE
-// ==========================================
-async function startNode(id) {
-    if (!nodesList[id]) return;
-    if (activeNodeId) {
-        showSynergyAlert("Complete current node first!", "error");
-        return;
-    }
-
-    const task = nodesList[id];
-    const uniqueCode = generateUniqueCode();
-    const now = Math.floor(Date.now() / 1000);
-
-    // Adana localStorage
-    localStorage.setItem(`startTime_${id}`, now);
-    localStorage.setItem(`nodeCode_${id}`, uniqueCode);
-
-    // Adana Firebase
-    await db.collection("users").doc(currentUser).update({
-        activeNodeId: id,
-        [`nodeProgress.${id}.startTime`]: now,
-        [`nodeProgress.${id}.code`]: uniqueCode,
-        [`nodeProgress.${id}.status`]: "watching"
-    });
-
-    activeNodeId = id;
-    lockAllExcept(id);
-    updateNodeToVerify(id, task.title);
-    openYouTubeApp(task.title);
-}
-
-
-// ==========================================
-// 10. VERIFY NODE
-// ==========================================
+    
+// 2. Function na duba lokaci da tabbatar da Code
 async function verifyNodeCode(id) {
-    if (!nodesList[id]) return;
-
     const task = nodesList[id];
-    const now = Math.floor(Date.now() / 1000);
+    const currentTime = Math.floor(Date.now() / 1000);
+    
     const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
+    
+    // GYARA: Karanta unique code daga localStorage, ba daga task.code ba
     const storedCode = localStorage.getItem(`nodeCode_${id}`) || "";
 
-    // Check 1: startTime ya wanzu?
     if (storedStart === 0) {
-        showSynergyAlert("Please click START again.", "error");
+        showSynergyAlert("Security Error: Please click START again.", "error");
         return;
     }
 
-    // Check 2: Duration ta cika?
-    const timeSpent = now - storedStart;
+    const timeSpent = currentTime - storedStart;
+
     if (timeSpent < task.duration) {
         const remaining = task.duration - timeSpent;
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
-        showSynergyAlert(`⏱ ${mins}m ${secs}s remaining - Keep watching!`, "error");
-        return;
-    }
+        showSynergyAlert(`⏱ ${mins}m ${secs}s REMAINING - Keep Watching!`, "error");
 
-    // Check 3: Input field ya wanzu?
-    const inputEl = document.getElementById(`code-input-${id}`);
-    if (!inputEl) {
-        showCodeOverlay(id, storedCode);
-        return;
-    }
-
-    // Check 4: Code ya dace?
-    const inputVal = inputEl.value.toUpperCase().trim();
-    if (inputVal === "") {
-        showSynergyAlert("Enter the hash code!", "error");
-        return;
-    }
-    if (inputVal !== storedCode) {
-        showSynergyAlert("Invalid hash code!", "error");
-        inputEl.style.borderColor = '#f87171';
-        inputEl.value = "";
-        setTimeout(() => inputEl.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
-        return;
-    }
-
-    await completeNode(id, task.amount);
-}
-
-
-// ==========================================
-// 11. COMPLETE NODE
-// ==========================================
-async function completeNode(id, amount) {
-    try {
-        localStorage.removeItem(`startTime_${id}`);
-        localStorage.removeItem(`nodeCode_${id}`);
-
-        await db.collection("users").doc(currentUser).update({
-            pointsBalance: firebase.firestore.FieldValue.increment(amount),
-            videosWatchedToday: firebase.firestore.FieldValue.increment(1),
-            activeNodeId: firebase.firestore.FieldValue.delete(),
-            [`nodeProgress.${id}.status`]: "completed",
-            lastActivityDate: new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' })
-        });
-
-        activeNodeId = null;
-        showSynergyAlert(`${amount} pts earned!`, "success");
-
-        // Cire node daga screen
-        const nodeEl = document.getElementById(`node-${id}`);
-        if (nodeEl) {
-            nodeEl.style.transition = "all 0.5s ease";
-            nodeEl.style.opacity = "0";
-            nodeEl.style.transform = "translateY(-10px)";
-            setTimeout(() => nodeEl.remove(), 500);
-        }
-
-        setTimeout(() => unlockAllNodes(), 600);
-
-    } catch (e) {
-        console.error(e);
-        showSynergyAlert("Database error", "error");
-    }
-}
-
-
-// ==========================================
-// 12. HELPER FUNCTIONS
-// ==========================================
-function lockAllExcept(activeId) {
-    Object.keys(nodesList).forEach(id => {
-        if (id === activeId) return;
         const btn = document.getElementById(`btn-${id}`);
-        const nodeEl = document.getElementById(`node-${id}`);
         if (btn) {
-            btn.innerText = "LOCKED";
-            btn.disabled = true;
-            btn.style.cssText = "background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.2);cursor:not-allowed;padding:10px 24px;border-radius:12px;";
-            btn.onclick = null;
+            btn.innerText = "RESUME";
+            btn.style.background = "#eab308";
+            btn.style.color = "black";
+            btn.onclick = () => {
+                openYouTubeApp(task.title);
+                btn.innerText = "VERIFY";
+                btn.style.background = "#00f2fe";
+                btn.onclick = () => verifyNodeCode(id);
+            };
         }
-        if (nodeEl) nodeEl.style.opacity = "0.3";
-    });
-}
+        return;
+    }
 
-function unlockAllNodes() {
-    Object.keys(nodesList).forEach(id => {
-        const btn = document.getElementById(`btn-${id}`);
-        const nodeEl = document.getElementById(`node-${id}`);
-        if (btn && btn.innerText === "LOCKED") {
-            btn.innerText = "START";
-            btn.disabled = false;
-            btn.style.cssText = "background:white;color:black;padding:10px 24px;border-radius:12px;";
-            btn.onclick = () => startNode(id);
+    const inputVal = (document.getElementById(`code-input-${id}`)?.value || "").toUpperCase().trim();
+    
+    // GYARA: Kwatanta da stored unique code, ba task.code ba
+    if (inputVal === storedCode && storedCode !== "") {
+        localStorage.removeItem(`startTime_${id}`);
+        localStorage.removeItem(`nodeCode_${id}`); // Goge code bayan an yi amfani
+        handleSuccess(id, task.amount);
+    } else {
+        showSynergyAlert("Invalid hash code", "error");
+        const input = document.getElementById(`code-input-${id}`);
+        if (input) {
+            input.style.borderColor = '#f87171';
+            input.value = "";
+            setTimeout(() => input.style.borderColor = 'rgba(0,242,254,0.3)', 1500);
         }
-        if (nodeEl) nodeEl.style.opacity = "1";
-    });
-}
+    }
+                }
+    
 
-function updateNodeToVerify(id, title) {
-    const infoArea = document.getElementById(`info-area-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-    if (infoArea) {
-        infoArea.innerHTML = `
-            <h4 class="orbitron text-[11px] text-white tracking-wider uppercase">${title}</h4>
-            <span class="text-[9px] text-cyan-500/60 orbitron animate-pulse">WATCHING...</span>
-        `;
-    }
-    if (btn) {
-        btn.innerText = "VERIFY";
-        btn.disabled = false;
-        btn.style.cssText = "background:#00f2fe;color:black;padding:10px 24px;border-radius:12px;";
-        btn.onclick = () => verifyNodeCode(id);
-    }
-}
 
-function showCodeOverlay(id, code) {
-    if (document.getElementById('code-reveal-overlay')) return;
-    const overlay = document.createElement('div');
-    overlay.id = 'code-reveal-overlay';
-    overlay.style.cssText = `
-        position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(2,6,23,0.95);backdrop-filter:blur(24px);
-        z-index:999999;display:flex;align-items:center;justify-content:center;
-    `;
-    overlay.innerHTML = `
-        <div style="background:rgba(5,10,21,0.95);border:1px solid rgba(0,242,254,0.2);border-top:2px solid #00f2fe;border-radius:28px;padding:36px;text-align:center;max-width:300px;width:88%;">
-            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);border-radius:50px;padding:5px 14px;margin-bottom:20px;">
-                <div style="width:5px;height:5px;border-radius:50%;background:#00f2fe;"></div>
-                <span style="font-family:'Syncopate',sans-serif;font-size:6px;color:rgba(0,242,254,0.6);letter-spacing:3px;">HASH CODE</span>
-            </div>
-            <div style="font-family:'Roboto Mono',monospace;font-size:2.2rem;color:#00f2fe;letter-spacing:12px;padding-left:12px;margin-bottom:20px;">
-                ${code}
-            </div>
-            <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:24px;">
-                Memorize this code, then enter it below.
-            </p>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="navigator.clipboard.writeText('${code}');this.innerText='✓ COPIED!';this.style.background='#10b981';setTimeout(()=>{this.innerText='COPY CODE';this.style.background='rgba(0,242,254,0.08)';},2000);"
-                    style="width:100%;padding:13px;border-radius:14px;background:rgba(0,242,254,0.08);color:#00f2fe;font-family:'Syncopate',sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);">
-                    COPY CODE
-                </button>
-                <button onclick="closeOverlayAndShowInput('${id}')"
-                    style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;">
-                    GOT IT →
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-}
-
-function closeOverlayAndShowInput(id) {
-    const overlay = document.getElementById('code-reveal-overlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s';
-        setTimeout(() => overlay.remove(), 300);
-    }
-    const infoArea = document.getElementById(`info-area-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-    if (infoArea) {
-        infoArea.innerHTML = `
-            <div class="flex flex-col gap-1 w-full pr-2">
-                <span class="text-[8px] text-cyan-500 orbitron font-bold">ENTER CODE</span>
-                <input type="text" id="code-input-${id}" maxlength="6"
-                    class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[13px] outline-none"
-                    placeholder="••••••" style="letter-spacing:4px;"
-                    oninput="this.value=this.value.toUpperCase()">
-            </div>
-        `;
-        setTimeout(() => {
-            const input = document.getElementById(`code-input-${id}`);
-            if (input) input.focus();
-        }, 400);
-    }
-    if (btn) {
-        btn.innerText = "VERIFY";
-        btn.style.cssText = "background:#00f2fe;color:black;padding:10px 24px;border-radius:12px;";
-        btn.onclick = () => verifyNodeCode(id);
-    }
-}
+    // =============================================
+// GYARAN KARSHE: processNodeViaSearch
+// - Auto-generates unique code (ba shared ba)
+// - Opens YouTube App, ba web ba (Opera Mini fix)
+// =============================================
 
 function generateUniqueCode() {
+    // Cire haruffa masu kama: 0/O, 1/I
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
-    for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
     return code;
 }
 
@@ -961,46 +1392,111 @@ function openYouTubeApp(videoTitle) {
     const searchQuery = `"${videoTitle.trim()}"`;
     const isAndroid = /Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Android Intent - kai tsaye zuwa YouTube App KAWAI
     if (isAndroid) {
         window.location.href = `intent://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        // Babu fallback - idan YouTube app bai girka ba, Android kansa zai nuna "Open with" dialog
         return;
     }
+
+    // iOS - YouTube App KAWAI
     if (isIOS) {
         window.location.href = `youtube://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
+        // Babu fallback
         return;
     }
+
+    // Desktop kawai - babu app, so web shi ne daidai
     window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`, '_blank');
 }
 
+function processNodeViaSearch(id) {
+    if (!nodesList || !nodesList[id]) return;
 
-// ==========================================
-// 13. VISIBILITY CHANGE - Nuna overlay idan lokaci ya cika
-// ==========================================
-document.addEventListener("visibilitychange", function () {
-    if (document.hidden) return;
-    if (!activeNodeId) return;
-
+    const task = nodesList[id];
+    
+    // 1. Generate UNIQUE code - ba iri daya ba ga kowa
+    const uniqueCode = generateUniqueCode();
+    
+    // 2. Save code + startTime a localStorage (per-session, per-node)
     const now = Math.floor(Date.now() / 1000);
-    const storedStart = parseInt(localStorage.getItem(`startTime_${activeNodeId}`)) || 0;
-    const storedCode = localStorage.getItem(`nodeCode_${activeNodeId}`) || "";
-    const task = nodesList[activeNodeId];
+    localStorage.setItem(`startTime_${id}`, now);
+    localStorage.setItem(`nodeCode_${id}`, uniqueCode); // Unique code!
+  
+    // Save "in-progress" zuwa Firebase
+const username = localStorage.getItem('synergy_user');
+if (username) {
+    db.collection("users").doc(username).update({
+        [`nodeProgress.${id}.startTime`]: Math.floor(Date.now() / 1000),
+        [`nodeProgress.${id}.code`]: uniqueCode,
+        [`nodeProgress.${id}.status`]: "watching"
+    });
+}
 
-    if (!task || storedStart === 0) return;
+    // 3. Buɗe YouTube APP (ba web ba - fix Opera Mini)
+    openYouTubeApp(task.title);
 
-    const timeSpent = now - storedStart;
-    if (timeSpent >= task.duration) {
-        showCodeOverlay(activeNodeId, storedCode);
+    // 4. Update UI - nuna code din a infoArea
+    const infoArea = document.getElementById(`info-area-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+
+    if (infoArea) {
+        infoArea.innerHTML = `
+            <div class="flex flex-col gap-2 w-full">
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-[7px] text-cyan-500/60 orbitron uppercase tracking-widest">Your Hash Code</span>
+                    <span class="text-[18px] text-cyan-400 orbitron font-bold tracking-[8px]">${uniqueCode}</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[7px] text-white/40 orbitron uppercase tracking-widest">Enter Code Below</span>
+                    <input type="text" id="code-input-${id}" maxlength="6"
+                    class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[13px] outline-none focus:border-cyan-400 uppercase" 
+                    placeholder="••••••">
+                </div>
+            </div>
+        `;
     }
-});
 
+    if (btn) {
+        btn.innerText = "VERIFY";
+        btn.style.background = "#00f2fe";
+        btn.style.color = "black";
+        btn.style.border = "none";
+        btn.onclick = () => verifyNodeCode(id);
+    }
+    }
 
-// ==========================================
-// 14. PAGE LOAD
-// ==========================================
-window.onload = () => {
-    checkMultiLogin();
-    fetchAndRenderNodes();
-};
+    
+
+    // Function don goge tsoffin submissions bayan sun shiga Dashboard
+async function autoCleanupTasks() {
+    const currentUsername = localStorage.getItem('synergy_user');
+    if (!currentUsername) return;
+
+    try {
+        // Nema mana duk inda status din yake "approved" na wannan user din
+        const snap = await db.collection("task_submissions")
+            .where("username", "==", currentUsername)
+            .where("status", "==", "approved")
+            .get();
+
+        if (!snap.empty) {
+            const batch = db.batch();
+            snap.forEach(doc => {
+                batch.delete(doc.ref); // Goge record din bayan an tabbatar an riga an shiga Dashboard
+            });
+            await batch.commit();
+            console.log("An goge tsoffin task submissions domin tsaftace database.");
+        }
+    } catch (error) {
+        console.error("Kuskure wajen goge tasks:", error);
+    }
+}
+
+// Kira shi da zaran Dashboard ya bude
+window.addEventListener('load', autoCleanupTasks);
+    
     
 </script>
 </body>
