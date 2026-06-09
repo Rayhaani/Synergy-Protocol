@@ -1516,12 +1516,17 @@ document.addEventListener("visibilitychange", function() {
 
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // Idan ya FITA dashboard - Kawai mu bar shi ya tafi, ba sai mun canza leftAt ba anan
+    // 1. Idan ya fita dashboard don tafiya YouTube, kawai mu bar shi ya tafi
     if (document.hidden) {
         return; 
     }
 
-    // ✅ Idan ya DAWO - A nan ne za mu lissafi ainihin lokacin da aka dauka a waje
+    // 2. ✅ Idan ya dawo dashboard - Abu na farko: TSAYAR DA DUKKAN TIMER dake gudu!
+    // Juya 'countdownInterval' zuwa ainihin sunan variable din da kake amfani dashi don rage lokaci a dashboard dinka
+    if (typeof countdownInterval !== 'undefined') {
+        clearInterval(countdownInterval); 
+    }
+
     Object.keys(nodesList).forEach((id) => {
         const task = nodesList[id];
         const storedStart = parseInt(localStorage.getItem(`startTime_${id}`)) || 0;
@@ -1529,11 +1534,11 @@ document.addEventListener("visibilitychange", function() {
 
         if (storedStart === 0) return;
 
-        // Ainihin lokacin da ya dauka tun daga danna START har dawowarsa yanzu
+        // Lissafin sakan nawa ya yi a waje tun kafin ya dawo yanzu
         const totalTimeSpent = currentTime - storedStart; 
 
         if (totalTimeSpent >= task.duration) {
-            // Lokaci ya cika gaba daya - Nuna masa Code dinsa na gaskiya!
+            // A. Idan ya dade a can wajen har lokaci ya cika gaba daya -> Nuna masa Code
             const infoArea = document.getElementById(`info-area-${id}`);
             const btn = document.getElementById(`btn-${id}`);
 
@@ -1563,28 +1568,39 @@ document.addEventListener("visibilitychange", function() {
             }
 
         } else {
-            // Idan lokaci bai cika ba tukuna - Tsarin "RESUME" maimakon Reset gaba daya
-            const remaining = task.duration - totalTimeSpent;
-            const mins = Math.floor(remaining / 60);
-            const secs = remaining % 60;
-            
-            showSynergyAlert(`⏱ ${mins}m ${secs}s REMAINING - Go back and finish!`, "error");
+            // B. 🛑 Idan kuma da sauran lokaci bai gama kallo ba!
+            // 1. Goge lokacin da aka ajiye a baya don system din ta TSAYA cak, kar ta sake kirawa da kanta
+            localStorage.removeItem(`startTime_${id}`);
 
+            // 2. Nuna masa button na RESUME na mutuƙar tsayawa
             const btn = document.getElementById(`btn-${id}`);
             if (btn) {
                 btn.innerText = "RESUME";
-                btn.style.background = "#eab308"; // Yellow color ga resume
+                btn.style.background = "#eab308"; // Yellow code
                 btn.style.color = "black";
+                
+                // 3. Idan ya danna RESUME din, yanzu ne komai zai fara AFRESH daga farko!
                 btn.onclick = () => {
+                    // Sanya sabon lokaci na yanzu don ya sake farawa cif-cif
+                    const newStart = Math.floor(Date.now() / 1000);
+                    localStorage.setItem(`startTime_${id}`, newStart);
+                    
+                    // Bude YouTube
                     openYouTubeApp(task.title);
+                    
+                    // Maida button din zuwa kallo
                     btn.innerText = "WATCHING...";
                     btn.style.background = "rgba(0,242,254,0.1)";
                     btn.style.color = "#00f2fe";
                 };
             }
+            
+            // Nuna masa gargadi cewa lokacinsa bai cika ba, dole sai ya sake komawa
+            showSynergyAlert(`⚠️ Duration not met! Press RESUME to start afresh.`, "error");
         }
     });
 });
+    
     
 
     // Function don goge tsoffin submissions bayan sun shiga Dashboard
