@@ -73,7 +73,7 @@
         <section class="master-card rounded-[32px] p-8 text-center fade-in">
             <p class="orbitron text-[8px] text-gray-500 mb-3">Available Equity</p>
             <h1 id="main-equity-display" class="digits-terminal text-[42px] text-white leading-none mb-4">
-                <span class="text-gray-500 text-2xl">₦</span>0<span class="text-gray-500 text-2xl">.00</span>
+                <span id="total-balance-main">0</span><span class="text-gray-500 text-2xl ml-2">pts</span>
             </h1>
             <div class="flex justify-center items-center gap-2 mb-8">
                 <div class="w-1 h-1 rounded-full bg-cyan-400 animate-pulse"></div>
@@ -91,11 +91,11 @@
         <section class="grid grid-cols-2 gap-4 fade-in" style="animation-delay: 0.2s;">
             <div class="master-card rounded-[24px] p-5">
                 <p class="orbitron text-[7px] text-gray-500 mb-2">Total Earned</p>
-                <h4 id="total-earned-display" class="digits-terminal text-xl text-white">₦0</h4>
+                <h4 id="total-earned-display" class="digits-terminal text-xl text-white">0 pts</h4>
             </div>
             <div class="master-card rounded-[24px] p-5">
                 <p class="orbitron text-[7px] text-gray-500 mb-2">Withdrawn</p>
-                <h4 id="withdrawn-display" class="digits-terminal text-xl text-white">₦0</h4>
+                <h4 id="withdrawn-display" class="digits-terminal text-xl text-white">0 pts</h4>
             </div>
         </section>
 
@@ -185,13 +185,13 @@
                 // Update UI nan take ba tare da refresh ba
                 const equityDisplay = document.getElementById('main-equity-display');
                 if (equityDisplay) {
-                    equityDisplay.innerHTML = `<span class="text-gray-500 text-2xl">₦</span>${availableEquity.toLocaleString()}<span class="text-gray-500 text-2xl">.00</span>`;
+                    equityDisplay.innerHTML = `${availableEquity.toLocaleString()}<span class="text-gray-500 text-2xl ml-2">pts</span>`;
                 }
                 
-                document.getElementById('total-earned-display').innerText = `₦${totalEarned.toLocaleString()}`;
-                document.getElementById('withdrawn-display').innerText = `₦${totalWithdrawn.toLocaleString()}`;
-
-                // Update sauran ayyukan shafin
+                document.getElementById('total-earned-display').innerText = `${totalEarned.toLocaleString()} pts`;
+                document.getElementById('withdrawn-display').innerText = `${totalWithdrawn.toLocaleString()} pts`;
+                
+                  // Update sauran ayyukan shafin
                 updateTransactionHistory(data);
                 controlWithdrawButton(data.isVerified, availableEquity);
             });
@@ -219,7 +219,7 @@
         
         btn.onclick = async () => {
             if (!userBankData || !userBankData.accountNumber) {
-                alert("SETTLEMENT REQUIRED: Please update your bank details.");
+                alert("Settlement required: Please update your bank details.");
                 openWithdrawalModal();
                 return;
             }
@@ -227,9 +227,9 @@
             const amountInput = document.getElementById('withdraw-amount');
             const amount = parseFloat(amountInput.value);
 
-            if (!amount || amount <= 0) { alert("PLEASE ENTER VALID AMOUNT"); return; }
-            if (amount > balance) { alert("INSUFFICIENT EQUITY"); return; }
-            if (amount < 100) { alert("MINIMUM WITHDRAWAL: ₦100"); return; }
+            if (!amount || amount <= 0) { alert("Please enter valid amount"); return; }
+            if (amount > balance) { alert("Insufficient balance"); return; }
+            if (amount < 100) { alert("Minimum.withdrawal: 100 pts"); return; }
 
             try {
                 btn.disabled = true;
@@ -246,13 +246,13 @@
 
                 // MUN CIRE 'totalWithdrawn update' DIN DA KE NAN DOMIN GUDEWA DOUBLE DEDUCTION
                 
-                alert(`SUCCESS: ₦${amount} request sent. It will reflect as pending.`);
+                alert(`Success: ${amount} pts request sent. It will reflect as pending.`);
                 amountInput.value = ""; 
                 btn.innerText = "Process Transaction";
                 btn.disabled = false;
             } catch (error) {
                 console.error("Firebase Error:", error);
-                alert("SYSTEM ERROR: Transaction failed.");
+                alert("System error: Transaction failed.");
                 btn.innerText = "Process Transaction";
                 btn.disabled = false;
             }
@@ -260,7 +260,7 @@
     } else {
         btn.disabled = true; 
         btn.style.opacity = "0.3"; 
-        btn.innerText = "LOCKED: ACTIVATE NODES";
+        btn.innerText = "Locked: Active nodes";
     }
                 }
             
@@ -352,7 +352,7 @@
             await db.collection("users").doc(currentActiveUser).update({
                 bankDetails: { bankName: bank, accountNumber: accNum, accountName: accName, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
             });
-            alert("SETTLEMENT DETAILS SECURED!");
+            alert("Settlement details succeed!");
             closeWithdrawalModal();
         } catch (error) { alert("System Error. Try again."); }
     }
