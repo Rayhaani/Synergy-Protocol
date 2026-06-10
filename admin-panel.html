@@ -249,8 +249,8 @@
                     </span>
                 </td>
                 <td class="pr-6 text-right py-5 font-bold text-white text-sm">
-                    ₦${u.videoBalance.toLocaleString()}
-                </td>
+    ${u.videoBalance.toLocaleString()} pts
+</td>
             </tr>
             <tr id="details-${u.id.replace(/\s+/g, '-')}" class="details-row bg-white/[0.03]">
                 <td colspan="4" class="p-8 border-l-4 border-cyan-400">
@@ -265,8 +265,8 @@
                             <div class="flex items-center gap-3">
                                 <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
                                        class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
-                                <button onclick="event.stopPropagation();" class="btn-update">Update Balance</button>
-                            </div>
+                                <button onclick="event.stopPropagation(); updateBalance('${u.id}')" class="btn-update">Update Balance</button>
+                                       </div>
                             <div class="flex flex-row gap-3 w-full max-w-2xl">
                                 <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
                                 <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
@@ -300,8 +300,8 @@
         document.getElementById('total-members').innerText = data.length;
         document.getElementById('total-active').innerText = data.filter(u => u.status === 'active').length;
         document.getElementById('total-inactive').innerText = data.filter(u => u.status === 'inactive').length;
-        document.getElementById('total-balance').innerText = `₦${data.reduce((s, u) => s + u.videoBalance, 0).toLocaleString()}`;
-        document.getElementById('total-payout').innerText = `₦${data.reduce((s, u) => s + (u.payout || 0), 0).toLocaleString()}`;
+        document.getElementById('total-balance').innerText = `${data.reduce((s, u) => s + u.videoBalance, 0).toLocaleString()} pts`;
+        document.getElementById('total-payout').innerText = `${data.reduce((s, u) => s + (u.payout || 0), 0).toLocaleString()} pts`;
     }
 
     function searchNetwork() {
@@ -385,7 +385,29 @@ async function approveAndCleanup(username) {
     }
     }
         
-      
+      async function updateBalance(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const inputEl = document.getElementById(`input-${safeId}`);
+    const newBalance = parseInt(inputEl.value);
+    
+    if (isNaN(newBalance) || newBalance < 0) {
+        alert("Please enter a valid number");
+        return;
+    }
+    
+    if (!confirm(`Set ${username} balance to ${newBalance} pts?`)) return;
+    
+    try {
+        await db.collection("users").doc(username).update({
+            pointsBalance: newBalance
+        });
+        alert(`✓ Balance updated to ${newBalance} pts`);
+        inputEl.value = "";
+        fetchUsers(); // Refresh table
+    } catch(e) {
+        alert("Error: " + e.message);
+    }
+      }
         
     </script>
 </body>
