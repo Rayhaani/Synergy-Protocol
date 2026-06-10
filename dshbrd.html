@@ -1467,7 +1467,7 @@ function generateUniqueCode() {
 }
 
 function openYouTubeApp(videoTitle) {
-    const searchQuery = `"${videoTitle.trim()}"`;
+    const searchQuery = videoTitle.trim(); 
     const isAndroid = /Android/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
