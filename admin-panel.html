@@ -163,6 +163,10 @@
     </div>
 
     <script>
+
+        if (sessionStorage.getItem('admin_auth') !== 'true') {
+    window.location.replace('admin-login.html');
+        }
         
                 // 1. FIREBASE SETUP
     const firebaseConfig = {
