@@ -173,7 +173,7 @@
                 btn.innerText = "ACCESS GRANTED";
                 btn.style.background = "linear-gradient(90deg, #00f2fe, #22c55e)";
                 setTimeout(() => {
-                    window.location.replace('content-command.html');
+                    window.location.replace('admin-panel.html');
                 }, 800);
             } else {
                 err.style.display = 'block';
@@ -188,7 +188,7 @@
 
     // Idan ya riga ya shiga a wannan session
     if (sessionStorage.getItem('admin_auth') === 'true') {
-        window.location.replace('content-command.html');
+        window.location.replace('admin-panel.html');
     }
 </script>
 </body>
