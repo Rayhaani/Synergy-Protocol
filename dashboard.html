@@ -227,24 +227,6 @@
 </head>
 <body>
 
-    <!-- ADMIN PASSWORD GATE -->
-<div id="admin-gate" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#030712;z-index:99999;display:flex;align-items:center;justify-content:center;">
-    <div style="background:rgba(0,242,254,0.03);border:1px solid rgba(0,242,254,0.2);border-top:3px solid #00f2fe;border-radius:24px;padding:40px;text-align:center;width:90%;max-width:340px;">
-        <p style="font-family:'Syncopate',sans-serif;font-size:9px;color:#00f2fe;letter-spacing:4px;margin-bottom:6px;">SYNERGY PROTOCOL</p>
-        <h2 style="font-family:'Syncopate',sans-serif;font-size:14px;color:white;margin-bottom:30px;letter-spacing:3px;">CORE ADMIN</h2>
-        
-        <input type="text" id="gate-user" placeholder="Username" style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-size:13px;text-align:center;padding:14px;margin-bottom:12px;outline:none;box-sizing:border-box;">
-        
-        <input type="password" id="gate-pass" placeholder="Password" onkeydown="if(event.key==='Enter') checkAdminAccess()" style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-size:13px;text-align:center;padding:14px;margin-bottom:20px;outline:none;box-sizing:border-box;">
-        
-        <p id="gate-error" style="color:#ff4d4d;font-size:10px;margin-bottom:12px;display:none;font-family:'Syncopate',sans-serif;letter-spacing:2px;">ACCESS DENIED</p>
-        
-        <button onclick="checkAdminAccess()" style="width:100%;padding:15px;border-radius:12px;background:#00f2fe;color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;cursor:pointer;border:none;">
-            AUTHENTICATE
-        </button>
-    </div>
-</div>
-    
 <nav class="sticky top-4 z-[10000] mx-auto max-w-[95%] rounded-[30px] p-2 flex items-center justify-between px-6 bg-[#050a15]/40 backdrop-blur-2xl border border-cyan-500/20 shadow-[0_0_30px_rgba(0,242,254,0.1)] transition-all duration-500">
     
     <div class="flex items-center gap-4">
@@ -1630,36 +1612,6 @@ document.addEventListener("visibilitychange", function() {
         }
     });
 });
-    
-
-
-    // ADMIN CREDENTIALS — Ka sauya su da naka
-const ADMIN_USERNAME = "Soultaan";   // ← Sauya da username ɗinka
-const ADMIN_PASSWORD = "Syydlahbb@05!"; // ← Sauya da password ɗinka
-
-function checkAdminAccess() {
-    const user = document.getElementById('gate-user').value.trim();
-    const pass = document.getElementById('gate-pass').value.trim();
-    
-    if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
-        // Correct — boye gate, bude panel
-        document.getElementById('admin-gate').style.display = 'none';
-        sessionStorage.setItem('admin_auth', 'true');
-    } else {
-        // Wrong — nuna error
-        document.getElementById('gate-error').style.display = 'block';
-        document.getElementById('gate-pass').value = '';
-        setTimeout(() => {
-            document.getElementById('gate-error').style.display = 'none';
-        }, 2000);
-    }
-}
-
-// Idan ya riga ya shiga a wannan session, kar a sake tambaya
-if (sessionStorage.getItem('admin_auth') === 'true') {
-    document.getElementById('admin-gate').style.display = 'none';
-}
-
     
 
     // Function don goge tsoffin submissions bayan sun shiga Dashboard
