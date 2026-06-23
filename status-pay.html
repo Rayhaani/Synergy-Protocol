@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TallaStatus — Post ads, earn money</title>
+<title>TallaStatus — Status Ads, Tracked Properly</title>
 <style>
 @import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
 
 :root{
   --ink:#0F1A12; --bone:#F3EFE3; --bone-dim:#E7E1D0;
-  --forest:#1C6B45; --forest-dark:#154F33;
-  --amber:#E7A23D; --ember:#D14B33;
+  --forest:#1C6B45; --forest-dark:#154F33; --forest-pale:#E3EEE6;
+  --amber:#E7A23D; --amber-pale:#FBEED9; --ember:#D14B33; --ember-pale:#FBE4DE;
   --ink-mist:#5C6B5E; --bone-mist:#B9C2B6;
-  --radius:18px; --radius-sm:12px;
+  --radius:18px; --radius-sm:12px; --radius-lg:22px;
   --shadow:0 18px 40px -22px rgba(15,26,18,.45);
+  --shadow-sm:0 8px 20px -12px rgba(15,26,18,.35);
   --font-display:'Clash Display',sans-serif;
   --font-body:'General Sans',sans-serif;
   --font-mono:'JetBrains Mono',monospace;
@@ -27,16 +28,24 @@ body{
   font-family:var(--font-body);
   -webkit-font-smoothing:antialiased;
 }
-.shell{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+.shell{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
 
 .topbar{
-  position:sticky;top:0;z-index:10;
+  position:sticky;top:0;z-index:20;
   background:var(--ink);color:var(--bone);
   padding:16px 20px;display:flex;flex-direction:column;gap:14px;
   box-shadow:var(--shadow);
 }
-.brand{font-family:var(--font-display);font-weight:700;font-size:1.3rem;display:flex;align-items:center;gap:8px;letter-spacing:.2px;}
+.brand-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.brand{font-family:var(--font-display);font-weight:700;font-size:1.25rem;display:flex;align-items:center;gap:8px;letter-spacing:.2px;}
 .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(231,162,61,.25);}
+.wallet-pill{
+  font-family:var(--font-mono);font-size:.74rem;font-weight:700;
+  background:rgba(255,255,255,.08);padding:7px 12px;border-radius:999px;
+  display:flex;align-items:center;gap:6px;color:var(--amber);white-space:nowrap;
+}
+.wallet-pill .tok-icon{width:7px;height:7px;border-radius:50%;background:var(--amber);}
+
 .roletabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:999px;}
 .tab{
   flex:1;border:none;background:transparent;color:var(--bone-mist);
@@ -45,13 +54,25 @@ body{
 }
 .tab.active{background:var(--bone);color:var(--ink);}
 
+.subtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+.subtabs::-webkit-scrollbar{display:none;}
+.subtab{
+  flex-shrink:0;border:1.5px solid rgba(15,26,18,.14);background:#fff;color:var(--ink-mist);
+  font-family:var(--font-display);font-weight:600;font-size:.78rem;
+  padding:7px 14px;border-radius:999px;cursor:pointer;transition:all .15s ease;
+}
+.subtab.active{background:var(--ink);color:var(--bone);border-color:var(--ink);}
+.subtab .count{font-family:var(--font-mono);opacity:.7;margin-left:4px;}
+
 main#app{flex:1;padding:18px 16px 28px;display:flex;flex-direction:column;gap:18px;}
 
-h2{font-family:var(--font-display);font-weight:600;font-size:1.05rem;margin:0 0 10px;}
-h3{font-family:var(--font-display);font-weight:600;font-size:.98rem;margin:0;}
+h2{font-family:var(--font-display);font-weight:600;font-size:1.05rem;margin:0 0 2px;}
+h3{font-family:var(--font-display);font-weight:600;font-size:.96rem;margin:0;}
 p{margin:0 0 8px;line-height:1.5;}
 .muted{color:var(--ink-mist);}
 .small{font-size:.82rem;}
+.tiny{font-size:.72rem;}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px;}
 
 .card{
   background:#fff;border:1px solid rgba(15,26,18,.08);
@@ -62,39 +83,48 @@ p{margin:0 0 8px;line-height:1.5;}
 
 .stacked-form{display:flex;flex-direction:column;gap:10px;}
 .form-row{display:flex;gap:10px;}
-.form-row input{flex:1;min-width:0;}
-input,textarea{
+.form-row input,.form-row select{flex:1;min-width:0;}
+label.field-label{font-size:.76rem;font-weight:600;color:var(--ink-mist);margin-bottom:-4px;display:block;}
+input,textarea,select{
   font-family:var(--font-body);font-size:.92rem;
   border:1.5px solid rgba(15,26,18,.14);border-radius:var(--radius-sm);
   padding:11px 13px;background:var(--bone);color:var(--ink);width:100%;
 }
-input:focus,textarea:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber);}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber);}
 .note-input{width:100%;min-height:46px;resize:vertical;margin:8px 0;}
+.helptext{font-size:.74rem;color:var(--ink-mist);margin:-4px 0 2px;}
 
-button{font-family:var(--font-display);cursor:pointer;border:none;transition:transform .15s ease,box-shadow .15s ease;}
+button{font-family:var(--font-display);cursor:pointer;border:none;transition:transform .15s ease,box-shadow .15s ease,background .15s ease;}
 button:active{transform:scale(.97);}
+button:disabled{opacity:.55;cursor:not-allowed;transform:none;}
 .btn-primary{
   background:var(--forest);color:var(--bone);
   font-weight:600;font-size:.88rem;padding:11px 18px;border-radius:999px;
 }
-.btn-primary:hover{background:var(--forest-dark);}
+.btn-primary:hover:not(:disabled){background:var(--forest-dark);}
 .btn-secondary{
   background:transparent;color:var(--ink);border:1.5px solid rgba(15,26,18,.2)!important;
   font-weight:600;font-size:.85rem;padding:9px 16px;border-radius:999px;text-decoration:none;display:inline-block;
 }
-.btn-primary.small,.btn-secondary.small{padding:8px 14px;font-size:.8rem;}
+.btn-danger{
+  background:transparent;color:var(--ember);border:1.5px solid rgba(209,75,51,.35)!important;
+  font-weight:600;font-size:.8rem;padding:8px 14px;border-radius:999px;
+}
+.btn-primary.small,.btn-secondary.small,.btn-danger.small{padding:8px 14px;font-size:.8rem;}
+.btn-block{width:100%;}
 
 .hero-card{
   background:var(--ink);color:var(--bone);border-radius:var(--radius);
   padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px;
   box-shadow:var(--shadow);animation:rise .5s ease both;
 }
-.hero-ring{position:relative;width:84px;height:84px;}
-.hero-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.ring-num{font-family:var(--font-mono);font-weight:700;font-size:.72rem;text-align:center;}
-.hero-stats{display:flex;gap:28px;text-align:center;}
-.hero-stats strong{display:block;font-family:var(--font-mono);font-size:1.2rem;}
-.hero-stats span{font-size:.74rem;color:var(--bone-mist);}
+.hero-ring{position:relative;width:88px;height:88px;}
+.hero-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-num{font-family:var(--font-mono);font-weight:700;font-size:.82rem;text-align:center;}
+.ring-sub{font-size:.58rem;color:var(--bone-mist);text-transform:uppercase;letter-spacing:.04em;}
+.hero-stats{display:flex;gap:24px;text-align:center;flex-wrap:wrap;justify-content:center;}
+.hero-stats strong{display:block;font-family:var(--font-mono);font-size:1.15rem;}
+.hero-stats span{font-size:.7rem;color:var(--bone-mist);}
 
 .howto ol{list-style:none;counter-reset:step;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
 .howto li{counter-increment:step;display:flex;gap:12px;align-items:baseline;font-size:.88rem;}
@@ -110,45 +140,100 @@ button:active{transform:scale(.97);}
   border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);
   animation:rise .5s ease both;
 }
-.campaign-img{width:72px;height:72px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;}
+.campaign-img{width:72px;height:72px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;background:var(--bone-dim);}
 .campaign-body{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
 .campaign-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
 .campaign-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
 .inline-form{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%;}
 .inline-form input[type=file]{flex:1;min-width:120px;font-size:.78rem;padding:7px;}
-.inline-form input[type=number]{width:110px;}
+.inline-form input[type=number]{width:130px;}
 
 .lock-row{display:flex;align-items:center;gap:8px;font-size:.78rem;}
 
 .status-badge{
-  font-family:var(--font-mono);font-size:.74rem;font-weight:600;
-  padding:6px 10px;border-radius:999px;display:inline-block;
+  font-family:var(--font-mono);font-size:.72rem;font-weight:600;
+  padding:6px 10px;border-radius:999px;display:inline-block;white-space:nowrap;
 }
-.status-badge.pending{background:rgba(231,162,61,.16);color:#9a6a1c;}
-.status-badge.approved{background:rgba(28,107,69,.14);color:var(--forest-dark);}
-.status-badge.rejected{background:rgba(209,75,51,.14);color:var(--ember);}
+.status-badge.claimed{background:rgba(92,107,94,.14);color:var(--ink-mist);}
+.status-badge.pending{background:var(--amber-pale);color:#9a6a1c;}
+.status-badge.approved{background:var(--forest-pale);color:var(--forest-dark);}
+.status-badge.rejected{background:var(--ember-pale);color:var(--ember);}
 .status-badge.full{background:rgba(15,26,18,.08);color:var(--ink-mist);}
 
-.stats-row{display:flex;gap:10px;}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;}
 .stat-pill{
-  flex:1;background:#fff;border:1px solid rgba(15,26,18,.08);border-radius:var(--radius-sm);
-  padding:12px;text-align:center;box-shadow:var(--shadow);
+  flex:1;min-width:78px;background:#fff;border:1px solid rgba(15,26,18,.08);border-radius:var(--radius-sm);
+  padding:12px;text-align:center;box-shadow:var(--shadow-sm);
 }
-.stat-pill strong{display:block;font-family:var(--font-mono);font-size:1.1rem;}
-.stat-pill span{font-size:.7rem;color:var(--ink-mist);}
+.stat-pill strong{display:block;font-family:var(--font-mono);font-size:1.05rem;}
+.stat-pill span{font-size:.66rem;color:var(--ink-mist);text-transform:uppercase;letter-spacing:.03em;}
 
 .review-card{
   display:flex;gap:12px;background:#fff;border:1px solid rgba(15,26,18,.08);
-  border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);
+  border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);
 }
-.review-img{width:90px;height:120px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;}
-.review-body{flex:1;display:flex;flex-direction:column;min-width:0;}
-.review-actions{display:flex;gap:8px;}
+.review-img{width:90px;height:120px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;background:var(--bone-dim);cursor:zoom-in;}
+.review-body{flex:1;display:flex;flex-direction:column;min-width:0;gap:4px;}
+.review-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ---- Tracking dashboard ---- */
+.dash-card{background:#fff;border:1px solid rgba(15,26,18,.08);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;animation:rise .5s ease both;}
+.dash-head{padding:14px 16px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(15,26,18,.06);cursor:pointer;}
+.dash-head img{width:48px;height:48px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;background:var(--bone-dim);}
+.dash-head-body{flex:1;min-width:0;}
+.dash-head-meta{display:flex;gap:10px;font-size:.72rem;color:var(--ink-mist);margin-top:2px;flex-wrap:wrap;}
+.dash-progress-track{height:6px;background:var(--bone-dim);border-radius:99px;overflow:hidden;margin-top:8px;}
+.dash-progress-fill{height:100%;background:var(--forest);border-radius:99px;transition:width .4s ease;}
+.dash-chevron{font-family:var(--font-mono);color:var(--ink-mist);font-size:.9rem;flex-shrink:0;transition:transform .2s ease;}
+.dash-chevron.open{transform:rotate(180deg);}
+
+.funnel-row{display:flex;gap:8px;padding:12px 16px;background:var(--bone);flex-wrap:wrap;}
+.funnel-chip{
+  flex:1;min-width:72px;text-align:center;background:#fff;border-radius:var(--radius-sm);
+  padding:8px 6px;border:1px solid rgba(15,26,18,.08);
+}
+.funnel-chip strong{display:block;font-family:var(--font-mono);font-size:1rem;}
+.funnel-chip span{font-size:.6rem;color:var(--ink-mist);text-transform:uppercase;letter-spacing:.03em;}
+
+.timeline-wrap{padding:4px 16px 14px;}
+.timeline-row{
+  display:flex;gap:10px;align-items:center;padding:9px 0;
+  border-bottom:1px solid rgba(15,26,18,.06);font-size:.8rem;
+}
+.timeline-row:last-child{border-bottom:none;}
+.timeline-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.timeline-dot.claimed{background:var(--ink-mist);}
+.timeline-dot.submitted{background:var(--amber);}
+.timeline-dot.approved{background:var(--forest);}
+.timeline-dot.rejected{background:var(--ember);}
+.timeline-name{font-weight:600;flex-shrink:0;}
+.timeline-meta{color:var(--ink-mist);font-size:.74rem;flex:1;min-width:0;}
+.timeline-time{font-family:var(--font-mono);font-size:.68rem;color:var(--ink-mist);flex-shrink:0;white-space:nowrap;}
+.timeline-empty{padding:14px 16px;color:var(--ink-mist);font-size:.8rem;text-align:center;}
+
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-chip{
+  flex-shrink:0;border:1.5px solid rgba(15,26,18,.14);background:#fff;color:var(--ink-mist);
+  font-family:var(--font-mono);font-weight:600;font-size:.72rem;
+  padding:6px 12px;border-radius:999px;cursor:pointer;
+}
+.filter-chip.active{background:var(--ink);color:var(--bone);border-color:var(--ink);}
 
 .empty{
   text-align:center;color:var(--ink-mist);font-size:.86rem;
   border:1.5px dashed rgba(15,26,18,.16);border-radius:var(--radius);padding:24px;
 }
+
+.wallet-card{background:linear-gradient(135deg,var(--forest),var(--forest-dark));color:var(--bone);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);animation:rise .5s ease both;}
+.wallet-card .label{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(243,239,227,.7);}
+.wallet-card .amount{font-family:var(--font-mono);font-weight:700;font-size:1.9rem;margin:4px 0 2px;}
+.wallet-card .sub{font-size:.74rem;color:rgba(243,239,227,.75);}
+.wallet-history{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.wallet-history-row{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;background:rgba(255,255,255,.08);border-radius:var(--radius-sm);padding:9px 12px;}
+.wallet-history-row .amt{font-family:var(--font-mono);font-weight:700;}
+.wallet-history-row .amt.pos{color:#9FE3B8;}
+.wallet-history-row .amt.neg{color:#F2A99A;}
 
 .foot-note{
   font-size:.72rem;color:var(--ink-mist);text-align:center;padding:16px 24px 28px;
@@ -165,15 +250,19 @@ button:active{transform:scale(.97);}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+.lightbox{position:fixed;inset:0;background:rgba(15,26,18,.92);z-index:60;display:none;align-items:center;justify-content:center;padding:20px;}
+.lightbox.show{display:flex;}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:var(--radius-sm);box-shadow:var(--shadow);}
+
 @keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.campaign-grid .campaign-card:nth-child(2){animation-delay:.05s;}
-.campaign-grid .campaign-card:nth-child(3){animation-delay:.1s;}
-.campaign-grid .campaign-card:nth-child(4){animation-delay:.15s;}
+.campaign-grid .campaign-card:nth-child(2),.dash-list .dash-card:nth-child(2){animation-delay:.05s;}
+.campaign-grid .campaign-card:nth-child(3),.dash-list .dash-card:nth-child(3){animation-delay:.1s;}
+.campaign-grid .campaign-card:nth-child(4),.dash-list .dash-card:nth-child(4){animation-delay:.15s;}
 
 @media (prefers-reduced-motion:reduce){
-  .card,.hero-card,.campaign-card{animation:none;}
-  .ring-fill{transition:none;}
-  button,.tab{transition:none;}
+  .card,.hero-card,.campaign-card,.dash-card,.wallet-card{animation:none;}
+  .ring-fill,.dash-progress-fill,.dash-chevron{transition:none;}
+  button,.tab,.subtab{transition:none;}
 }
 
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
@@ -186,7 +275,10 @@ button:active{transform:scale(.97);}
 <body>
 <div class="shell">
   <header class="topbar">
-    <div class="brand"><span class="brand-dot"></span>TallaStatus</div>
+    <div class="brand-row">
+      <div class="brand"><span class="brand-dot"></span>TallaStatus</div>
+      <div id="walletPillSlot"></div>
+    </div>
     <nav class="roletabs">
       <button class="tab active" data-role="poster" type="button">Status Posters</button>
       <button class="tab" data-role="advertiser" type="button">Businesses</button>
@@ -194,15 +286,28 @@ button:active{transform:scale(.97);}
   </header>
   <main id="app">Loading app…</main>
   <footer class="foot-note">
-    This is a working prototype — data is stored for testing purposes only. No real payments are made yet; screenshot review is currently manual, not AI-based.
+    This is a working prototype — data is stored for testing purposes only. Tokens are an in-app credit with no cash value yet. Screenshot review is currently manual, not AI-based.
   </footer>
 </div>
 <div id="toast" class="toast"></div>
+<div id="lightbox" class="lightbox"><img id="lightboxImg" src="" alt="Full size proof" /></div>
 
 <script>
-const STORAGE_KEYS = { profile: 'profile', campaigns: 'campaigns', entries: 'entries' };
+const STORAGE_KEYS = { profile: 'profile', campaigns: 'campaigns', entries: 'entries', wallets: 'wallets' };
+const TOKEN_TO_NAIRA = 10; // 1 Token = ₦10 (advertiser funding rate, for display only)
 
-let state = { role: 'poster', profile: null, campaigns: [], entries: [], ready: false };
+let state = {
+  role: 'poster',
+  profile: null,
+  campaigns: [],
+  entries: [],
+  wallets: {},          // keyed by phone
+  ready: false,
+  posterFilter: 'all',
+  advertiserTab: 'dashboard', // dashboard | create | review
+  reviewFilter: 'pending',
+  openDashIds: {}        // campaignId -> bool (expanded)
+};
 
 /* ---------- storage helpers ---------- */
 async function loadKey(key, shared) {
@@ -229,6 +334,7 @@ function genId(prefix) {
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function fmtTok(n) { return Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
 function timeAgo(ts) {
   if (!ts) return '';
   const mins = Math.floor((Date.now() - ts) / 60000);
@@ -237,6 +343,12 @@ function timeAgo(ts) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return hrs + ' hr ago';
   return Math.floor(hrs / 24) + ' day(s) ago';
+}
+function fmtClock(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ', ' +
+    d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 function lockInfo(entry) {
   const hoursPassed = (Date.now() - entry.claimedAt) / 3600000;
@@ -284,20 +396,44 @@ function showToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 function emptyState(msg) {
   return `<div class="empty">${esc(msg)}</div>`;
 }
+function getUrlProfile() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const name = (params.get('name') || '').trim();
+    const phone = (params.get('phone') || '').trim();
+    const role = (params.get('role') || '').trim().toLowerCase();
+    if (name && phone) {
+      return { name, phone, role: (role === 'advertiser' || role === 'poster') ? role : null };
+    }
+  } catch (e) { /* ignore malformed URL */ }
+  return null;
+}
+function getWallet(phone) {
+  if (!state.wallets[phone]) {
+    state.wallets[phone] = { phone, tokenBalance: 0, nairaBalance: 0, history: [] };
+  }
+  return state.wallets[phone];
+}
+async function persistWallets() {
+  await saveKey(STORAGE_KEYS.wallets, state.wallets, true);
+}
 
-/* ---------- data actions ---------- */
+/* ---------- data actions: poster side ---------- */
 async function claimCampaign(id) {
   const c = state.campaigns.find(x => x.id === id);
   if (!c) return;
   const exists = state.entries.find(e => e.campaignId === id && e.posterPhone === state.profile.phone);
   if (exists) return;
+  const approvedCount = state.entries.filter(e => e.campaignId === id && e.status === 'approved').length;
+  if (approvedCount >= c.targetPosts) { showToast('This campaign is already filled.'); return; }
   const entry = {
-    id: genId('en'), campaignId: id, campaignTitle: c.title, payPerPost: c.payPerPost,
+    id: genId('en'), campaignId: id, campaignTitle: c.title, tokenPerPost: c.tokenPerPost,
+    advertiserPhone: c.advertiserPhone,
     posterName: state.profile.name, posterPhone: state.profile.phone,
     claimedAt: Date.now(), status: 'claimed', screenshotUrl: null, claimedViews: null,
     submittedAt: null, reviewedAt: null, reviewNote: null
@@ -322,17 +458,43 @@ async function submitScreenshot(entryId, file, views) {
   entry.status = 'submitted';
   entry.submittedAt = Date.now();
   await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  showToast('Screenshot submitted! Waiting for review from the advertiser.');
+  showToast('Screenshot submitted! Waiting for review.');
   render();
 }
+
+/* ---------- data actions: advertiser side ---------- */
 async function reviewEntry(entryId, decision, note) {
   const entry = state.entries.find(e => e.id === entryId);
   if (!entry) return;
   entry.status = decision;
   entry.reviewedAt = Date.now();
   entry.reviewNote = note || null;
+  if (decision === 'approved') {
+    const campaign = state.campaigns.find(c => c.id === entry.campaignId);
+    const reward = Number(entry.tokenPerPost || 0);
+    if (campaign) {
+      campaign.spentTokens = Number(campaign.spentTokens || 0) + reward;
+    }
+    const w = getWallet(entry.posterPhone);
+    w.name = entry.posterName;
+    w.tokenBalance = Number(w.tokenBalance || 0) + reward;
+    w.history.unshift({ type: 'earned', amount: reward, note: entry.campaignTitle, ts: Date.now() });
+    await persistWallets();
+  }
   await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  showToast(decision === 'approved' ? 'Screenshot approved!' : 'Screenshot rejected.');
+  await saveKey(STORAGE_KEYS.campaigns, state.campaigns, true);
+  showToast(decision === 'approved' ? 'Approved — tokens credited to poster.' : 'Submission rejected.');
+  render();
+}
+async function fundCampaignWithTokens(advertiserPhone, nairaAmount) {
+  const w = getWallet(advertiserPhone);
+  const tokens = Math.floor(nairaAmount / TOKEN_TO_NAIRA);
+  if (tokens <= 0) { showToast('Enter a valid Naira amount.'); return; }
+  w.name = state.profile.name;
+  w.tokenBalance = Number(w.tokenBalance || 0) + tokens;
+  w.history.unshift({ type: 'funded', amount: tokens, note: `Converted ₦${nairaAmount.toLocaleString()}`, ts: Date.now() });
+  await persistWallets();
+  showToast(`Wallet funded with ${fmtTok(tokens)} tokens.`);
   render();
 }
 
@@ -350,6 +512,12 @@ function profileGateHtml(role) {
       </form>
     </section>
   `;
+}
+
+function walletPillHtml() {
+  if (!state.profile) return '';
+  const w = getWallet(state.profile.phone);
+  return `<div class="wallet-pill"><span class="tok-icon"></span>${fmtTok(w.tokenBalance)} Tokens</div>`;
 }
 
 function campaignCard(c) {
@@ -381,7 +549,7 @@ function campaignCard(c) {
   } else if (myEntry.status === 'submitted') {
     actionHtml = `<span class="status-badge pending">⏳ Under review since ${timeAgo(myEntry.submittedAt)}</span>`;
   } else if (myEntry.status === 'approved') {
-    actionHtml = `<span class="status-badge approved">✓ Approved • ₦${Number(myEntry.payPerPost).toLocaleString()}</span>`;
+    actionHtml = `<span class="status-badge approved">✓ Approved • ${fmtTok(myEntry.tokenPerPost)} Tokens</span>`;
   } else if (myEntry.status === 'rejected') {
     actionHtml = `<span class="status-badge rejected">Rejected${myEntry.reviewNote ? ': ' + esc(myEntry.reviewNote) : ''}</span>
       <button data-action="reclaim" data-id="${myEntry.id}" class="btn-secondary small" type="button">Try again</button>`;
@@ -395,22 +563,8 @@ function campaignCard(c) {
           <h3>${esc(c.title)}</h3>
           ${ring(percent, 44, 5, 'var(--forest)')}
         </div>
-        <p class="muted small">₦${Number(c.payPerPost).toLocaleString()} / post • ${approvedCount}/${c.targetPosts} filled</p>
+        <p class="muted small">${fmtTok(c.tokenPerPost)} Tokens / post • ${approvedCount}/${c.targetPosts} filled</p>
         <div class="campaign-actions">${actionHtml}</div>
-      </div>
-    </article>
-  `;
-}
-
-function advertiserCampaignCard(c) {
-  const approvedCount = state.entries.filter(e => e.campaignId === c.id && e.status === 'approved').length;
-  const percent = Math.min(100, (approvedCount / c.targetPosts) * 100);
-  return `
-    <article class="campaign-card">
-      <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
-      <div class="campaign-body">
-        <div class="campaign-top"><h3>${esc(c.title)}</h3>${ring(percent, 44, 5, 'var(--forest)')}</div>
-        <p class="muted small">${approvedCount}/${c.targetPosts} filled • ₦${Number(c.payPerPost).toLocaleString()}/post</p>
       </div>
     </article>
   `;
@@ -419,95 +573,263 @@ function advertiserCampaignCard(c) {
 function reviewCard(e) {
   return `
     <article class="review-card">
-      <img src="${e.screenshotUrl}" alt="hoton shaida" class="review-img" />
+      <img data-action="zoom" data-src="${e.screenshotUrl}" src="${e.screenshotUrl}" alt="Submitted proof screenshot" class="review-img" />
       <div class="review-body">
         <p><strong>${esc(e.posterName)}</strong> <span class="muted small">• ${esc(e.posterPhone)}</span></p>
         <p class="muted small">${esc(e.campaignTitle)} • ${e.claimedViews ? esc(String(e.claimedViews)) + ' views (self-reported) • ' : ''}submitted ${timeAgo(e.submittedAt)}</p>
+        <p class="muted tiny">Reward if approved: ${fmtTok(e.tokenPerPost)} Tokens</p>
         <textarea data-note-for="${e.id}" placeholder="Reason for rejection (if any)" class="note-input"></textarea>
         <div class="review-actions">
           <button data-action="approve" data-id="${e.id}" class="btn-primary small" type="button">Approve</button>
-          <button data-action="reject" data-id="${e.id}" class="btn-secondary small" type="button">Reject</button>
+          <button data-action="reject" data-id="${e.id}" class="btn-danger small" type="button">Reject</button>
         </div>
       </div>
     </article>
   `;
 }
 
-/* ---------- view renderers ---------- */
+function decidedReviewRow(e) {
+  const badgeClass = e.status === 'approved' ? 'approved' : 'rejected';
+  const label = e.status === 'approved' ? `✓ Approved • ${fmtTok(e.tokenPerPost)} Tokens` : `✕ Rejected${e.reviewNote ? ': ' + esc(e.reviewNote) : ''}`;
+  return `
+    <article class="review-card">
+      <img data-action="zoom" data-src="${e.screenshotUrl}" src="${e.screenshotUrl}" alt="Submitted proof screenshot" class="review-img" />
+      <div class="review-body">
+        <p><strong>${esc(e.posterName)}</strong> <span class="muted small">• ${esc(e.posterPhone)}</span></p>
+        <p class="muted small">${esc(e.campaignTitle)} • reviewed ${timeAgo(e.reviewedAt)}</p>
+        <span class="status-badge ${badgeClass}">${label}</span>
+      </div>
+    </article>
+  `;
+}
+
+/* ---- Advertiser tracking dashboard ---- */
+function campaignFunnel(campaignId) {
+  const rows = state.entries.filter(e => e.campaignId === campaignId);
+  const locked = rows.filter(e => e.status === 'claimed' && !lockInfo(e).unlocked).length;
+  const readyToSubmit = rows.filter(e => e.status === 'claimed' && lockInfo(e).unlocked).length;
+  const submitted = rows.filter(e => e.status === 'submitted').length;
+  const approved = rows.filter(e => e.status === 'approved').length;
+  const rejected = rows.filter(e => e.status === 'rejected').length;
+  return { rows, claimedTotal: locked + readyToSubmit, locked, readyToSubmit, submitted, approved, rejected };
+}
+
+function timelineRowHtml(e) {
+  let dotClass = 'claimed', metaText = 'Claimed the campaign', time = e.claimedAt;
+  if (e.status === 'submitted') { dotClass = 'submitted'; metaText = 'Submitted proof' + (e.claimedViews ? ` (${e.claimedViews} views reported)` : ''); time = e.submittedAt; }
+  else if (e.status === 'approved') { dotClass = 'approved'; metaText = `Approved • +${fmtTok(e.tokenPerPost)} Tokens`; time = e.reviewedAt; }
+  else if (e.status === 'rejected') { dotClass = 'rejected'; metaText = 'Rejected' + (e.reviewNote ? `: ${esc(e.reviewNote)}` : ''); time = e.reviewedAt; }
+  else if (e.status === 'claimed') {
+    const li = lockInfo(e);
+    metaText = li.unlocked ? 'Claimed — proof window open, not yet submitted' : `Claimed — ${li.remaining.toFixed(1)} hr left on 24hr wait`;
+  }
+  return `
+    <div class="timeline-row">
+      <span class="timeline-dot ${dotClass}"></span>
+      <span class="timeline-name">${esc(e.posterName)}</span>
+      <span class="timeline-meta">${metaText}</span>
+      <span class="timeline-time">${fmtClock(time)}</span>
+    </div>
+  `;
+}
+
+function dashboardCard(c) {
+  const f = campaignFunnel(c.id);
+  const percent = Math.min(100, (f.approved / c.targetPosts) * 100);
+  const isOpen = !!state.openDashIds[c.id];
+  const sortedRows = f.rows.slice().sort((a, b) => {
+    const ta = a.reviewedAt || a.submittedAt || a.claimedAt;
+    const tb = b.reviewedAt || b.submittedAt || b.claimedAt;
+    return tb - ta;
+  });
+  return `
+    <div class="dash-card">
+      <div class="dash-head" data-action="toggle-dash" data-id="${c.id}">
+        <img src="${c.imageUrl}" alt="${esc(c.title)}" />
+        <div class="dash-head-body">
+          <h3>${esc(c.title)}</h3>
+          <div class="dash-head-meta">
+            <span>${f.approved}/${c.targetPosts} filled</span>
+            <span>•</span>
+            <span>${fmtTok(c.tokenPerPost)} Tok/post</span>
+            <span>•</span>
+            <span>${fmtTok(c.spentTokens || 0)} spent</span>
+          </div>
+          <div class="dash-progress-track"><div class="dash-progress-fill" style="width:${percent}%"></div></div>
+        </div>
+        <span class="dash-chevron ${isOpen ? 'open' : ''}">⌄</span>
+      </div>
+      ${isOpen ? `
+        <div class="funnel-row">
+          <div class="funnel-chip"><strong>${f.locked}</strong><span>Locked</span></div>
+          <div class="funnel-chip"><strong>${f.readyToSubmit}</strong><span>Ready</span></div>
+          <div class="funnel-chip"><strong>${f.submitted}</strong><span>Pending</span></div>
+          <div class="funnel-chip"><strong>${f.approved}</strong><span>Approved</span></div>
+          <div class="funnel-chip"><strong>${f.rejected}</strong><span>Rejected</span></div>
+        </div>
+        <div class="timeline-wrap">
+          ${sortedRows.length ? sortedRows.map(timelineRowHtml).join('') : '<div class="timeline-empty">No one has claimed this campaign yet.</div>'}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/* ---------- view renderers: poster ---------- */
 function renderPoster() {
   if (!state.profile) return profileGateHtml('poster');
   const myApproved = state.entries.filter(e => e.status === 'approved' && e.posterPhone === state.profile.phone);
-  const totalEarned = myApproved.reduce((s, e) => s + Number(e.payPerPost || 0), 0);
+  const tokensEarned = myApproved.reduce((s, e) => s + Number(e.tokenPerPost || 0), 0);
   const pendingCount = state.entries.filter(e => e.status === 'submitted' && e.posterPhone === state.profile.phone).length;
+  const lockedCount = state.entries.filter(e => e.status === 'claimed' && e.posterPhone === state.profile.phone).length;
+
+  const myEntries = state.entries.filter(e => e.posterPhone === state.profile.phone)
+    .slice().sort((a, b) => (b.submittedAt || b.claimedAt) - (a.submittedAt || a.claimedAt));
+  const filters = [
+    { key: 'all', label: 'All ads' },
+    { key: 'claimed', label: 'My claims' },
+    { key: 'submitted', label: 'In review' },
+    { key: 'approved', label: 'Approved' },
+    { key: 'rejected', label: 'Rejected' }
+  ];
+  const visibleCampaigns = state.posterFilter === 'all'
+    ? state.campaigns
+    : state.campaigns.filter(c => {
+        const e = state.entries.find(en => en.campaignId === c.id && en.posterPhone === state.profile.phone);
+        return e && e.status === state.posterFilter;
+      });
+
   return `
     <section class="hero-card">
       <div class="hero-ring">
-        ${ring(Math.min(100, (myApproved.length / 10) * 100), 84, 9, 'var(--forest)')}
-        <div class="hero-ring-center"><span class="ring-num">₦${totalEarned.toLocaleString()}</span></div>
+        ${ring(Math.min(100, (myApproved.length / 10) * 100), 88, 9, 'var(--forest)')}
+        <div class="hero-ring-center">
+          <span class="ring-num">${fmtTok(tokensEarned)}</span>
+          <span class="ring-sub">Tokens</span>
+        </div>
       </div>
       <div class="hero-stats">
-        <div><strong>${myApproved.length}</strong><span class="muted">approved posts</span></div>
+        <div><strong>${myApproved.length}</strong><span class="muted">approved</span></div>
         <div><strong>${pendingCount}</strong><span class="muted">in review</span></div>
+        <div><strong>${lockedCount}</strong><span class="muted">locked</span></div>
       </div>
-      ${totalEarned > 0 ? `<button class="btn-secondary small" data-action="cashout" type="button">Request cashout</button>` : ''}
+    </section>
+    <section class="card" style="padding:14px 16px;">
+      <h3 style="margin-bottom:6px;">My Token wallet</h3>
+      <p class="muted small" style="margin-bottom:0;">Tokens are credited automatically when an advertiser approves your screenshot. Cash-out is not available yet — this is an in-app credit only.</p>
     </section>
     <section class="howto">
       <ol>
         <li><strong>Claim an ad</strong> from the list below</li>
         <li><strong>Download the image</strong>, post it to your Status</li>
         <li><strong>Wait 24 hours</strong> so people can see it</li>
-        <li><strong>Upload a screenshot</strong> so it can be reviewed and you get paid</li>
+        <li><strong>Upload a screenshot</strong> so it can be reviewed and Tokens credited</li>
       </ol>
     </section>
     <section>
-      <h2>Available ads</h2>
+      <div class="section-head"><h2>Available ads</h2></div>
+      <div class="filter-row" style="margin-bottom:10px;">
+        ${filters.map(f => `<button class="filter-chip ${state.posterFilter === f.key ? 'active' : ''}" data-action="poster-filter" data-key="${f.key}" type="button">${f.label}</button>`).join('')}
+      </div>
       <div class="campaign-grid">
-        ${state.campaigns.length ? state.campaigns.map(campaignCard).join('') : emptyState('No ads right now. Check back later.')}
+        ${visibleCampaigns.length ? visibleCampaigns.map(campaignCard).join('') : emptyState('No ads match this filter yet.')}
       </div>
     </section>
   `;
 }
 
+/* ---------- view renderers: advertiser ---------- */
 function renderAdvertiser() {
   if (!state.profile) return profileGateHtml('advertiser');
-  const mine = state.campaigns.filter(c => c.advertiser === state.profile.name);
+  const phone = state.profile.phone;
+  const mine = state.campaigns.filter(c => c.advertiserPhone === phone);
   const myIds = mine.map(c => c.id);
   const pendingReview = state.entries.filter(e => e.status === 'submitted' && myIds.includes(e.campaignId));
-  const totalSpend = state.entries.filter(e => e.status === 'approved' && myIds.includes(e.campaignId)).reduce((s, e) => s + Number(e.payPerPost || 0), 0);
-  return `
-    <section class="card">
-      <h2>Create a new ad</h2>
-      <form id="campaign-form" class="stacked-form">
-        <input name="title" placeholder="Business / ad name" required />
-        <div class="form-row">
-          <input name="targetPosts" type="number" min="1" placeholder="Number of people needed" required />
-          <input name="payPerPost" type="number" min="0" placeholder="₦ per post" required />
+  const decidedReviews = state.entries.filter(e => (e.status === 'approved' || e.status === 'rejected') && myIds.includes(e.campaignId))
+    .slice().sort((a, b) => b.reviewedAt - a.reviewedAt);
+  const totalSpend = mine.reduce((s, c) => s + Number(c.spentTokens || 0), 0);
+  const totalApproved = state.entries.filter(e => e.status === 'approved' && myIds.includes(e.campaignId)).length;
+  const w = getWallet(phone);
+
+  const subtabs = [
+    { key: 'dashboard', label: 'Campaigns', count: mine.length },
+    { key: 'review', label: 'Review queue', count: pendingReview.length },
+    { key: 'create', label: 'New ad', count: null }
+  ];
+
+  let body = '';
+  if (state.advertiserTab === 'create') {
+    body = `
+      <section class="card">
+        <h2>Create a new ad</h2>
+        <p class="muted small">Set how many Tokens each approved post earns. This comes out of your Token wallet (${fmtTok(w.tokenBalance)} available).</p>
+        <form id="campaign-form" class="stacked-form">
+          <input name="title" placeholder="Business / ad name" required />
+          <div class="form-row">
+            <input name="targetPosts" type="number" min="1" placeholder="Number of people needed" required />
+            <input name="tokenPerPost" type="number" min="1" placeholder="Tokens per approved post" required />
+          </div>
+          <input name="image" type="file" accept="image/*" required />
+          <button type="submit" class="btn-primary">Launch ad</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>Fund your Token wallet</h2>
+        <p class="muted small">Convert Naira into Tokens to pay posters. Rate: 1 Token = ₦${TOKEN_TO_NAIRA}.</p>
+        <form id="fund-form" class="stacked-form">
+          <input name="naira" type="number" min="${TOKEN_TO_NAIRA}" step="${TOKEN_TO_NAIRA}" placeholder="Naira amount" required />
+          <button type="submit" class="btn-secondary btn-block">Convert to Tokens</button>
+        </form>
+      </section>
+    `;
+  } else if (state.advertiserTab === 'review') {
+    const filters = [
+      { key: 'pending', label: 'Pending', count: pendingReview.length },
+      { key: 'decided', label: 'Decided', count: decidedReviews.length }
+    ];
+    const list = state.reviewFilter === 'pending' ? pendingReview : decidedReviews;
+    const builder = state.reviewFilter === 'pending' ? reviewCard : decidedReviewRow;
+    body = `
+      <section>
+        <div class="section-head"><h2>Review queue</h2></div>
+        <div class="filter-row" style="margin-bottom:10px;">
+          ${filters.map(f => `<button class="filter-chip ${state.reviewFilter === f.key ? 'active' : ''}" data-action="review-filter" data-key="${f.key}" type="button">${f.label} (${f.count})</button>`).join('')}
         </div>
-        <input name="image" type="file" accept="image/*" required />
-        <button type="submit" class="btn-primary">Launch ad</button>
-      </form>
-    </section>
-    <section class="stats-row">
-      <div class="stat-pill"><strong>${mine.length}</strong><span>ads</span></div>
-      <div class="stat-pill"><strong>${pendingReview.length}</strong><span>pending review</span></div>
-      <div class="stat-pill"><strong>₦${totalSpend.toLocaleString()}</strong><span>spent</span></div>
-    </section>
-    <section>
-      <h2>My ads</h2>
-      <div class="campaign-grid">
-        ${mine.length ? mine.map(advertiserCampaignCard).join('') : emptyState('Create your first ad above.')}
-      </div>
-    </section>
-    <section>
-      <h2>Review queue (${pendingReview.length})</h2>
-      ${pendingReview.length ? pendingReview.map(reviewCard).join('') : emptyState('No new screenshots to review yet.')}
-    </section>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${list.length ? list.map(builder).join('') : emptyState(state.reviewFilter === 'pending' ? 'No new screenshots to review yet.' : 'No decisions made yet.')}
+        </div>
+      </section>
+    `;
+  } else {
+    body = `
+      <section class="stats-row">
+        <div class="stat-pill"><strong>${mine.length}</strong><span>Campaigns</span></div>
+        <div class="stat-pill"><strong>${totalApproved}</strong><span>Approved</span></div>
+        <div class="stat-pill"><strong>${fmtTok(totalSpend)}</strong><span>Tok Spent</span></div>
+        <div class="stat-pill"><strong>${fmtTok(w.tokenBalance)}</strong><span>Tok Balance</span></div>
+      </section>
+      <section>
+        <div class="section-head"><h2>Campaign tracking</h2></div>
+        <p class="muted small" style="margin-top:-4px;">Tap a campaign to see exactly who claimed it, who's still in the 24hr wait, and who's been paid.</p>
+        <div class="campaign-grid dash-list">
+          ${mine.length ? mine.map(dashboardCard).join('') : emptyState('Create your first ad to start tracking progress here.')}
+        </div>
+      </section>
+    `;
+  }
+
+  return `
+    <div class="subtabs">
+      ${subtabs.map(t => `<button class="subtab ${state.advertiserTab === t.key ? 'active' : ''}" data-action="adv-tab" data-key="${t.key}" type="button">${t.label}${t.count !== null ? `<span class="count">${t.count}</span>` : ''}</button>`).join('')}
+    </div>
+    ${body}
   `;
 }
 
 function render() {
   document.getElementById('app').innerHTML = state.role === 'poster' ? renderPoster() : renderAdvertiser();
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.role === state.role));
+  document.getElementById('walletPillSlot').innerHTML = walletPillHtml();
+  document.querySelectorAll('.roletabs .tab').forEach(t => t.classList.toggle('active', t.dataset.role === state.role));
 }
 
 /* ---------- event delegation ---------- */
@@ -521,8 +843,22 @@ function onAppClick(e) {
   else if (action === 'reject') {
     const noteEl = document.querySelector(`[data-note-for="${btn.dataset.id}"]`);
     reviewEntry(btn.dataset.id, 'rejected', noteEl ? noteEl.value.trim() : '');
-  } else if (action === 'cashout') {
-    showToast('Your request has been received — we will contact you within 24 hours (demo only, no real money).');
+  } else if (action === 'poster-filter') {
+    state.posterFilter = btn.dataset.key;
+    render();
+  } else if (action === 'review-filter') {
+    state.reviewFilter = btn.dataset.key;
+    render();
+  } else if (action === 'adv-tab') {
+    state.advertiserTab = btn.dataset.key;
+    render();
+  } else if (action === 'toggle-dash') {
+    const id = btn.dataset.id;
+    state.openDashIds[id] = !state.openDashIds[id];
+    render();
+  } else if (action === 'zoom') {
+    document.getElementById('lightboxImg').src = btn.dataset.src;
+    document.getElementById('lightbox').classList.add('show');
   }
 }
 
@@ -532,29 +868,45 @@ async function onAppSubmit(e) {
     const fd = new FormData(e.target);
     state.profile = { name: fd.get('name').trim(), phone: fd.get('phone').trim() };
     await saveKey(STORAGE_KEYS.profile, state.profile, false);
+    getWallet(state.profile.phone).name = state.profile.name;
+    await persistWallets();
     render();
   } else if (e.target.id === 'campaign-form') {
     const fd = new FormData(e.target);
     const file = fd.get('image');
     if (!file || !file.size) { showToast('Select an ad image.'); return; }
+    const targetPosts = Number(fd.get('targetPosts'));
+    const tokenPerPost = Number(fd.get('tokenPerPost'));
+    const totalNeeded = targetPosts * tokenPerPost;
+    const w = getWallet(state.profile.phone);
+    if (totalNeeded > Number(w.tokenBalance || 0)) {
+      showToast(`You need ${fmtTok(totalNeeded)} Tokens to fully fund this campaign, but you only have ${fmtTok(w.tokenBalance)}.`);
+      return;
+    }
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading…'; }
     try {
       const imageUrl = await compressImage(file, 480, 0.65);
       const campaign = {
-        id: genId('cm'), advertiser: state.profile.name,
+        id: genId('cm'), advertiser: state.profile.name, advertiserPhone: state.profile.phone,
         title: fd.get('title').trim(), imageUrl,
-        targetPosts: Number(fd.get('targetPosts')), payPerPost: Number(fd.get('payPerPost')),
+        targetPosts, tokenPerPost, spentTokens: 0,
         createdAt: Date.now()
       };
       state.campaigns.push(campaign);
       await saveKey(STORAGE_KEYS.campaigns, state.campaigns, true);
       showToast('New ad launched!');
+      state.advertiserTab = 'dashboard';
       render();
     } catch (err) {
       showToast('Image upload failed, please try another image.');
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Launch ad'; }
     }
+  } else if (e.target.id === 'fund-form') {
+    const fd = new FormData(e.target);
+    const naira = Number(fd.get('naira'));
+    await fundCampaignWithTokens(state.profile.phone, naira);
+    e.target.reset();
   } else if (e.target.id && e.target.id.indexOf('screenshot-form-') === 0) {
     const entryId = e.target.dataset.entryId;
     const fd = new FormData(e.target);
@@ -564,14 +916,29 @@ async function onAppSubmit(e) {
 
 /* ---------- init ---------- */
 async function init() {
-  const [profile, campaigns, entries] = await Promise.all([
+  const [storedProfile, campaigns, entries, wallets] = await Promise.all([
     loadKey(STORAGE_KEYS.profile, false),
     loadKey(STORAGE_KEYS.campaigns, true),
-    loadKey(STORAGE_KEYS.entries, true)
+    loadKey(STORAGE_KEYS.entries, true),
+    loadKey(STORAGE_KEYS.wallets, true)
   ]);
-  state.profile = profile;
   state.campaigns = campaigns || [];
   state.entries = entries || [];
+  state.wallets = wallets || {};
+
+  const urlProfile = getUrlProfile();
+  if (urlProfile) {
+    // Host site supplied identity via ?name=...&phone=...&role=...
+    state.profile = { name: urlProfile.name, phone: urlProfile.phone };
+    if (urlProfile.role) state.role = urlProfile.role;
+    await saveKey(STORAGE_KEYS.profile, state.profile, false);
+    const w = getWallet(state.profile.phone);
+    w.name = state.profile.name;
+    await persistWallets();
+  } else {
+    state.profile = storedProfile;
+  }
+
   state.ready = true;
   render();
 }
@@ -580,6 +947,9 @@ document.getElementById('app').addEventListener('click', onAppClick);
 document.getElementById('app').addEventListener('submit', onAppSubmit);
 document.querySelectorAll('.roletabs .tab').forEach(btn => {
   btn.addEventListener('click', () => { state.role = btn.dataset.role; render(); });
+});
+document.getElementById('lightbox').addEventListener('click', () => {
+  document.getElementById('lightbox').classList.remove('show');
 });
 setInterval(() => { if (state.ready) render(); }, 60000);
 
