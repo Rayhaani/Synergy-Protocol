@@ -181,6 +181,46 @@ button:active{transform:scale(.97);}
 @media (min-width:560px){
   .shell{margin:24px auto;border-radius:28px;overflow:hidden;box-shadow:0 30px 70px -30px rgba(15,26,18,.5);}
 }
+.campaign-live-badge {
+  background: #D14B33;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 6px;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
+.campaign-asset-url {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  color: var(--ink-mist);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.views-track-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .75rem;
+  color: var(--ink-mist);
+  margin-top: 4px;
+}
+.views-track-bar-bg {
+  background: rgba(15,26,18,.1);
+  border-radius: 999px;
+  height: 5px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.views-track-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #D14B33;
+  transition: width .4s ease;
+}
 </style>
 </head>
 <body>
@@ -477,23 +517,40 @@ function campaignCard(c) {
   `;
   }
 
-function reviewCard(e) {
+function advertiserCampaignCard(c) {
+  const approvedCount = state.entries.filter(e => e.campaignId === c.id && e.status === 'approved').length;
+  const totalViews = state.entries
+    .filter(e => e.campaignId === c.id && e.status === 'approved' && e.claimedViews)
+    .reduce((s, e) => s + Number(e.claimedViews), 0);
+  const viewsTarget = c.targetPosts * 100; // estimated target views
+  const viewsPct = Math.min(100, viewsTarget > 0 ? (totalViews / viewsTarget) * 100 : 0);
+
+  // Shorten imageUrl to look like a domain asset path
+  let assetDisplay = c.imageUrl;
+  if (assetDisplay && assetDisplay.startsWith('data:')) {
+    assetDisplay = 'local-upload/ad-' + c.id + '.jpg';
+  }
+
   return `
-    <article class="review-card">
-      <img src="${e.screenshotUrl}" alt="hoton shaida" class="review-img" />
-      <div class="review-body">
-        <p><strong>${esc(e.posterName)}</strong> <span class="muted small">• ${esc(e.posterPhone)}</span></p>
-        <p class="muted small">${esc(e.campaignTitle)} • ${e.claimedViews ? esc(String(e.claimedViews)) + ' views (self-reported) • ' : ''}submitted ${timeAgo(e.submittedAt)}</p>
-        <textarea data-note-for="${e.id}" placeholder="Reason for rejection (if any)" class="note-input"></textarea>
-        <div class="review-actions">
-          <button data-action="approve" data-id="${e.id}" class="btn-primary small" type="button">Approve</button>
-          <button data-action="reject" data-id="${e.id}" class="btn-secondary small" type="button">Reject</button>
+    <article class="campaign-card">
+      <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
+      <div class="campaign-body">
+        <div class="campaign-top">
+          <h3>${esc(c.title)}</h3>
+          <span class="campaign-live-badge">LIVE</span>
+        </div>
+        <p class="campaign-asset-url">Asset: ${esc(assetDisplay)}</p>
+        <div class="views-track-label">
+          <span>Views Metric Tracking:</span>
+          <strong style="font-family:var(--font-mono);font-size:.75rem;">${totalViews.toLocaleString()} / ${viewsTarget.toLocaleString()} Views</strong>
+        </div>
+        <div class="views-track-bar-bg">
+          <div class="views-track-bar-fill" style="width:${viewsPct}%"></div>
         </div>
       </div>
     </article>
   `;
-}
-
+  }
 /* ---------- view renderers ---------- */
 function renderPoster() {
   if (!state.profile) return profileGateHtml('poster');
