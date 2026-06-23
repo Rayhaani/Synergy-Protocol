@@ -1,616 +1,414 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ha">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TallaStatus — Post ads, earn money</title>
-<style>
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
-
-:root{
-  --ink:#0F1A12; --bone:#F3EFE3; --bone-dim:#E7E1D0;
-  --forest:#1C6B45; --forest-dark:#154F33;
-  --amber:#E7A23D; --ember:#D14B33;
-  --ink-mist:#5C6B5E; --bone-mist:#B9C2B6;
-  --radius:18px; --radius-sm:12px;
-  --shadow:0 18px 40px -22px rgba(15,26,18,.45);
-  --font-display:'Clash Display',sans-serif;
-  --font-body:'General Sans',sans-serif;
-  --font-mono:'JetBrains Mono',monospace;
-}
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:var(--bone);
-  color:var(--ink);
-  font-family:var(--font-body);
-  -webkit-font-smoothing:antialiased;
-}
-.shell{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
-
-.topbar{
-  position:sticky;top:0;z-index:10;
-  background:var(--ink);color:var(--bone);
-  padding:16px 20px;display:flex;flex-direction:column;gap:14px;
-  box-shadow:var(--shadow);
-}
-.brand{font-family:var(--font-display);font-weight:700;font-size:1.3rem;display:flex;align-items:center;gap:8px;letter-spacing:.2px;}
-.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(231,162,61,.25);}
-.roletabs{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:4px;border-radius:999px;}
-.tab{
-  flex:1;border:none;background:transparent;color:var(--bone-mist);
-  font-family:var(--font-display);font-weight:600;font-size:.82rem;
-  padding:9px 10px;border-radius:999px;cursor:pointer;transition:all .2s ease;
-}
-.tab.active{background:var(--bone);color:var(--ink);}
-
-main#app{flex:1;padding:18px 16px 28px;display:flex;flex-direction:column;gap:18px;}
-
-h2{font-family:var(--font-display);font-weight:600;font-size:1.05rem;margin:0 0 10px;}
-h3{font-family:var(--font-display);font-weight:600;font-size:.98rem;margin:0;}
-p{margin:0 0 8px;line-height:1.5;}
-.muted{color:var(--ink-mist);}
-.small{font-size:.82rem;}
-
-.card{
-  background:#fff;border:1px solid rgba(15,26,18,.08);
-  border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
-  animation:rise .5s ease both;
-}
-.profile-gate p{margin-top:0;}
-
-.stacked-form{display:flex;flex-direction:column;gap:10px;}
-.form-row{display:flex;gap:10px;}
-.form-row input{flex:1;min-width:0;}
-input,textarea{
-  font-family:var(--font-body);font-size:.92rem;
-  border:1.5px solid rgba(15,26,18,.14);border-radius:var(--radius-sm);
-  padding:11px 13px;background:var(--bone);color:var(--ink);width:100%;
-}
-input:focus,textarea:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber);}
-.note-input{width:100%;min-height:46px;resize:vertical;margin:8px 0;}
-
-button{font-family:var(--font-display);cursor:pointer;border:none;transition:transform .15s ease,box-shadow .15s ease;}
-button:active{transform:scale(.97);}
-.btn-primary{
-  background:var(--forest);color:var(--bone);
-  font-weight:600;font-size:.88rem;padding:11px 18px;border-radius:999px;
-}
-.btn-primary:hover{background:var(--forest-dark);}
-.btn-secondary{
-  background:transparent;color:var(--ink);border:1.5px solid rgba(15,26,18,.2)!important;
-  font-weight:600;font-size:.85rem;padding:9px 16px;border-radius:999px;text-decoration:none;display:inline-block;
-}
-.btn-primary.small,.btn-secondary.small{padding:8px 14px;font-size:.8rem;}
-
-.hero-card{
-  background:var(--ink);color:var(--bone);border-radius:var(--radius);
-  padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px;
-  box-shadow:var(--shadow);animation:rise .5s ease both;
-}
-.hero-ring{position:relative;width:84px;height:84px;}
-.hero-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.ring-num{font-family:var(--font-mono);font-weight:700;font-size:.72rem;text-align:center;}
-.hero-stats{display:flex;gap:28px;text-align:center;}
-.hero-stats strong{display:block;font-family:var(--font-mono);font-size:1.2rem;}
-.hero-stats span{font-size:.74rem;color:var(--bone-mist);}
-
-.howto ol{list-style:none;counter-reset:step;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
-.howto li{counter-increment:step;display:flex;gap:12px;align-items:baseline;font-size:.88rem;}
-.howto li::before{
-  content:counter(step);font-family:var(--font-mono);font-weight:700;
-  background:var(--amber);color:var(--ink);width:22px;height:22px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.74rem;
-}
-
-.campaign-grid{display:flex;flex-direction:column;gap:12px;}
-.campaign-card{
-  display:flex;gap:12px;background:#fff;border:1px solid rgba(15,26,18,.08);
-  border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);
-  animation:rise .5s ease both;
-}
-.campaign-img{width:72px;height:72px;border-radius:var(--radius-sm);object-fit:cover;flex-shrink:0;}
-.campaign-body{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;}
-.campaign-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
-.campaign-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-.inline-form{display:flex;flex-wrap:wrap;gap:6px;align-items:center;width:100%;}
-.inline-form input[type=file]{flex:1;min-width:120px;font-size:.78rem;padding:7px;}
-.inline-form input[type=number]{width:110px;}
-
-.lock-row{display:flex;align-items:center;gap:8px;font-size:.78rem;}
-
-.status-badge{
-  font-family:var(--font-mono);font-size:.74rem;font-weight:600;
-  padding:6px 10px;border-radius:999px;display:inline-block;
-}
-.status-badge.pending{background:rgba(231,162,61,.16);color:#9a6a1c;}
-.status-badge.approved{background:rgba(28,107,69,.14);color:var(--forest-dark);}
-.status-badge.rejected{background:rgba(209,75,51,.14);color:var(--ember);}
-.status-badge.full{background:rgba(15,26,18,.08);color:var(--ink-mist);}
-
-.stats-row{display:flex;gap:10px;}
-.stat-pill{
-  flex:1;background:#fff;border:1px solid rgba(15,26,18,.08);border-radius:var(--radius-sm);
-  padding:12px;text-align:center;box-shadow:var(--shadow);
-}
-.stat-pill strong{display:block;font-family:var(--font-mono);font-size:1.1rem;}
-.stat-pill span{font-size:.7rem;color:var(--ink-mist);}
-
-.review-card{
-  display:flex;gap:12px;background:#fff;border:1px solid rgba(15,26,18,.08);
-  border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);
-}
-.review-img{width:90px;height:120px;object-fit:cover;border-radius:var(--radius-sm);flex-shrink:0;}
-.review-body{flex:1;display:flex;flex-direction:column;min-width:0;}
-.review-actions{display:flex;gap:8px;}
-
-.empty{
-  text-align:center;color:var(--ink-mist);font-size:.86rem;
-  border:1.5px dashed rgba(15,26,18,.16);border-radius:var(--radius);padding:24px;
-}
-
-.foot-note{
-  font-size:.72rem;color:var(--ink-mist);text-align:center;padding:16px 24px 28px;
-  font-family:var(--font-body);
-}
-
-.ring-fill{transition:stroke-dashoffset .6s ease;}
-
-.toast{
-  position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--ink);color:var(--bone);padding:11px 18px;border-radius:999px;
-  font-size:.84rem;opacity:0;pointer-events:none;transition:all .3s ease;box-shadow:var(--shadow);
-  max-width:90vw;text-align:center;z-index:50;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-@keyframes rise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.campaign-grid .campaign-card:nth-child(2){animation-delay:.05s;}
-.campaign-grid .campaign-card:nth-child(3){animation-delay:.1s;}
-.campaign-grid .campaign-card:nth-child(4){animation-delay:.15s;}
-
-@media (prefers-reduced-motion:reduce){
-  .card,.hero-card,.campaign-card{animation:none;}
-  .ring-fill{transition:none;}
-  button,.tab{transition:none;}
-}
-
-:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
-
-@media (min-width:560px){
-  .shell{margin:24px auto;border-radius:28px;overflow:hidden;box-shadow:0 30px 70px -30px rgba(15,26,18,.5);}
-}
-  @keyframes blink-live {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Ad-Network | Synergy Monetization Suite</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #060813;
+            color: #f3f4f6;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glass-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+        }
+        .gradient-border-rose {
+            border-left: 4px solid #f43f5e;
+        }
+        .gradient-border-gold {
+            border-left: 4px solid #eab308;
+        }
+        /* Custom scrollbar for clean app feels */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #060813; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
 </head>
-<body>
-<div class="shell">
-  <header class="topbar">
-    <div class="brand"><span class="brand-dot"></span>TallaStatus</div>
-    <nav class="roletabs">
-      <button class="tab active" data-role="poster" type="button">Status Posters</button>
-      <button class="tab" data-role="advertiser" type="button">Businesses</button>
-    </nav>
-  </header>
-  <main id="app">Loading app…</main>
-  <footer class="foot-note">
-    This is a working prototype — data is stored for testing purposes only. No real payments are made yet; screenshot review is currently manual, not AI-based.
-  </footer>
-</div>
-<div id="toast" class="toast"></div>
+<body class="min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
 
-<script>
-const STORAGE_KEYS = { profile: 'profile', campaigns: 'campaigns', entries: 'entries' };
+    <!-- EXECUTIVE PREMIUM HEADBAR -->
+    <header class="border-b border-gray-900 bg-[#060813]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="h-9 w-9 bg-gradient-to-tr from-rose-500 to-amber-500 rounded-xl flex items-center justify-center text-white font-bold shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+                <span class="brand-font text-base">S</span>
+            </div>
+            <span class="brand-font text-xl font-bold tracking-tight text-white">SOVEREIGN<span class="text-rose-500">.AD</span></span>
+        </div>
+        
+        <!-- Live Decentralized Status Metrics -->
+        <div class="flex items-center space-x-4">
+            <div class="bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-900 text-xs flex items-center space-x-2">
+                <span class="text-gray-500">Naira Wallet:</span>
+                <span id="nairaBalanceDisplay" class="font-bold text-rose-400">₦5,400.00</span>
+            </div>
+            <div class="bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-900 text-xs flex items-center space-x-2">
+                <span class="text-gray-500">Synergy Balance:</span>
+                <span id="tokenBalanceDisplay" class="font-bold text-amber-400">0.00 SYN</span>
+            </div>
+        </div>
+    </header>
 
-let state = { role: 'poster', profile: null, campaigns: [], entries: [], ready: false };
+    <!-- ARCHITECTURE SWITCHER (TABLESS CONTROL) -->
+    <div class="max-w-7xl mx-auto w-full px-6 pt-6 flex justify-start space-x-3">
+        <button onclick="togglePortal('advertiser')" id="btn-portal-advertiser" class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-rose-500 text-white shadow-lg shadow-rose-500/10">
+            Advertiser Hub (Post an Ad)
+        </button>
+        <button onclick="togglePortal('earner')" id="btn-portal-earner" class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-gray-400 hover:text-white">
+            Earner Terminal (Post Ad on your Status)
+        </button>
+    </div>
 
-/* ---------- storage helpers ---------- */
-async function loadKey(key, shared) {
-  try {
-    const res = await window.storage.get(key, shared);
-    return res ? JSON.parse(res.value) : null;
-  } catch (e) {
-    return null;
-  }
-}
-async function saveKey(key, value, shared) {
-  try {
-    await window.storage.set(key, JSON.stringify(value), shared);
-  } catch (e) {
-    console.error('Storage save failed', key, e);
-    showToast('Save failed, please try again.');
-  }
-}
+    <!-- MAIN ENGINE ROUTER CONTAINER -->
+    <main class="max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow">
+        
+        <!-- ==================== PORTAL A: ADVERTISER HUB ==================== -->
+        <div id="advertiserPortal" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+            <!-- Left Panel: Form Control -->
+            <section class="lg:col-span-5 space-y-6">
+                <div class="glass-card gradient-border-rose p-6 rounded-2xl space-y-6">
+                    <div>
+                        <span class="text-[10px] text-rose-400 uppercase tracking-widest font-bold block">Campaign Deployment Launchpad</span>
+                        <h2 class="text-lg font-bold text-white mt-1">Kaddamar da Tallan WhatsApp Status</h2>
+                        <p class="text-xs text-gray-400 mt-1">Saka hoton tallanka da kake son dubunnan matasa su ɗora a status ɗinsu na tsawon awa 24.</p>
+                    </div>
 
-/* ---------- utils ---------- */
-function genId(prefix) {
-  return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function timeAgo(ts) {
-  if (!ts) return '';
-  const mins = Math.floor((Date.now() - ts) / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return mins + ' min ago';
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return hrs + ' hr ago';
-  return Math.floor(hrs / 24) + ' day(s) ago';
-}
-function lockInfo(entry) {
-  const hoursPassed = (Date.now() - entry.claimedAt) / 3600000;
-  const remaining = Math.max(0, 24 - hoursPassed);
-  const percent = Math.min(100, (hoursPassed / 24) * 100);
-  return { remaining, percent, unlocked: hoursPassed >= 24 };
-}
-function ring(percent, size, strokeW, color) {
-  const r = (size - strokeW) / 2;
-  const c = 2 * Math.PI * r;
-  const p = Math.max(0, Math.min(100, percent));
-  const offset = c - (p / 100) * c;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="ring">
-    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="rgba(15,26,18,.12)" stroke-width="${strokeW}" fill="none"/>
-    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${strokeW}" fill="none"
-      stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}"
-      transform="rotate(-90 ${size/2} ${size/2})" class="ring-fill"/>
-  </svg>`;
-}
-function compressImage(file, maxW, quality) {
-  maxW = maxW || 480; quality = quality || 0.65;
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(1, maxW / img.width);
-        const w = Math.max(1, Math.round(img.width * scale));
-        const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
-}
-function emptyState(msg) {
-  return `<div class="empty">${esc(msg)}</div>`;
-}
+                    <form onsubmit="deployNewCampaign(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Sunan Kamfe (Campaign Identity)</label>
+                            <input type="text" id="campTitle" required placeholder="Misali: KanoMart Wholesale Promo" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition">
+                        </div>
 
-/* ---------- data actions ---------- */
-async function claimCampaign(id) {
-  const c = state.campaigns.find(x => x.id === id);
-  if (!c) return;
-  const exists = state.entries.find(e => e.campaignId === id && e.posterPhone === state.profile.phone);
-  if (exists) return;
-  const entry = {
-    id: genId('en'), campaignId: id, campaignTitle: c.title, payPerPost: c.payPerPost,
-    posterName: state.profile.name, posterPhone: state.profile.phone,
-    claimedAt: Date.now(), status: 'claimed', screenshotUrl: null, claimedViews: null,
-    submittedAt: null, reviewedAt: null, reviewNote: null
-  };
-  state.entries.push(entry);
-  await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  showToast('Ad claimed! Download the image and post it to your status.');
-  render();
-}
-async function removeEntry(id) {
-  state.entries = state.entries.filter(e => e.id !== id);
-  await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  render();
-}
-async function submitScreenshot(entryId, file, views) {
-  const entry = state.entries.find(e => e.id === entryId);
-  if (!entry) return;
-  if (!file || !file.size) { showToast('Select a screenshot first.'); return; }
-  const dataUrl = await compressImage(file, 480, 0.6);
-  entry.screenshotUrl = dataUrl;
-  entry.claimedViews = views ? Number(views) : null;
-  entry.status = 'submitted';
-  entry.submittedAt = Date.now();
-  await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  showToast('Screenshot submitted! Waiting for review from the advertiser.');
-  render();
-}
-async function reviewEntry(entryId, decision, note) {
-  const entry = state.entries.find(e => e.id === entryId);
-  if (!entry) return;
-  entry.status = decision;
-  entry.reviewedAt = Date.now();
-  entry.reviewNote = note || null;
-  await saveKey(STORAGE_KEYS.entries, state.entries, true);
-  showToast(decision === 'approved' ? 'Screenshot approved!' : 'Screenshot rejected.');
-  render();
-}
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Hanyar Shiga (Talla/Media Asset Link)</label>
+                            <input type="url" id="campMedia" required placeholder="https://kanomart.com/promo-banner.jpg" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition">
+                        </div>
 
-/* ---------- markup builders ---------- */
-function profileGateHtml(role) {
-  const label = role === 'poster' ? 'status posters' : 'businesses';
-  return `
-    <section class="card profile-gate">
-      <h2>Welcome to TallaStatus</h2>
-      <p class="muted">Enter your name to get started — this identifies you as one of our ${esc(label)}.</p>
-      <form id="profile-form" class="stacked-form">
-        <input name="name" placeholder="Full name" required />
-        <input name="phone" placeholder="Phone number" required />
-        <button type="submit" class="btn-primary">Get started</button>
-      </form>
-    </section>
-  `;
-}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-2">Kuɗi ga View 1 (Min: ₦5)</label>
+                                <input type="number" id="payPerView" min="5" required oninput="calculateAdBudget()" placeholder="5" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-2">Target Total Views</label>
+                                <input type="number" id="targetViews" min="50" required oninput="calculateAdBudget()" placeholder="500" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none">
+                            </div>
+                        </div>
 
-function advertiserCampaignCard(c) {
-  const approvedCount = state.entries.filter(
-    e => e.campaignId === c.id && e.status === 'approved'
-  ).length;
-  const totalViews = state.entries
-    .filter(e => e.campaignId === c.id && e.status === 'approved' && e.claimedViews)
-    .reduce((s, e) => s + Number(e.claimedViews), 0);
-  const viewsTarget = c.targetPosts * 100;
-  const viewsPct = Math.min(100, viewsTarget > 0 ? (totalViews / viewsTarget) * 100 : 0);
+                        <!-- Live Liquidity Statement -->
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-900 flex justify-between items-center text-xs">
+                            <span class="text-gray-400">Jimillar Kuɗin Talla (Naira):</span>
+                            <span id="totalAdCostDisplay" class="text-base font-bold text-rose-400">₦0.00</span>
+                        </div>
+                        <p id="adBudgetWarning" class="text-[11px] text-red-400 hidden">⚠️ Error: Minimum Campaign budget dole ya kai ko ya gota ₦1,000 domin tabbatar da inganci.</p>
 
-  return `
-    <article class="campaign-card">
-      <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
-      <div class="campaign-body">
+                        <button type="submit" class="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition duration-300 shadow-md">
+                            Tura Tallan Cikin Tsarin (Deploy Live)
+                        </button>
+                    </form>
+                </div>
+            </section>
 
-        <div class="campaign-top">
-          <h3>${esc(c.title)}</h3>
-          <span style="background:#D14B33;color:#fff;padding:3px 9px;border-radius:6px;font-size:.68rem;font-weight:700;letter-spacing:.4px;flex-shrink:0;animation:blink-live 1.2s ease-in-out infinite;">LIVE</span>
+            <!-- Right Panel: Overview Metrics for Mutum 300 Monitoring -->
+            <section class="lg:col-span-7 space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Tallace-tallacen da Ke Gudana (Live Network Feed)</h2>
+                    <p class="text-xs text-gray-400 mt-1">Mutum 300 dinka na iya amfani da wannan bangaren don tantance screenshots da kuma bin diddigin yaduwa.</p>
+                </div>
+                <div id="advertiserFeedContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Loaded dynamically -->
+                </div>
+            </section>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-          <span style="font-size:.72rem;color:var(--ink-mist);font-family:var(--font-body);letter-spacing:0;">Views Metric Tracking:</span>
-          <span style="font-size:.78rem;font-weight:700;color:var(--ink);font-family:var(--font-mono);letter-spacing:0;">${totalViews.toLocaleString()} / ${viewsTarget.toLocaleString()} Views</span>
+
+        <!-- ==================== PORTAL B: EARNER TERMINAL ==================== -->
+        <div id="earnerPortal" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full hidden">
+            <!-- Left Panel: Job Grid -->
+            <section class="lg:col-span-7 space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Ayyukan Status Da Ke Akwai</h2>
+                    <p class="text-xs text-gray-400 mt-1">Sauke hoton kowane kamfe, dora shi a WhatsApp dinka na tsawon awa 24, sannan ka turo screenshot.</p>
+                </div>
+                <div id="earnerFeedContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Right Panel: Safe Synergy Token Convertor (Trojan Horse Gateway) -->
+            <section class="lg:col-span-5 space-y-6">
+                <div class="glass-card gradient-border-gold p-6 rounded-2xl space-y-6">
+                    <div>
+                        <span class="text-[10px] text-amber-400 uppercase tracking-widest font-bold block">Vault Gateway // The Value Lock</span>
+                        <h2 class="text-lg font-bold text-white mt-1">Maida Kuɗinka Zuwa Synergy Token</h2>
+                        <p class="text-xs text-gray-400 mt-1">Cire kuɗi a matsayin Naira yana da harajin 10%. Amma idan ka maida shi Synergy Token, zaka sami **20% Kyauta (Bonus)** na musamman nan take!</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Adadin Nairar da Kake Son Canzawa</label>
+                            <input type="number" id="convertNairaAmount" placeholder="Misali: 2000" oninput="calculateTokenSwap()" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-900 space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Zaka Karɓi (Tare da 20% Bonus):</span>
+                                <span id="estimatedTokensDisplay" class="font-bold text-amber-400">0.00 SYN</span>
+                            </div>
+                            <div class="flex justify-between text-[11px] text-gray-500 border-t border-slate-900 pt-2">
+                                <span>Synergy Fixed Rate:</span>
+                                <span>1 SYN = ₦10.00</span>
+                            </div>
+                        </div>
+
+                        <button onclick="executeTrojanSwap()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition duration-300">
+                            Canza Zuwa Synergy Token (Claim 20% Bonus)
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <div style="width:100%;height:4px;background:rgba(15,26,18,.12);border-radius:999px;overflow:hidden;margin-top:5px;">
-          <div style="width:${viewsPct}%;height:100%;background:#D14B33;border-radius:999px;"></div>
+    </main>
+
+    <!-- MANUAL PROOF VERIFICATION INTERFACE (SCREENSHOT MODAL) -->
+    <div id="proofVerificationModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-card max-w-md w-full p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-900 pb-3">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Tura Screenshot na Views (Shaida)</h3>
+                <button onclick="closeProofModal()" class="text-gray-500 hover:text-white text-xl">&times;</button>
+            </div>
+            <p class="text-xs text-gray-400">Tura adadin mutanen da suka kalli status dinka bayan awa 24 don mutum 300 na rukunin gudanarwa su tabbatar da gaskiyar aikin.</p>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Adadin Views Da Ka Samu</label>
+                    <input type="number" id="proofViewCount" placeholder="Misali: 150" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Manna Link na Screenshot ɗinka</label>
+                    <input type="text" id="proofImgUrl" placeholder="https://imgur.com/your-screenshot.jpg" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+                <button onclick="submitProofToNetwork()" class="w-full bg-amber-500 text-black font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Kaddamar da Shaida (Submit)</button>
+            </div>
         </div>
+    </div>
 
-      </div>
-    </article>
-  `;
-  }
+    <!-- SOVEREIGN SYSTEM FOOTER -->
+    <footer class="border-t border-slate-950 bg-[#060813] px-8 py-5 text-center text-xs text-gray-600">
+        &copy; 2026 Sovereign Ad-Network Engine. Trojan Horse Tokenomics Active.
+    </footer>
 
-function campaignCard(c) {
-  const myEntry = state.entries.find(e => e.campaignId === c.id && e.posterPhone === state.profile.phone);
-  const approvedCount = state.entries.filter(e => e.campaignId === c.id && e.status === 'approved').length;
-  const percent = Math.min(100, (approvedCount / c.targetPosts) * 100);
-  const full = approvedCount >= c.targetPosts;
-  let actionHtml = '';
+    <!-- CORE REACTION CODE ENGINE -->
+    <script>
+        // Memory Architecture Mock Databases
+        let activeCampaigns = [
+            { id: 2001, title: "KanoMart Launch Promo Campaign", media: "https://kanomart.com/banner.jpg", rate: 6, target: 1000, filled: 340 },
+            { id: 2002, title: "Synergy Ecosystem Airdrop Awareness", media: "https://synergy.net/airdrop.jpg", rate: 8, target: 500, filled: 120 }
+        ];
 
-  if (!myEntry) {
-    actionHtml = full
-      ? `<span class="status-badge full">Filled</span>`
-      : `<button data-action="claim" data-id="${c.id}" class="btn-primary small" type="button">Claim this ad</button>`;
-  } else if (myEntry.status === 'claimed') {
-    const li = lockInfo(myEntry);
-    actionHtml = `
-      <a href="${c.imageUrl}" download="ad-${c.id}.jpg" class="btn-secondary small">⬇ Download image</a>
-      ${li.unlocked ? `
-        <form id="screenshot-form-${myEntry.id}" data-entry-id="${myEntry.id}" class="inline-form">
-          <input type="file" name="screenshot" accept="image/*" required />
-          <input type="number" name="views" placeholder="Views (optional)" min="0" />
-          <button type="submit" class="btn-primary small">Submit proof</button>
-        </form>` : `
-        <div class="lock-row">
-          ${ring(li.percent, 48, 5, 'var(--amber)')}
-          <span class="muted">${li.remaining.toFixed(1)} hr left before you can upload proof</span>
-        </div>`}
-    `;
-  } else if (myEntry.status === 'submitted') {
-    actionHtml = `<span class="status-badge pending">⏳ Under review since ${timeAgo(myEntry.submittedAt)}</span>`;
-  } else if (myEntry.status === 'approved') {
-    actionHtml = `<span class="status-badge approved">✓ Approved • ₦${Number(myEntry.payPerPost).toLocaleString()}</span>`;
-  } else if (myEntry.status === 'rejected') {
-    actionHtml = `<span class="status-badge rejected">Rejected${myEntry.reviewNote ? ': ' + esc(myEntry.reviewNote) : ''}</span>
-      <button data-action="reclaim" data-id="${myEntry.id}" class="btn-secondary small" type="button">Try again</button>`;
-  }
+        let userNairaWallet = 5400.00;
+        let userSynergyWallet = 0.00;
+        let activeSelectedJobId = null;
 
-  return `
-    <article class="campaign-card">
-      <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
-      <div class="campaign-body">
-        <div class="campaign-top">
-          <h3>${esc(c.title)}</h3>
-          ${ring(percent, 44, 5, 'var(--forest)')}
-        </div>
-        <p class="muted small">Views Metric Tracking: ${approvedCount} / ${c.targetPosts}</p>
-        <div class="views-track" style="background:rgba(15,26,18,.1);border-radius:999px;height:6px;overflow:hidden;">
-          <div style="width:${percent}%;height:100%;background:var(--forest);border-radius:999px;"></div>
-        </div>
-        <div class="campaign-actions">${actionHtml}</div>
-      </div>
-    </article>
-  `;
-  }
+        // Portal Switcher Logic
+        function togglePortal(target) {
+            const advBtn = document.getElementById('btn-portal-advertiser');
+            const earnBtn = document.getElementById('btn-portal-earner');
+            const advPortal = document.getElementById('advertiserPortal');
+            const earnPortal = document.getElementById('earnerPortal');
 
-function reviewCard(e) {
-  return `
-    <article class="review-card">
-      <img src="${e.screenshotUrl}" alt="hoton shaida" class="review-img" />
-      <div class="review-body">
-        <p><strong>${esc(e.posterName)}</strong> <span class="muted small">• ${esc(e.posterPhone)}</span></p>
-        <p class="muted small">${esc(e.campaignTitle)} • ${e.claimedViews ? esc(String(e.claimedViews)) + ' views (self-reported) • ' : ''}submitted ${timeAgo(e.submittedAt)}</p>
-        <textarea data-note-for="${e.id}" placeholder="Reason for rejection (if any)" class="note-input"></textarea>
-        <div class="review-actions">
-          <button data-action="approve" data-id="${e.id}" class="btn-primary small" type="button">Approve</button>
-          <button data-action="reject" data-id="${e.id}" class="btn-secondary small" type="button">Reject</button>
-        </div>
-      </div>
-    </article>
-  `;
-}
+            if (target === 'advertiser') {
+                advPortal.classList.remove('hidden');
+                earnPortal.classList.add('hidden');
+                advBtn.className = "px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-rose-500 text-white shadow-lg shadow-rose-500/10";
+                earnBtn.className = "px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-gray-400 hover:text-white";
+            } else {
+                earnPortal.classList.remove('hidden');
+                advPortal.classList.add('hidden');
+                earnBtn.className = "px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-amber-500 text-black shadow-lg shadow-amber-500/10";
+                advBtn.className = "px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-gray-400 hover:text-white";
+                renderEarnerFeed();
+            }
+        }
 
-/* ---------- view renderers ---------- */
-function renderPoster() {
-  if (!state.profile) return profileGateHtml('poster');
-  const myApproved = state.entries.filter(e => e.status === 'approved' && e.posterPhone === state.profile.phone);
-  const totalEarned = myApproved.reduce((s, e) => s + Number(e.payPerPost || 0), 0);
-  const pendingCount = state.entries.filter(e => e.status === 'submitted' && e.posterPhone === state.profile.phone).length;
-  return `
-    <section class="hero-card">
-      <div class="hero-ring">
-        ${ring(Math.min(100, (myApproved.length / 10) * 100), 84, 9, 'var(--forest)')}
-        <div class="hero-ring-center"><span class="ring-num">₦${totalEarned.toLocaleString()}</span></div>
-      </div>
-      <div class="hero-stats">
-        <div><strong>${myApproved.length}</strong><span class="muted">approved posts</span></div>
-        <div><strong>${pendingCount}</strong><span class="muted">in review</span></div>
-      </div>
-      ${totalEarned > 0 ? `<button class="btn-secondary small" data-action="cashout" type="button">Request cashout</button>` : ''}
-    </section>
-    <section class="howto">
-      <ol>
-        <li><strong>Claim an ad</strong> from the list below</li>
-        <li><strong>Download the image</strong>, post it to your Status</li>
-        <li><strong>Wait 24 hours</strong> so people can see it</li>
-        <li><strong>Upload a screenshot</strong> so it can be reviewed and you get paid</li>
-      </ol>
-    </section>
-    <section>
-      <h2>Available ads</h2>
-      <div class="campaign-grid">
-        ${state.campaigns.length ? state.campaigns.map(campaignCard).join('') : emptyState('No ads right now. Check back later.')}
-      </div>
-    </section>
-  `;
-}
+        // Live Calculator For Advertisers
+        function calculateAdBudget() {
+            const pay = parseFloat(document.getElementById('payPerView').value) || 0;
+            const views = parseInt(document.getElementById('targetViews').value) || 0;
+            const total = pay * views;
 
-function renderAdvertiser() {
-  if (!state.profile) return profileGateHtml('advertiser');
-  const mine = state.campaigns.filter(c => c.advertiser === state.profile.name);
-  const myIds = mine.map(c => c.id);
-  const pendingReview = state.entries.filter(e => e.status === 'submitted' && myIds.includes(e.campaignId));
-  const totalSpend = state.entries.filter(e => e.status === 'approved' && myIds.includes(e.campaignId)).reduce((s, e) => s + Number(e.payPerPost || 0), 0);
-  return `
-    <section class="card">
-      <h2>Create a new ad</h2>
-      <form id="campaign-form" class="stacked-form">
-        <input name="title" placeholder="Business / ad name" required />
-        <div class="form-row">
-          <input name="targetPosts" type="number" min="1" placeholder="Number of people needed" required />
-          <input name="payPerPost" type="number" min="0" placeholder="₦ per post" required />
-        </div>
-        <input name="image" type="file" accept="image/*" required />
-        <button type="submit" class="btn-primary">Launch ad</button>
-      </form>
-    </section>
-    <section class="stats-row">
-      <div class="stat-pill"><strong>${mine.length}</strong><span>ads</span></div>
-      <div class="stat-pill"><strong>${pendingReview.length}</strong><span>pending review</span></div>
-      <div class="stat-pill"><strong>₦${totalSpend.toLocaleString()}</strong><span>spent</span></div>
-    </section>
-    <section>
-      <h2>My ads</h2>
-      <div class="campaign-grid">
-        ${mine.length ? mine.map(advertiserCampaignCard).join('') : emptyState('Create your first ad above.')}
-      </div>
-    </section>
-    <section>
-      <h2>Review queue (${pendingReview.length})</h2>
-      ${pendingReview.length ? pendingReview.map(reviewCard).join('') : emptyState('No new screenshots to review yet.')}
-    </section>
-  `;
-}
+            document.getElementById('totalAdCostDisplay').innerText = `₦${total.toFixed(2)}`;
+            if (total < 1000 && total > 0) {
+                document.getElementById('adBudgetWarning').classList.remove('hidden');
+            } else {
+                document.getElementById('adBudgetWarning').classList.add('hidden');
+            }
+        }
 
-function render() {
-  document.getElementById('app').innerHTML = state.role === 'poster' ? renderPoster() : renderAdvertiser();
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.role === state.role));
-}
+        // Deploy New Ad Core
+        function deployNewCampaign(e) {
+            e.preventDefault();
+            const pay = parseFloat(document.getElementById('payPerView').value);
+            const views = parseInt(document.getElementById('targetViews').value);
+            const totalCost = pay * views;
 
-/* ---------- event delegation ---------- */
-function onAppClick(e) {
-  const btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  const action = btn.dataset.action;
-  if (action === 'claim') claimCampaign(btn.dataset.id);
-  else if (action === 'reclaim') removeEntry(btn.dataset.id);
-  else if (action === 'approve') reviewEntry(btn.dataset.id, 'approved');
-  else if (action === 'reject') {
-    const noteEl = document.querySelector(`[data-note-for="${btn.dataset.id}"]`);
-    reviewEntry(btn.dataset.id, 'rejected', noteEl ? noteEl.value.trim() : '');
-  } else if (action === 'cashout') {
-    showToast('Your request has been received — we will contact you within 24 hours (demo only, no real money).');
-  }
-}
+            if (totalCost < 1000) return;
+            if (userNairaWallet < totalCost) {
+                alert("⚠️ Kudinka bai isa cikin asusunka na Naira don kaddamar da wannan tallan ba!");
+                return;
+            }
 
-async function onAppSubmit(e) {
-  e.preventDefault();
-  if (e.target.id === 'profile-form') {
-    const fd = new FormData(e.target);
-    state.profile = { name: fd.get('name').trim(), phone: fd.get('phone').trim() };
-    await saveKey(STORAGE_KEYS.profile, state.profile, false);
-    render();
-  } else if (e.target.id === 'campaign-form') {
-    const fd = new FormData(e.target);
-    const file = fd.get('image');
-    if (!file || !file.size) { showToast('Select an ad image.'); return; }
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading…'; }
-    try {
-      const imageUrl = await compressImage(file, 480, 0.65);
-      const campaign = {
-        id: genId('cm'), advertiser: state.profile.name,
-        title: fd.get('title').trim(), imageUrl,
-        targetPosts: Number(fd.get('targetPosts')), payPerPost: Number(fd.get('payPerPost')),
-        createdAt: Date.now()
-      };
-      state.campaigns.push(campaign);
-      await saveKey(STORAGE_KEYS.campaigns, state.campaigns, true);
-      showToast('New ad launched!');
-      render();
-    } catch (err) {
-      showToast('Image upload failed, please try another image.');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Launch ad'; }
-    }
-  } else if (e.target.id && e.target.id.indexOf('screenshot-form-') === 0) {
-    const entryId = e.target.dataset.entryId;
-    const fd = new FormData(e.target);
-    await submitScreenshot(entryId, fd.get('screenshot'), fd.get('views'));
-  }
-}
+            userNairaWallet -= totalCost;
+            
+            const newCampaign = {
+                id: Date.now(),
+                title: document.getElementById('campTitle').value,
+                media: document.getElementById('campMedia').value,
+                rate: pay,
+                target: views,
+                filled: 0
+            };
 
-/* ---------- init ---------- */
-async function init() {
-  const [profile, campaigns, entries] = await Promise.all([
-    loadKey(STORAGE_KEYS.profile, false),
-    loadKey(STORAGE_KEYS.campaigns, true),
-    loadKey(STORAGE_KEYS.entries, true)
-  ]);
-  state.profile = profile;
-  state.campaigns = campaigns || [];
-  state.entries = entries || [];
-  state.ready = true;
-  render();
-}
+            activeCampaigns.unshift(newCampaign);
+            alert("🚀 An kaddamar da tallan ku cikin nasara! Mutum 60,000 za su fara gani a WhatsApp yanzu.");
+            document.getElementById('campTitle').value = "";
+            document.getElementById('campMedia').value = "";
+            document.getElementById('payPerView').value = "";
+            document.getElementById('targetViews').value = "";
+            document.getElementById('totalAdCostDisplay').innerText = "₦0.00";
+            updateGlobalUI();
+            renderAdvertiserFeed();
+        }
 
-document.getElementById('app').addEventListener('click', onAppClick);
-document.getElementById('app').addEventListener('submit', onAppSubmit);
-document.querySelectorAll('.roletabs .tab').forEach(btn => {
-  btn.addEventListener('click', () => { state.role = btn.dataset.role; render(); });
-});
-setInterval(() => { if (state.ready) render(); }, 60000);
+        // Rendering Core Engine: Advertiser Tracking view
+        function renderAdvertiserFeed() {
+            const container = document.getElementById('advertiserFeedContainer');
+            container.innerHTML = "";
 
-init();
-</script>
+            activeCampaigns.forEach(ad => {
+                container.innerHTML += `
+                    <div class="glass-card p-5 rounded-xl border border-slate-900 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-xs font-bold text-white line-clamp-1">${ad.title}</h3>
+                            <span class="text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded font-bold">LIVE</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 truncate">Asset: ${ad.media}</p>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] text-gray-500">
+                                <span>Views Metric Tracking:</span>
+                                <span class="font-bold text-gray-300">${ad.filled} / ${ad.target} Views</span>
+                            </div>
+                            <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-rose-500 h-full" style="width: ${(ad.filled / ad.target) * 100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Rendering Core Engine: Earner Side
+        function renderEarnerFeed() {
+            const container = document.getElementById('earnerFeedContainer');
+            container.innerHTML = "";
+
+            activeCampaigns.forEach(ad => {
+                container.innerHTML += `
+                    <div class="glass-card p-5 rounded-xl border border-slate-900 flex flex-col justify-between space-y-4">
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] text-amber-400 font-bold tracking-wider uppercase">
+                                <span>WhatsApp Monetization</span>
+                                <span>₦${ad.rate.toFixed(2)} Per View</span>
+                            </div>
+                            <h3 class="text-xs font-bold text-white">${ad.title}</h3>
+                        </div>
+                        <div class="flex space-x-2 pt-2">
+                            <a href="${ad.media}" target="_blank" class="w-1/2 bg-slate-950 border border-slate-900 text-center hover:bg-slate-900 text-gray-300 py-2 rounded-xl text-[11px] font-bold">Sauke Asset (Download)</a>
+                            <button onclick="openProofSubmissionModal(${ad.id})" class="w-1/2 bg-amber-500 text-black py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider">Tura Shaida</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Modal Handlers
+        window.openProofSubmissionModal = (id) => {
+            activeSelectedJobId = id;
+            document.getElementById('proofVerificationModal').classList.remove('hidden');
+        };
+
+        window.closeProofModal = () => {
+            document.getElementById('proofVerificationModal').classList.add('hidden');
+            document.getElementById('proofViewCount').value = "";
+            document.getElementById('proofImgUrl').value = "";
+        };
+
+        window.submitProofToNetwork = () => {
+            const views = parseInt(document.getElementById('proofViewCount').value) || 0;
+            const img = document.getElementById('proofImgUrl').value;
+
+            if (views <= 0 || !img) {
+                alert("Don Allah cika dukkan bayanan sirri na shaida dakyau!");
+                return;
+            }
+
+            const ad = activeCampaigns.find(a => a.id === activeSelectedJobId);
+            if (ad) {
+                const totalPayout = views * ad.rate;
+                ad.filled += views;
+                userNairaWallet += totalPayout;
+                
+                alert(`🎯 An yi nasara! Mutum 300 za su duba screenshot din. An biya ka lada na wucin gadi ₦${totalPayout.toFixed(2)} kai tsaye.`);
+                closeProofModal();
+                updateGlobalUI();
+                renderEarnerFeed();
+            }
+        };
+
+        // Trojan Swap Calculation Logic (The Core Synergy Multiplier)
+        window.calculateTokenSwap = () => {
+            const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+            // 1 SYN = 10 Naira. Plus 20% Bonus!
+            const tokens = (amount / 10) * 1.20;
+            document.getElementById('estimatedTokensDisplay').innerText = `${tokens.toFixed(2)} SYN`;
+        };
+
+        window.executeTrojanSwap = () => {
+            const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+            if (amount <= 0 || amount > userNairaWallet) {
+                alert("Kudin da kake son canzawa ya wuce abinda ke aljihunka!");
+                return;
+            }
+
+            const tokensEarned = (amount / 10) * 1.20;
+            userNairaWallet -= amount;
+            userSynergyWallet += tokensEarned;
+
+            alert(`💎 Madallah! An canza ₦${amount.toFixed(2)} zuwa ${tokensEarned.toFixed(2)} SYN (Hadda 20% Bonus dinka). Yanzu kai babban Holder ne!`);
+            document.getElementById('convertNairaAmount').value = "";
+            document.getElementById('estimatedTokensDisplay').innerText = "0.00 SYN";
+            updateGlobalUI();
+        };
+
+        function updateGlobalUI() {
+            document.getElementById('nairaBalanceDisplay').innerText = `₦${userNairaWallet.toFixed(2)}`;
+            document.getElementById('tokenBalanceDisplay').innerText = `${userSynergyWallet.toFixed(2)} SYN`;
+        }
+
+        window.onload = () => {
+            updateGlobalUI();
+            renderAdvertiserFeed();
+        };
+    </script>
 </body>
 </html>
