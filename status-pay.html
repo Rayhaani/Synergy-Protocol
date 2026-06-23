@@ -356,73 +356,46 @@ function advertiserCampaignCard(c) {
   const approvedCount = state.entries.filter(
     e => e.campaignId === c.id && e.status === 'approved'
   ).length;
-
-  const percent = Math.min(
-    100,
-    (approvedCount / c.targetPosts) * 100
-  );
+  const totalViews = state.entries
+    .filter(e => e.campaignId === c.id && e.status === 'approved' && e.claimedViews)
+    .reduce((s, e) => s + Number(e.claimedViews), 0);
+  const viewsTarget = c.targetPosts * 100;
+  const viewsPct = Math.min(100, viewsTarget > 0 ? (totalViews / viewsTarget) * 100 : 0);
 
   return `
     <article class="campaign-card">
       <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
-
       <div class="campaign-body">
 
         <div class="campaign-top">
           <h3>${esc(c.title)}</h3>
-
           <span style="
-            background:#D14B33;
-            color:white;
-            padding:4px 10px;
-            border-radius:999px;
-            font-size:.72rem;
-            font-weight:600;
-          ">
-            LIVE
-          </span>
+            background:#D14B33;color:white;padding:4px 10px;
+            border-radius:999px;font-size:.72rem;font-weight:600;flex-shrink:0;
+          ">LIVE</span>
         </div>
 
-        <p class="muted small">
-          Asset: campaign-image.jpg
-        </p>
-
-        <div style="margin-top:6px;">
-          <p class="muted small" style="margin-bottom:6px;">
-            Views Metric Tracking:
-          </p>
-
+        <div style="
+          width:100%;height:6px;background:rgba(15,26,18,.12);
+          border-radius:999px;overflow:hidden;margin-top:2px;
+        ">
           <div style="
-            width:100%;
-            height:8px;
-            background:rgba(15,26,18,.12);
-            border-radius:999px;
-            overflow:hidden;
-          ">
-            <div style="
-              width:${percent}%;
-              height:100%;
-              background:linear-gradient(
-                90deg,
-                var(--amber),
-                var(--forest)
-              );
-              border-radius:999px;
-            "></div>
-          </div>
+            width:${viewsPct}%;height:100%;
+            background:#D14B33;border-radius:999px;
+          "></div>
+        </div>
 
-          <p class="small" style="
-            margin-top:6px;
-            font-weight:600;
-          ">
-            ${approvedCount} Approved Posts
-          </p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+          <span class="muted small">Views Metric Tracking:</span>
+          <span style="font-family:var(--font-mono);font-size:.75rem;font-weight:600;">
+            ${totalViews.toLocaleString()} / ${viewsTarget.toLocaleString()} Views
+          </span>
         </div>
 
       </div>
     </article>
   `;
-    }
+  }
 
 function campaignCard(c) {
   const myEntry = state.entries.find(e => e.campaignId === c.id && e.posterPhone === state.profile.phone);
