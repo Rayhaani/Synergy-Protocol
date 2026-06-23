@@ -402,19 +402,58 @@ function campaignCard(c) {
   `;
 }
 
-function advertiserCampaignCard(c) {
+function campaignCard(c) {
+  const myEntry = state.entries.find(e => e.campaignId === c.id && e.posterPhone === state.profile.phone);
   const approvedCount = state.entries.filter(e => e.campaignId === c.id && e.status === 'approved').length;
   const percent = Math.min(100, (approvedCount / c.targetPosts) * 100);
+  const full = approvedCount >= c.targetPosts;
+  let actionHtml = '';
+
+  if (!myEntry) {
+    actionHtml = full
+      ? `<span class="status-badge full">Filled</span>`
+      : `<button data-action="claim" data-id="${c.id}" class="btn-primary small" type="button">Claim this ad</button>`;
+  } else if (myEntry.status === 'claimed') {
+    const li = lockInfo(myEntry);
+    actionHtml = `
+      <a href="${c.imageUrl}" download="ad-${c.id}.jpg" class="btn-secondary small">⬇ Download image</a>
+      ${li.unlocked ? `
+        <form id="screenshot-form-${myEntry.id}" data-entry-id="${myEntry.id}" class="inline-form">
+          <input type="file" name="screenshot" accept="image/*" required />
+          <input type="number" name="views" placeholder="Views (optional)" min="0" />
+          <button type="submit" class="btn-primary small">Submit proof</button>
+        </form>` : `
+        <div class="lock-row">
+          ${ring(li.percent, 48, 5, 'var(--amber)')}
+          <span class="muted">${li.remaining.toFixed(1)} hr left before you can upload proof</span>
+        </div>`}
+    `;
+  } else if (myEntry.status === 'submitted') {
+    actionHtml = `<span class="status-badge pending">⏳ Under review since ${timeAgo(myEntry.submittedAt)}</span>`;
+  } else if (myEntry.status === 'approved') {
+    actionHtml = `<span class="status-badge approved">✓ Approved • ₦${Number(myEntry.payPerPost).toLocaleString()}</span>`;
+  } else if (myEntry.status === 'rejected') {
+    actionHtml = `<span class="status-badge rejected">Rejected${myEntry.reviewNote ? ': ' + esc(myEntry.reviewNote) : ''}</span>
+      <button data-action="reclaim" data-id="${myEntry.id}" class="btn-secondary small" type="button">Try again</button>`;
+  }
+
   return `
     <article class="campaign-card">
       <img src="${c.imageUrl}" alt="${esc(c.title)}" class="campaign-img" />
       <div class="campaign-body">
-        <div class="campaign-top"><h3>${esc(c.title)}</h3>${ring(percent, 44, 5, 'var(--forest)')}</div>
-        <p class="muted small">${approvedCount}/${c.targetPosts} filled • ₦${Number(c.payPerPost).toLocaleString()}/post</p>
+        <div class="campaign-top">
+          <h3>${esc(c.title)}</h3>
+          ${ring(percent, 44, 5, 'var(--forest)')}
+        </div>
+        <p class="muted small">Views Metric Tracking: ${approvedCount} / ${c.targetPosts}</p>
+        <div class="views-track" style="background:rgba(15,26,18,.1);border-radius:999px;height:6px;overflow:hidden;">
+          <div style="width:${percent}%;height:100%;background:var(--forest);border-radius:999px;"></div>
+        </div>
+        <div class="campaign-actions">${actionHtml}</div>
       </div>
     </article>
   `;
-}
+  }
 
 function reviewCard(e) {
   return `
