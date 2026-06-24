@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Million Customers — Global Micro-Task & Ad Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family:'Plus Jakarta Sans',sans-serif; color:#f3f4f6; background:#020617;
+            background-image: radial-gradient(circle at 50% 50%,rgba(112,0,255,0.15),transparent),
+            url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); min-height:100vh; }
+        h1,h2,h3,.brand-font { font-family:'Space Grotesk',sans-serif; }
+        .glass-card { background:linear-gradient(135deg,rgba(15,23,42,0.65),rgba(30,41,59,0.45));
+            border:1px solid rgba(255,255,255,0.05); backdrop-filter:blur(14px); }
+        .gradient-border-rose { border-left:4px solid #f43f5e; }
+        .gradient-border-gold { border-left:4px solid #eab308; }
+        .gradient-border-blue { border-left:4px solid #3b82f6; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:#020617}
+        ::-webkit-scrollbar-thumb{background:#1e293b;border-radius:10px}
+        .ad-thumb{width:72px;height:72px;min-width:72px;border-radius:10px;object-fit:cover;display:block;background:#1e293b;}
+        .ad-thumb-fallback{width:72px;height:72px;min-width:72px;border-radius:10px;
+            background:linear-gradient(135deg,#1e293b,#0f172a);display:none;align-items:center;justify-content:center;}
+        .field{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+            border-radius:12px;padding:11px 15px;font-size:13px;color:#f1f5f9;outline:none;
+            transition:border-color .2s;font-family:'Plus Jakarta Sans',sans-serif;}
+        .field:focus{border-color:#f43f5e;}
+        .field::placeholder{color:rgba(255,255,255,0.22);}
+        .field-blue:focus{border-color:#3b82f6;}
+        .upload-zone{background:rgba(255,255,255,0.02);border:1.5px dashed rgba(255,255,255,0.10);
+            border-radius:12px;padding:12px 16px;text-align:center;cursor:pointer;transition:all .2s;}
+        .upload-zone:hover{border-color:#f43f5e;background:rgba(244,63,94,0.04);}
+        .pill-wrap{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);
+            border-radius:99px;padding:4px;display:flex;}
+        .pill-btn{flex:1;padding:8px 0;border-radius:99px;font-size:12px;font-weight:700;
+            transition:all .25s;cursor:pointer;border:none;background:transparent;
+            color:rgba(255,255,255,0.35);font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;}
+        .pill-btn.active{background:#fff;color:#04050f;box-shadow:0 2px 12px rgba(0,0,0,0.4);}
+        .wallet-badge{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+            border-radius:10px;padding:5px 13px;font-size:11px;display:flex;align-items:center;gap:6px;}
+        .btn-rose{width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;
+            font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+            border:none;border-radius:12px;padding:13px;cursor:pointer;
+            transition:opacity .2s,transform .15s;box-shadow:0 4px 20px rgba(244,63,94,0.25);
+            font-family:'Plus Jakarta Sans',sans-serif;}
+        .btn-rose:hover{opacity:.9;transform:translateY(-1px);}
+        .btn-gold{width:100%;background:linear-gradient(135deg,#eab308,#ca8a04);color:#000;
+            font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+            border:none;border-radius:12px;padding:13px;cursor:pointer;
+            transition:opacity .2s,transform .15s;box-shadow:0 4px 20px rgba(234,179,8,0.2);
+            font-family:'Plus Jakarta Sans',sans-serif;}
+        .btn-gold:hover{opacity:.9;transform:translateY(-1px);}
+        .btn-blue{width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;
+            font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;
+            border:none;border-radius:12px;padding:13px;cursor:pointer;
+            transition:opacity .2s,transform .15s;box-shadow:0 4px 20px rgba(59,130,246,0.25);
+            font-family:'Plus Jakarta Sans',sans-serif;}
+        .btn-blue:hover{opacity:.9;transform:translateY(-1px);}
+        .btn-sm-outline{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);
+            color:#cbd5e1;border-radius:10px;font-size:11px;font-weight:600;padding:8px 12px;
+            cursor:pointer;transition:background .2s;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;}
+        .btn-sm-outline:hover{background:rgba(255,255,255,0.09);}
+        .task-type-chip{padding:6px 14px;border-radius:99px;font-size:11px;font-weight:700;
+            cursor:pointer;border:1.5px solid transparent;transition:all .2s;white-space:nowrap;}
+        .task-type-chip.selected{border-color:#3b82f6;background:rgba(59,130,246,0.12);color:#60a5fa;}
+        .task-type-chip:not(.selected){border-color:rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.4);}
+        .section-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+        .live-badge{background:rgba(244,63,94,0.12);color:#f43f5e;border:1px solid rgba(244,63,94,0.2);
+            font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+        .open-badge{background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.2);
+            font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+        .closed-badge{background:rgba(100,116,139,0.15);color:#64748b;border:1px solid rgba(100,116,139,0.2);
+            font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+        .progress-track{background:rgba(255,255,255,0.05);border-radius:99px;height:3px;overflow:hidden;}
+        .progress-fill-rose{height:100%;background:linear-gradient(90deg,#f43f5e,#f59e0b);border-radius:99px;transition:width .6s;}
+        .progress-fill-blue{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:99px;transition:width .6s;}
+        .category-icon{font-size:22px;line-height:1;}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+            z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;}
+        select.field option{background:#0f172a;color:#f1f5f9;}
+        textarea.field{resize:vertical;min-height:90px;}
+        .stats-strip{background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04);}
+        .stat-pill{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+            border-radius:99px;padding:4px 13px;font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap;}
+        .stat-pill span{color:#fff;font-weight:700;}
+        .proof-type-btn{padding:8px 14px;border-radius:10px;font-size:11px;font-weight:700;
+            cursor:pointer;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);
+            color:rgba(255,255,255,0.4);transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif;}
+        .proof-type-btn.selected{border-color:#eab308;background:rgba(234,179,8,0.1);color:#eab308;}
+        .no-scrollbar::-webkit-scrollbar{display:none;}
+        .task-detail-row{display:flex;gap:8px;align-items:flex-start;padding:8px 0;
+            border-bottom:1px solid rgba(255,255,255,0.04);}
+        .task-detail-row:last-child{border-bottom:none;}
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-rose-500/30">
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header class="sticky top-0 z-50 border-b border-white/[0.05]" style="background:rgba(2,6,23,0.92);backdrop-filter:blur(20px);">
+    <div class="max-w-7xl mx-auto px-5 py-3 flex flex-col items-center gap-3">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:linear-gradient(135deg,#f43f5e,#f59e0b);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <span class="brand-font text-xl font-bold tracking-tight text-white">Million<span style="color:#f43f5e;">Customers</span></span>
+            <span class="text-[9px] font-bold text-white/25 border border-white/10 rounded px-1.5 py-0.5 tracking-wider">GLOBAL</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap justify-center">
+            <div class="wallet-badge"><span style="color:rgba(255,255,255,0.3)">Naira</span><span id="nairaBalanceDisplay" class="font-bold text-rose-400">&#x20A6;5,400.00</span></div>
+            <div class="wallet-badge"><span style="color:rgba(255,255,255,0.3)">Vonk</span><span id="tokenBalanceDisplay" class="font-bold text-amber-400">0.00 VNK</span></div>
+        </div>
+        <!-- 3-tab switcher -->
+        <div class="pill-wrap w-full max-w-sm">
+            <button class="pill-btn active" id="tab-taskboard"  onclick="showTab('taskboard')">&#x1F4CB; Task Board</button>
+            <button class="pill-btn"        id="tab-post"       onclick="showTab('post')">&#x2795; Post Task</button>
+            <button class="pill-btn"        id="tab-statusads"  onclick="showTab('statusads')">&#x1F4F1; Status Ads</button>
+        </div>
+    </div>
+</header>
+
+<!-- Live stats strip -->
+<div class="stats-strip overflow-x-auto no-scrollbar">
+    <div class="max-w-7xl mx-auto px-5 py-2 flex gap-3 items-center">
+        <div class="stat-pill">Active Tasks: <span id="statTasks">5</span></div>
+        <div class="stat-pill">Earners Online: <span>60,000+</span></div>
+        <div class="stat-pill">Tasks Completed: <span>1.2M+</span></div>
+        <div class="stat-pill">Avg. Payout: <span>&#x20A6;350</span></div>
+        <div class="stat-pill">Brands Served: <span>150+</span></div>
+    </div>
+</div>
+
+<main class="max-w-7xl mx-auto w-full px-5 py-7 flex-grow">
+
+<!-- ═══════════════════ TAB 1: TASK BOARD (EARNER) ═══════════════════════ -->
+<div id="panel-taskboard" class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <p class="section-label text-rose-400">Earner Terminal</p>
+            <h2 class="brand-font text-2xl font-bold text-white mt-1">Browse &amp; Complete Tasks</h2>
+            <p class="text-xs text-gray-400 mt-1">Pick any task, complete it, submit proof and get paid directly to your wallet.</p>
+        </div>
+        <!-- Category filter -->
+        <div class="flex gap-2 flex-wrap">
+            <button onclick="filterTasks('all')" id="filter-all" class="task-type-chip selected">All</button>
+            <button onclick="filterTasks('social')" id="filter-social" class="task-type-chip">&#x1F4F2; Social</button>
+            <button onclick="filterTasks('signup')" id="filter-signup" class="task-type-chip">&#x270F;&#xFE0F; Sign-up</button>
+            <button onclick="filterTasks('follow')" id="filter-follow" class="task-type-chip">&#x2764;&#xFE0F; Follow</button>
+            <button onclick="filterTasks('custom')" id="filter-custom" class="task-type-chip">&#x2699;&#xFE0F; Custom</button>
+        </div>
+    </div>
+    <div id="taskBoardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+</div>
+
+<!-- ═══════════════════ TAB 2: POST A TASK (CLIENT) ══════════════════════ -->
+<div id="panel-post" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- LEFT: Post form -->
+        <section class="lg:col-span-5 space-y-5">
+            <div>
+                <p class="section-label text-blue-400">Client Hub</p>
+                <h2 class="brand-font text-2xl font-bold text-white mt-1">Post a Task</h2>
+                <p class="text-xs text-gray-400 mt-1">Define any task, set your budget, choose proof type — our network delivers.</p>
+            </div>
+            <div class="glass-card gradient-border-blue p-6 rounded-2xl space-y-5">
+
+                <!-- Task category selector -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Task Category</label>
+                    <div class="grid grid-cols-3 gap-2" id="categoryGrid">
+                        <div onclick="selectCategory('youtube')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F4FA;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">YouTube</p>
+                        </div>
+                        <div onclick="selectCategory('facebook')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F30D;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">Facebook</p>
+                        </div>
+                        <div onclick="selectCategory('instagram')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F4F8;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">Instagram</p>
+                        </div>
+                        <div onclick="selectCategory('tiktok')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F3B5;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">TikTok</p>
+                        </div>
+                        <div onclick="selectCategory('telegram')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x2708;&#xFE0F;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">Telegram</p>
+                        </div>
+                        <div onclick="selectCategory('whatsapp')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F4AC;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">WhatsApp</p>
+                        </div>
+                        <div onclick="selectCategory('signup')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x270F;&#xFE0F;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">Sign-up</p>
+                        </div>
+                        <div onclick="selectCategory('download')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x1F4E5;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">App Download</p>
+                        </div>
+                        <div onclick="selectCategory('custom')" class="category-card cursor-pointer rounded-xl p-3 text-center transition-all border border-white/5 hover:border-blue-500/40" style="background:rgba(255,255,255,0.03);">
+                            <div class="category-icon">&#x2699;&#xFE0F;</div>
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">Custom</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedCategory" value="">
+                    <p id="catError" class="text-[11px] text-red-400 mt-1 hidden">Please select a category.</p>
+                </div>
+
+                <!-- Task title -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Task Title</label>
+                    <input type="text" id="taskTitle" class="field" placeholder="e.g. Subscribe to my YouTube channel">
+                </div>
+
+                <!-- Link -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Target Link / URL</label>
+                    <input type="url" id="taskLink" class="field" placeholder="https://youtube.com/c/yourchannel">
+                </div>
+
+                <!-- Full description -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Task Description (Step-by-step instructions)</label>
+                    <textarea id="taskDesc" class="field" rows="4" placeholder="1. Open the link&#10;2. Click Subscribe&#10;3. Make sure notifications are ON&#10;4. Take a screenshot showing you subscribed"></textarea>
+                </div>
+
+                <!-- Proof type -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Proof Type Required from Earner</label>
+                    <div class="grid grid-cols-2 gap-2" id="proofTypeGrid">
+                        <button type="button" onclick="selectProofType('screenshot')" id="proof-screenshot" class="proof-type-btn">&#x1F4F8; Screenshot</button>
+                        <button type="button" onclick="selectProofType('code')"       id="proof-code"       class="proof-type-btn">&#x1F511; Referral Code</button>
+                        <button type="button" onclick="selectProofType('email')"      id="proof-email"      class="proof-type-btn">&#x2709;&#xFE0F; Email / Phone</button>
+                        <button type="button" onclick="selectProofType('count')"      id="proof-count"      class="proof-type-btn">&#x1F4CA; Follower Count</button>
+                    </div>
+                    <input type="hidden" id="selectedProofType" value="">
+                    <p id="proofError" class="text-[11px] text-red-400 mt-1 hidden">Please select a proof type.</p>
+                </div>
+
+                <!-- Target count (optional, for follower/subscriber tasks) -->
+                <div id="targetCountWrap">
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Target Count <span class="text-gray-600">(e.g. 1000 subscribers needed)</span></label>
+                    <input type="number" id="taskTargetCount" class="field" placeholder="e.g. 1000">
+                </div>
+
+                <!-- Budget -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">Pay Per Completion (&#x20A6;)</label>
+                        <input type="number" id="taskPayPerUnit" min="10" class="field" placeholder="50" oninput="calcTaskBudget()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">No. of Completions Needed</label>
+                        <input type="number" id="taskUnits" min="1" class="field" placeholder="100" oninput="calcTaskBudget()">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center rounded-xl px-4 py-3" style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.12);">
+                    <span class="text-xs text-gray-400">Total Budget</span>
+                    <span id="taskBudgetDisplay" class="brand-font text-lg font-bold text-blue-400">&#x20A6;0.00</span>
+                </div>
+
+                <button onclick="deployTask()" class="btn-blue">Deploy Task to Network &#x2192;</button>
+            </div>
+        </section>
+
+        <!-- RIGHT: My posted tasks -->
+        <section class="lg:col-span-7 space-y-5">
+            <div class="flex items-end justify-between">
+                <div>
+                    <p class="section-label text-gray-500">Client Dashboard</p>
+                    <h2 class="brand-font text-xl font-bold text-white mt-0.5">My Posted Tasks</h2>
+                </div>
+                <span class="text-xs text-gray-600">Live tracking</span>
+            </div>
+            <div id="myTasksContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="glass-card rounded-xl p-8 text-center" style="grid-column:1/-1;">
+                    <p class="text-3xl mb-2">&#x1F4CB;</p>
+                    <p class="text-sm text-gray-500">No tasks posted yet.</p>
+                    <p class="text-xs text-gray-600 mt-1">Use the form to deploy your first task.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- ═══════════════════ TAB 3: STATUS ADS ════════════════════════════════ -->
+<div id="panel-statusads" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left: Ad form -->
+        <section class="lg:col-span-5 space-y-6">
+            <div>
+                <p class="section-label text-rose-400">Advertiser Hub</p>
+                <h2 class="brand-font text-2xl font-bold text-white mt-1">Launch a Status Campaign</h2>
+                <p class="text-xs text-gray-400 mt-1">Your ad creative reaches thousands of real WhatsApp users in 24 hours.</p>
+            </div>
+            <div class="glass-card gradient-border-rose p-6 rounded-2xl space-y-5">
+                <form onsubmit="deployNewCampaign(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">Campaign Name</label>
+                        <input type="text" id="campTitle" required placeholder="e.g. KanoMart Ramadan Sale" class="field">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-2">Ad Creative (Images &amp; Videos)</label>
+                        <div class="flex gap-2 mb-2">
+                            <button type="button" onclick="switchMediaTab('upload')" id="tab-upload" class="px-3 py-1 rounded-lg text-[11px] font-bold transition bg-rose-500 text-white">&#x2B06; Upload</button>
+                            <button type="button" onclick="switchMediaTab('url')"    id="tab-url"    class="px-3 py-1 rounded-lg text-[11px] font-bold transition bg-slate-800 text-gray-400">&#x1F517; Link</button>
+                        </div>
+                        <div id="media-upload-zone" class="space-y-2">
+                            <div class="upload-zone" onclick="document.getElementById('campMediaImages').click()">
+                                <input type="file" id="campMediaImages" accept="image/*" multiple class="hidden" onchange="handleAdImages(event)">
+                                <p class="text-[11px] text-gray-500">&#x1F4F7; Images — up to 4</p>
+                                <div id="adImagesPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                            </div>
+                            <div class="upload-zone" onclick="document.getElementById('campMediaVideos').click()">
+                                <input type="file" id="campMediaVideos" accept="video/*" multiple class="hidden" onchange="handleAdVideos(event)">
+                                <p class="text-[11px] text-gray-500">&#x1F3AC; Videos — up to 2</p>
+                                <div id="adVideosPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                            </div>
+                        </div>
+                        <input type="url" id="campMediaUrl" placeholder="https://example.com/your-ad.jpg" class="field hidden mt-2">
+                        <input type="hidden" id="campMedia">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Pay Per View (min &#x20A6;5)</label>
+                            <input type="number" id="payPerView" min="5" required oninput="calculateAdBudget()" placeholder="5" class="field">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Target Views</label>
+                            <input type="number" id="targetViews" min="50" required oninput="calculateAdBudget()" placeholder="500" class="field">
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center rounded-xl px-4 py-3" style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.12);">
+                        <span class="text-xs text-gray-400">Total Budget</span>
+                        <span id="totalAdCostDisplay" class="brand-font text-lg font-bold text-rose-400">&#x20A6;0.00</span>
+                    </div>
+                    <p id="adBudgetWarning" class="text-[11px] text-red-400 hidden">&#x26A0;&#xFE0F; Minimum budget is &#x20A6;1,000.</p>
+                    <button type="submit" class="btn-rose">Deploy Status Campaign &#x2192;</button>
+                </form>
+            </div>
+        </section>
+        <!-- Right: Live campaigns -->
+        <section class="lg:col-span-7 space-y-5">
+            <div class="flex items-end justify-between">
+                <div>
+                    <p class="section-label text-gray-500">Live Network Feed</p>
+                    <h2 class="brand-font text-xl font-bold text-white mt-0.5">Active Status Campaigns</h2>
+                </div>
+            </div>
+            <div id="advertiserFeedContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            <!-- Vonk converter inside status ads earner section -->
+            <div class="glass-card gradient-border-gold p-6 rounded-2xl space-y-4 mt-4">
+                <div>
+                    <span class="section-label text-amber-400">Vonk Vault</span>
+                    <h2 class="brand-font text-base font-bold text-white mt-1">Convert Earnings to Vonk</h2>
+                    <p class="text-xs text-gray-400 mt-1">Naira withdrawal has a 10% fee. Convert to Vonk and get a <strong class="text-amber-400">20% bonus</strong> instantly.</p>
+                </div>
+                <div class="flex gap-3">
+                    <input type="number" id="convertNairaAmount" placeholder="Amount in Naira" oninput="calculateVonkSwap()" class="field" style="flex:1">
+                    <div class="rounded-xl px-3 py-2 text-xs flex flex-col justify-center" style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.12);min-width:100px;">
+                        <span class="text-gray-500 text-[10px]">You get</span>
+                        <span id="estimatedTokensDisplay" class="font-bold text-amber-400">0.00 VNK</span>
+                        <span class="text-gray-600 text-[10px]">1 VNK = &#x20A6;10</span>
+                    </div>
+                </div>
+                <button onclick="executeVonkSwap()" class="btn-gold">Convert to Vonk (Claim 20% Bonus)</button>
+            </div>
+        </section>
+    </div>
+</div>
+
+</main>
+
+<!-- ═══════════════════════ TASK DETAIL MODAL ══════════════════════════════ -->
+<div id="taskDetailModal" class="modal-overlay hidden">
+    <div class="glass-card w-full max-w-lg rounded-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start pb-3 border-b border-white/[0.06]">
+            <div>
+                <p id="modalCategoryLabel" class="section-label text-blue-400">Loading...</p>
+                <h3 id="modalTaskTitle" class="brand-font text-lg font-bold text-white mt-0.5">Task Title</h3>
+            </div>
+            <button onclick="closeTaskModal()" class="text-gray-600 hover:text-white text-2xl leading-none" style="background:none;border:none;cursor:pointer;">&times;</button>
+        </div>
+
+        <!-- Pay badge -->
+        <div class="flex gap-3 flex-wrap">
+            <div class="rounded-xl px-4 py-2 text-xs" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);">
+                <span class="text-gray-500">Reward: </span><span id="modalPay" class="font-bold text-green-400">&#x20A6;0</span>
+            </div>
+            <div class="rounded-xl px-4 py-2 text-xs" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15);">
+                <span class="text-gray-500">Slots left: </span><span id="modalSlots" class="font-bold text-blue-400">0</span>
+            </div>
+            <div id="modalTargetWrap" class="rounded-xl px-4 py-2 text-xs hidden" style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.15);">
+                <span class="text-gray-500">Target: </span><span id="modalTarget" class="font-bold text-amber-400">0</span>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">What to Do</p>
+            <div id="modalDesc" class="text-sm text-gray-300 leading-relaxed whitespace-pre-line rounded-xl p-4" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);"></div>
+        </div>
+
+        <!-- Link -->
+        <div id="modalLinkWrap">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Target Link</p>
+            <a id="modalLink" href="#" target="_blank" class="text-blue-400 text-sm underline break-all hover:text-blue-300 transition"></a>
+        </div>
+
+        <!-- Proof submission -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Submit Your Proof</p>
+            <div id="proofInputArea" class="space-y-3"></div>
+            <button onclick="submitTaskProof()" class="btn-gold mt-4">Submit Proof &amp; Claim Reward</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ STATUS ADS PROOF MODAL ════════════════════════ -->
+<div id="proofVerificationModal" class="modal-overlay hidden">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center pb-3 border-b border-white/[0.06]">
+            <div>
+                <p class="section-label text-amber-400">Step 2 of 2</p>
+                <h3 class="brand-font text-base font-bold text-white mt-0.5">Submit Proof of Views</h3>
+            </div>
+            <button onclick="closeProofModal()" style="color:rgba(255,255,255,0.3);font-size:22px;background:none;border:none;cursor:pointer;">&times;</button>
+        </div>
+        <p class="text-xs text-gray-400">Upload screenshots and a short video showing your WhatsApp Status view count after 24 hours.</p>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Total Views Received</label>
+                <input type="number" id="proofViewCount" placeholder="e.g. 150" class="field">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Screenshots — up to 4</label>
+                <div class="upload-zone" onclick="document.getElementById('proofImages').click()">
+                    <input type="file" id="proofImages" accept="image/*" multiple class="hidden" onchange="handleProofImages(event)">
+                    <p class="text-[11px] text-gray-500">&#x1F4F8; Select screenshots (max 4)</p>
+                    <div id="proofImagesPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Screen-recordings — up to 2</label>
+                <div class="upload-zone" onclick="document.getElementById('proofVideos').click()">
+                    <input type="file" id="proofVideos" accept="video/*" multiple class="hidden" onchange="handleProofVideos(event)">
+                    <p class="text-[11px] text-gray-500">&#x1F3AC; Select videos (max 2)</p>
+                    <div id="proofVideosPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                </div>
+            </div>
+            <button onclick="submitProofToNetwork()" class="btn-gold">Submit Proof for Verification</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═════════════════════════════ FOOTER ═════════════════════════════════ -->
+<footer style="border-top:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.15);" class="px-8 py-6">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center gap-2">
+            <div class="w-5 h-5 rounded-md flex items-center justify-center" style="background:linear-gradient(135deg,#f43f5e,#f59e0b);">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <span class="brand-font text-sm font-bold text-white">MillionCustomers</span>
+        </div>
+        <p class="text-xs text-gray-700">&copy; 2026 Million Customers Global Network. All rights reserved.</p>
+        <div class="flex gap-5 text-xs text-gray-600">
+            <a href="#" class="hover:text-white transition">Privacy</a>
+            <a href="#" class="hover:text-white transition">Terms</a>
+            <a href="#" class="hover:text-white transition">Contact</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+const CATEGORY_META = {
+    youtube:   { label:'YouTube',      icon:'📺', color:'#ef4444', filter:'social' },
+    facebook:  { label:'Facebook',     icon:'🌍', color:'#3b82f6', filter:'social' },
+    instagram: { label:'Instagram',    icon:'📸', color:'#a855f7', filter:'follow' },
+    tiktok:    { label:'TikTok',       icon:'🎵', color:'#ec4899', filter:'follow' },
+    telegram:  { label:'Telegram',     icon:'✈️', color:'#0ea5e9', filter:'social' },
+    whatsapp:  { label:'WhatsApp',     icon:'💬', color:'#22c55e', filter:'social' },
+    signup:    { label:'Sign-up',      icon:'✏️', color:'#f59e0b', filter:'signup' },
+    download:  { label:'App Download', icon:'📥', color:'#8b5cf6', filter:'signup' },
+    custom:    { label:'Custom Task',  icon:'⚙️', color:'#64748b', filter:'custom' },
+};
+
+const PROOF_META = {
+    screenshot: { label:'Screenshot',    placeholder:'Upload screenshot(s) below', icon:'📸' },
+    code:       { label:'Referral Code', placeholder:'Enter the referral/invite code used', icon:'🔑' },
+    email:      { label:'Email / Phone', placeholder:'Enter the email or phone you registered with', icon:'✉️' },
+    count:      { label:'Follower Count',placeholder:'Enter your current follower/subscriber count', icon:'📊' },
+};
+
+let activeTasks = [
+    { id: 3001, category:'youtube',  title:'Subscribe to KanoTech YouTube',       link:'https://youtube.com/c/kanotech', desc:'1. Click the link
+2. Hit the Subscribe button
+3. Turn on notifications (bell icon)
+4. Take a screenshot of the channel page showing "Subscribed"', proofType:'screenshot', pay:80,  units:200,  filled:45,  targetCount:null },
+    { id: 3002, category:'telegram', title:'Join Arewa Business Hub Telegram',    link:'https://t.me/arewabiz',          desc:'1. Open the link
+2. Click "Join Channel"
+3. Screenshot showing you joined the channel', proofType:'screenshot', pay:50,  units:500,  filled:120, targetCount:5000 },
+    { id: 3003, category:'tiktok',   title:'Follow @SultaanFoods on TikTok',      link:'https://tiktok.com/@sultaanfoods',desc:'1. Open the link
+2. Tap Follow
+3. Screenshot your profile showing you follow @SultaanFoods', proofType:'screenshot', pay:60,  units:300,  filled:80,  targetCount:10000 },
+    { id: 3004, category:'signup',   title:'Sign up on NorthBridge App',           link:'https://northbridge.ng/register', desc:'1. Open the link and register a new account
+2. Use referral code: NORTH2026
+3. Submit the referral code below as proof', proofType:'code', pay:150, units:100,  filled:22,  targetCount:null },
+    { id: 3005, category:'facebook', title:'Like & Follow FitNaija Facebook Page', link:'https://facebook.com/fitnaija',   desc:'1. Open the page
+2. Click Like AND Follow
+3. Screenshot the page header showing "Liked" status', proofType:'screenshot', pay:40,  units:1000, filled:340, targetCount:null },
+];
+
+let myPostedTasks = [];
+let activeCampaigns = [
+    { id: 2001, title:'KanoMart Launch Promo', media:'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=300&q=80', rate:6,  target:1000, filled:340 },
+    { id: 2002, title:'NorthBridge Real Estate', media:'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=300&q=80', rate:8, target:500,  filled:120 },
+];
+
+let userNairaWallet  = 5400.00;
+let userVonkWallet   = 0.00;
+let activeJobId      = null;
+let activeTaskId     = null;
+let adImageFiles = [], adVideoFiles = [];
+let proofImageFiles = [], proofVideoFiles = [];
+
+// ════════════════════════════════════════════════════════
+//  TAB NAVIGATION
+// ════════════════════════════════════════════════════════
+function showTab(tab) {
+    ['taskboard','post','statusads'].forEach(t => {
+        document.getElementById('panel-'+t).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById('tab-'+t);
+        btn.classList.toggle('active', t === tab);
+    });
+    if (tab === 'taskboard') renderTaskBoard('all');
+    if (tab === 'statusads') renderAdvertiserFeed();
+}
+
+// ════════════════════════════════════════════════════════
+//  TASK BOARD
+// ════════════════════════════════════════════════════════
+let currentFilter = 'all';
+
+function filterTasks(cat) {
+    currentFilter = cat;
+    document.querySelectorAll('[id^="filter-"]').forEach(el => el.classList.remove('selected'));
+    document.getElementById('filter-'+cat).classList.add('selected');
+    renderTaskBoard(cat);
+}
+
+function renderTaskBoard(filter) {
+    const container = document.getElementById('taskBoardContainer');
+    container.innerHTML = '';
+    const all = [...activeTasks, ...myPostedTasks];
+    const filtered = filter === 'all' ? all : all.filter(t => CATEGORY_META[t.category]?.filter === filter || t.category === filter);
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-xl p-10 text-center col-span-3">
+            <p class="text-3xl mb-2">🔍</p><p class="text-sm text-gray-500">No tasks in this category yet.</p></div>`;
+        return;
+    }
+
+    filtered.forEach(task => {
+        const meta = CATEGORY_META[task.category] || CATEGORY_META.custom;
+        const pct  = Math.min((task.filled / task.units) * 100, 100);
+        const slotsLeft = task.units - task.filled;
+        const div = document.createElement('div');
+        div.className = 'glass-card rounded-xl p-4 space-y-3 flex flex-col justify-between hover:border-white/10 transition cursor-pointer';
+        div.onclick = () => openTaskModal(task.id);
+        div.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">${meta.icon}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider" style="color:${meta.color}">${meta.label}</span>
+                    </div>
+                    <span class="${slotsLeft > 0 ? 'open-badge' : 'closed-badge'}">${slotsLeft > 0 ? 'OPEN' : 'FULL'}</span>
+                </div>
+                <h3 class="brand-font text-sm font-bold text-white leading-snug line-clamp-2">${task.title}</h3>
+                ${task.targetCount ? `<div class="text-[11px] text-gray-500">Target: <span class="text-gray-300 font-semibold">${task.targetCount.toLocaleString()} ${meta.label}</span></div>` : ''}
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-[11px]">
+                    <span style="color:rgba(34,197,94,0.9)" class="font-bold">&#x20A6;${task.pay} / completion</span>
+                    <span class="text-gray-600">${task.filled}/${task.units} done</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill-blue" style="width:${pct}%"></div></div>
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-gray-600">${PROOF_META[task.proofType]?.icon} ${PROOF_META[task.proofType]?.label} required</span>
+                    <span class="text-[10px] text-gray-500">${slotsLeft} slots left</span>
+                </div>
+            </div>`;
+        container.appendChild(div);
+    });
+    document.getElementById('statTasks').innerText = all.length;
+}
+
+// ════════════════════════════════════════════════════════
+//  TASK DETAIL MODAL
+// ════════════════════════════════════════════════════════
+function openTaskModal(id) {
+    const all  = [...activeTasks, ...myPostedTasks];
+    const task = all.find(t => t.id === id);
+    if (!task) return;
+    activeTaskId = id;
+    const meta = CATEGORY_META[task.category] || CATEGORY_META.custom;
+    const pm   = PROOF_META[task.proofType];
+
+    document.getElementById('modalCategoryLabel').innerText = meta.label;
+    document.getElementById('modalCategoryLabel').style.color = meta.color;
+    document.getElementById('modalTaskTitle').innerText = task.title;
+    document.getElementById('modalPay').innerText       = '₦' + task.pay;
+    document.getElementById('modalSlots').innerText     = (task.units - task.filled) + ' slots';
+    document.getElementById('modalDesc').innerText      = task.desc;
+
+    const linkEl = document.getElementById('modalLink');
+    if (task.link) {
+        document.getElementById('modalLinkWrap').classList.remove('hidden');
+        linkEl.href = task.link; linkEl.innerText = task.link;
+    } else {
+        document.getElementById('modalLinkWrap').classList.add('hidden');
+    }
+
+    if (task.targetCount) {
+        document.getElementById('modalTargetWrap').classList.remove('hidden');
+        document.getElementById('modalTarget').innerText = task.targetCount.toLocaleString() + ' ' + meta.label;
+    } else {
+        document.getElementById('modalTargetWrap').classList.add('hidden');
+    }
+
+    // Build proof input
+    const area = document.getElementById('proofInputArea');
+    area.innerHTML = '';
+
+    if (task.proofType === 'screenshot') {
+        area.innerHTML = `
+            <p class="text-xs text-gray-400">${pm.icon} Upload screenshot(s) as proof:</p>
+            <div class="upload-zone" onclick="document.getElementById('taskProofImages').click()">
+                <input type="file" id="taskProofImages" accept="image/*" multiple class="hidden" onchange="handleTaskProofImages(event)">
+                <p class="text-[11px] text-gray-500">📸 Click to select screenshots (max 4)</p>
+                <div id="taskProofImgPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+            </div>`;
+    } else if (task.proofType === 'code') {
+        area.innerHTML = `
+            <p class="text-xs text-gray-400">${pm.icon} Enter the referral / invite code you used:</p>
+            <input type="text" id="taskProofText" class="field" placeholder="e.g. NORTH2026">`;
+    } else if (task.proofType === 'email') {
+        area.innerHTML = `
+            <p class="text-xs text-gray-400">${pm.icon} Enter the email or phone number you registered with:</p>
+            <input type="text" id="taskProofText" class="field" placeholder="e.g. user@email.com or 080xxxxxxxx">`;
+    } else if (task.proofType === 'count') {
+        area.innerHTML = `
+            <p class="text-xs text-gray-400">${pm.icon} Enter your current follower / subscriber count:</p>
+            <input type="number" id="taskProofText" class="field" placeholder="e.g. 10500">
+            <p class="text-xs text-gray-400 mt-1">Also upload a screenshot for verification:</p>
+            <div class="upload-zone" onclick="document.getElementById('taskProofImages').click()">
+                <input type="file" id="taskProofImages" accept="image/*" multiple class="hidden" onchange="handleTaskProofImages(event)">
+                <p class="text-[11px] text-gray-500">📸 Click to add screenshot</p>
+                <div id="taskProofImgPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+            </div>`;
+    }
+
+    document.getElementById('taskDetailModal').classList.remove('hidden');
+}
+
+let taskProofImages = [];
+function handleTaskProofImages(event) {
+    const files = Array.from(event.target.files).slice(0, 4);
+    taskProofImages = files;
+    const preview = document.getElementById('taskProofImgPreview');
+    if (!preview) return;
+    preview.innerHTML = '';
+    files.forEach(f => {
+        const img = document.createElement('img');
+        img.className = 'h-14 w-14 object-cover rounded-lg border border-slate-700';
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; };
+        reader.readAsDataURL(f);
+        preview.appendChild(img);
+    });
+}
+
+function closeTaskModal() {
+    document.getElementById('taskDetailModal').classList.add('hidden');
+    activeTaskId = null; taskProofImages = [];
+}
+
+function submitTaskProof() {
+    const all  = [...activeTasks, ...myPostedTasks];
+    const task = all.find(t => t.id === activeTaskId);
+    if (!task) return;
+
+    // Validate
+    if (task.proofType === 'screenshot' || task.proofType === 'count') {
+        if (taskProofImages.length === 0) { alert('Please upload at least one screenshot.'); return; }
+    }
+    if (task.proofType === 'code' || task.proofType === 'email' || task.proofType === 'count') {
+        const val = document.getElementById('taskProofText')?.value?.trim();
+        if (!val) { alert('Please fill in the required proof field.'); return; }
+    }
+
+    task.filled = Math.min(task.filled + 1, task.units);
+    userNairaWallet += task.pay;
+    alert(`✅ Proof submitted! ₦${task.pay} has been credited to your Naira wallet pending verification.`);
+    closeTaskModal(); updateGlobalUI(); renderTaskBoard(currentFilter);
+}
+
+// ════════════════════════════════════════════════════════
+//  POST A TASK
+// ════════════════════════════════════════════════════════
+let selectedCategory  = '';
+let selectedProofType = '';
+
+function selectCategory(cat) {
+    selectedCategory = cat;
+    document.getElementById('selectedCategory').value = cat;
+    document.getElementById('catError').classList.add('hidden');
+    document.querySelectorAll('.category-card').forEach(el => {
+        el.style.borderColor = 'rgba(255,255,255,0.05)';
+        el.style.background  = 'rgba(255,255,255,0.03)';
+    });
+    event.currentTarget.style.borderColor = '#3b82f6';
+    event.currentTarget.style.background  = 'rgba(59,130,246,0.10)';
+}
+
+function selectProofType(type) {
+    selectedProofType = type;
+    document.getElementById('selectedProofType').value = type;
+    document.getElementById('proofError').classList.add('hidden');
+    document.querySelectorAll('.proof-type-btn').forEach(el => el.classList.remove('selected'));
+    document.getElementById('proof-'+type).classList.add('selected');
+}
+
+function calcTaskBudget() {
+    const pay   = parseFloat(document.getElementById('taskPayPerUnit').value) || 0;
+    const units = parseInt(document.getElementById('taskUnits').value)        || 0;
+    document.getElementById('taskBudgetDisplay').innerText = '₦' + (pay * units).toFixed(2);
+}
+
+function deployTask() {
+    if (!selectedCategory)  { document.getElementById('catError').classList.remove('hidden');   return; }
+    if (!selectedProofType) { document.getElementById('proofError').classList.remove('hidden'); return; }
+
+    const title = document.getElementById('taskTitle').value.trim();
+    const link  = document.getElementById('taskLink').value.trim();
+    const desc  = document.getElementById('taskDesc').value.trim();
+    const pay   = parseFloat(document.getElementById('taskPayPerUnit').value);
+    const units = parseInt(document.getElementById('taskUnits').value);
+    const targetCount = parseInt(document.getElementById('taskTargetCount').value) || null;
+
+    if (!title || !desc || !pay || !units) { alert('Please fill in all required fields.'); return; }
+    const totalCost = pay * units;
+    if (userNairaWallet < totalCost) { alert('⚠ Insufficient balance to fund this task. Top up your Naira wallet.'); return; }
+
+    userNairaWallet -= totalCost;
+    const newTask = { id: Date.now(), category: selectedCategory, title, link, desc,
+        proofType: selectedProofType, pay, units, filled: 0, targetCount };
+    myPostedTasks.unshift(newTask);
+
+    alert(`🚀 Task deployed! ₦${totalCost.toFixed(2)} locked in escrow. Your task is now live on the network.`);
+
+    // Reset form
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskLink').value  = '';
+    document.getElementById('taskDesc').value  = '';
+    document.getElementById('taskPayPerUnit').value = '';
+    document.getElementById('taskUnits').value = '';
+    document.getElementById('taskTargetCount').value = '';
+    document.getElementById('taskBudgetDisplay').innerText = '₦0.00';
+    selectedCategory = ''; selectedProofType = '';
+    document.querySelectorAll('.category-card').forEach(el => {
+        el.style.borderColor='rgba(255,255,255,0.05)'; el.style.background='rgba(255,255,255,0.03)'; });
+    document.querySelectorAll('.proof-type-btn').forEach(el => el.classList.remove('selected'));
+
+    updateGlobalUI(); renderMyTasks();
+}
+
+function renderMyTasks() {
+    const c = document.getElementById('myTasksContainer');
+    c.innerHTML = '';
+    if (myPostedTasks.length === 0) {
+        c.innerHTML = `<div class="glass-card rounded-xl p-8 text-center" style="grid-column:1/-1;">
+            <p class="text-3xl mb-2">📋</p><p class="text-sm text-gray-500">No tasks posted yet.</p></div>`;
+        return;
+    }
+    myPostedTasks.forEach(task => {
+        const meta = CATEGORY_META[task.category] || CATEGORY_META.custom;
+        const pct  = Math.min((task.filled / task.units) * 100, 100);
+        c.innerHTML += `
+            <div class="glass-card rounded-xl p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span>${meta.icon}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider" style="color:${meta.color}">${meta.label}</span>
+                    </div>
+                    <span class="${task.filled < task.units ? 'open-badge' : 'closed-badge'}">${task.filled < task.units ? 'LIVE' : 'COMPLETE'}</span>
+                </div>
+                <h3 class="brand-font text-sm font-bold text-white line-clamp-2">${task.title}</h3>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-gray-500">
+                        <span>Completions</span>
+                        <span class="font-bold text-gray-300">${task.filled} / ${task.units}</span>
+                    </div>
+                    <div class="progress-track"><div class="progress-fill-blue" style="width:${pct}%"></div></div>
+                </div>
+                <div class="flex justify-between text-[11px]">
+                    <span class="text-gray-500">₦${task.pay}/unit · ${PROOF_META[task.proofType]?.icon} ${PROOF_META[task.proofType]?.label}</span>
+                    <span class="text-gray-500">Spent: ₦${(task.filled * task.pay).toFixed(0)}</span>
+                </div>
+            </div>`;
+    });
+}
+
+// ════════════════════════════════════════════════════════
+//  STATUS ADS
+// ════════════════════════════════════════════════════════
+function calculateAdBudget() {
+    const pay   = parseFloat(document.getElementById('payPerView').value) || 0;
+    const views = parseInt(document.getElementById('targetViews').value)  || 0;
+    const total = pay * views;
+    document.getElementById('totalAdCostDisplay').innerText = '₦' + total.toFixed(2);
+    document.getElementById('adBudgetWarning').classList.toggle('hidden', !(total > 0 && total < 1000));
+}
+
+function switchMediaTab(tab) {
+    const uploadZone = document.getElementById('media-upload-zone');
+    const urlInput   = document.getElementById('campMediaUrl');
+    const tabUp      = document.getElementById('tab-upload');
+    const tabUrl     = document.getElementById('tab-url');
+    const A = "px-3 py-1 rounded-lg text-[11px] font-bold transition bg-rose-500 text-white";
+    const I = "px-3 py-1 rounded-lg text-[11px] font-bold transition bg-slate-800 text-gray-400";
+    if (tab === 'upload') {
+        uploadZone.classList.remove('hidden'); urlInput.classList.add('hidden');
+        tabUp.className = A; tabUrl.className = I;
+    } else {
+        uploadZone.classList.add('hidden'); urlInput.classList.remove('hidden');
+        tabUrl.className = A; tabUp.className = I;
+        urlInput.oninput = () => { document.getElementById('campMedia').value = urlInput.value; };
+    }
+}
+
+function handleAdImages(event) {
+    const files = Array.from(event.target.files).slice(0, 4);
+    adImageFiles = files;
+    const preview = document.getElementById('adImagesPreview');
+    preview.innerHTML = '';
+    files.forEach(f => {
+        const img = document.createElement('img');
+        img.className = 'h-16 w-16 object-cover rounded-lg border border-slate-700';
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; };
+        reader.readAsDataURL(f);
+        preview.appendChild(img);
+    });
+    if (files.length) {
+        const r = new FileReader();
+        r.onload = e => { document.getElementById('campMedia').value = e.target.result; };
+        r.readAsDataURL(files[0]);
+    }
+}
+function handleAdVideos(event) {
+    const files = Array.from(event.target.files).slice(0, 2);
+    adVideoFiles = files;
+    const preview = document.getElementById('adVideosPreview');
+    preview.innerHTML = '';
+    files.forEach(f => {
+        const tag = document.createElement('div');
+        tag.className = 'flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 text-[10px] text-gray-300';
+        tag.innerHTML = '🎬 ' + f.name.slice(0, 20);
+        preview.appendChild(tag);
+    });
+}
+
+function deployNewCampaign(e) {
+    e.preventDefault();
+    const mediaVal = document.getElementById('campMedia').value.trim();
+    if (!mediaVal) { alert('Please upload or link your ad media before deploying.'); return; }
+    const pay = parseFloat(document.getElementById('payPerView').value);
+    const views = parseInt(document.getElementById('targetViews').value);
+    const totalCost = pay * views;
+    if (totalCost < 1000) return;
+    if (userNairaWallet < totalCost) { alert('⚠ Insufficient Naira balance.'); return; }
+    userNairaWallet -= totalCost;
+    activeCampaigns.unshift({ id: Date.now(), title: document.getElementById('campTitle').value, media: mediaVal, rate: pay, target: views, filled: 0 });
+    alert('🚀 Status campaign launched! Up to 60,000 users will start posting your ad now.');
+    document.getElementById('campTitle').value = '';
+    document.getElementById('campMedia').value = '';
+    document.getElementById('campMediaUrl').value = '';
+    document.getElementById('campMediaImages').value = '';
+    document.getElementById('campMediaVideos').value = '';
+    document.getElementById('adImagesPreview').innerHTML = '';
+    document.getElementById('adVideosPreview').innerHTML = '';
+    adImageFiles = []; adVideoFiles = [];
+    document.getElementById('payPerView').value = '';
+    document.getElementById('targetViews').value = '';
+    document.getElementById('totalAdCostDisplay').innerText = '₦0.00';
+    updateGlobalUI(); renderAdvertiserFeed();
+}
+
+function renderAdvertiserFeed() {
+    const container = document.getElementById('advertiserFeedContainer');
+    container.innerHTML = '';
+    activeCampaigns.forEach(ad => {
+        const pct = Math.min((ad.filled / ad.target) * 100, 100);
+        const div = document.createElement('div');
+        div.className = 'glass-card p-4 rounded-xl border border-slate-900 space-y-3';
+        div.innerHTML = `
+            <div class="flex items-start gap-3">
+                <img src="${ad.media}" alt="" style="width:72px;height:72px;min-width:72px;border-radius:10px;object-fit:cover;display:block;background:#1e293b;"
+                    onerror="this.style.display='none';" />
+                <div class="flex-1 min-w-0 flex items-start justify-between gap-2 mt-2">
+                    <h3 class="brand-font text-xs font-bold text-white line-clamp-2 leading-snug">${ad.title}</h3>
+                    <span class="live-badge">LIVE</span>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <div class="flex justify-between text-[10px] text-gray-500">
+                    <span>Views Metric Tracking:</span>
+                    <span class="font-bold text-gray-300">${ad.filled} / ${ad.target}</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill-rose" style="width:${pct}%"></div></div>
+            </div>`;
+        container.appendChild(div);
+    });
+}
+
+// ════════════════════════════════════════════════════════
+//  PROOF MODAL (STATUS ADS)
+// ════════════════════════════════════════════════════════
+function handleProofImages(event) {
+    const files = Array.from(event.target.files).slice(0, 4);
+    proofImageFiles = files;
+    const preview = document.getElementById('proofImagesPreview');
+    preview.innerHTML = '';
+    files.forEach(f => {
+        const img = document.createElement('img');
+        img.className = 'h-14 w-14 object-cover rounded-lg border border-slate-700';
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; };
+        reader.readAsDataURL(f);
+        preview.appendChild(img);
+    });
+}
+function handleProofVideos(event) {
+    const files = Array.from(event.target.files).slice(0, 2);
+    proofVideoFiles = files;
+    const preview = document.getElementById('proofVideosPreview');
+    preview.innerHTML = '';
+    files.forEach(f => {
+        const tag = document.createElement('div');
+        tag.className = 'flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 text-[10px] text-gray-300';
+        tag.innerHTML = '🎬 ' + f.name.slice(0, 20);
+        preview.appendChild(tag);
+    });
+}
+window.openProofSubmissionModal = (id) => { activeJobId = id; document.getElementById('proofVerificationModal').classList.remove('hidden'); };
+window.closeProofModal = () => {
+    document.getElementById('proofVerificationModal').classList.add('hidden');
+    document.getElementById('proofViewCount').value = '';
+    document.getElementById('proofImages').value = '';
+    document.getElementById('proofVideos').value = '';
+    document.getElementById('proofImagesPreview').innerHTML = '';
+    document.getElementById('proofVideosPreview').innerHTML = '';
+    proofImageFiles = []; proofVideoFiles = [];
+};
+window.submitProofToNetwork = () => {
+    const views = parseInt(document.getElementById('proofViewCount').value) || 0;
+    if (views <= 0 || (proofImageFiles.length === 0 && proofVideoFiles.length === 0)) {
+        alert('Please enter your view count and upload at least one screenshot or video.'); return;
+    }
+    const ad = activeCampaigns.find(a => a.id === activeJobId);
+    if (ad) {
+        const payout = views * ad.rate;
+        ad.filled += views; userNairaWallet += payout;
+        alert(`✅ Proof submitted! Provisional payout of ₦${payout.toFixed(2)} credited. Verification within 24 hours.`);
+        closeProofModal(); updateGlobalUI(); renderAdvertiserFeed();
+    }
+};
+
+// ════════════════════════════════════════════════════════
+//  VONK SWAP
+// ════════════════════════════════════════════════════════
+function calculateVonkSwap() {
+    const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+    document.getElementById('estimatedTokensDisplay').innerText = ((amount / 10) * 1.20).toFixed(2) + ' VNK';
+}
+function executeVonkSwap() {
+    const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+    if (amount <= 0 || amount > userNairaWallet) { alert('Amount exceeds your available balance.'); return; }
+    const vonkEarned = (amount / 10) * 1.20;
+    userNairaWallet -= amount; userVonkWallet += vonkEarned;
+    alert(`💎 Converted ₦${amount.toFixed(2)} → ${vonkEarned.toFixed(2)} VNK (includes 20% bonus).`);
+    document.getElementById('convertNairaAmount').value = '';
+    document.getElementById('estimatedTokensDisplay').innerText = '0.00 VNK';
+    updateGlobalUI();
+}
+
+// ════════════════════════════════════════════════════════
+//  GLOBAL UI
+// ════════════════════════════════════════════════════════
+function updateGlobalUI() {
+    document.getElementById('nairaBalanceDisplay').innerText = '₦' + userNairaWallet.toFixed(2);
+    document.getElementById('tokenBalanceDisplay').innerText = userVonkWallet.toFixed(2) + ' VNK';
+}
+
+window.onload = () => { updateGlobalUI(); renderTaskBoard('all'); };
+</script>
+</body>
+</html>
