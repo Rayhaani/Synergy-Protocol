@@ -68,113 +68,54 @@ img{display:block;max-width:100%}
   position:sticky;
   top:0;
   z-index:200;
-  background:rgba(8,9,13,.88);
+  background:rgba(2,6,23,.85);
   backdrop-filter:blur(20px) saturate(160%);
   -webkit-backdrop-filter:blur(20px) saturate(160%);
   padding:16px 20px 0;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }
 
 .header-top{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   margin-bottom:16px;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:8px;
+.brand, .brand-mark, .brand-name, .brand-tag,
+.balance-chip, .balance-label, .balance-value{
+  display:none;
 }
 
-.brand-mark{
-  width:34px;height:34px;
-  background:var(--lime);
-  border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);
-  font-weight:800;
-  font-size:18px;
-  color:var(--bg);
-  letter-spacing:-1px;
-  flex-shrink:0;
-}
-
-.brand-name{
-  font-family:var(--font-d);
-  font-weight:800;
-  font-size:20px;
-  color:var(--text);
-  letter-spacing:-.5px;
-}
-
-.brand-tag{
-  font-size:10px;
-  color:var(--text3);
-  font-weight:500;
-  letter-spacing:.5px;
-  margin-top:1px;
-}
-
-.balance-chip{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  padding:7px 12px;
-  gap:1px;
-  position:relative;
-  overflow:hidden;
-  transition:border-color .2s;
-}
-.balance-chip::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:linear-gradient(135deg,var(--lime-dim),transparent 60%);
-  opacity:0;
-  transition:opacity .3s;
-}
-.balance-chip:hover::before{opacity:1}
-.balance-chip:hover{border-color:rgba(198,241,53,.3)}
-
-.balance-label{
-  font-size:9px;
-  color:var(--text3);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-}
-
-.balance-value{
-  font-family:var(--font-m);
-  font-size:16px;
+.app-title{
+  font-family:'Georgia', 'Times New Roman', serif;
+  font-size:22px;
   font-weight:700;
-  color:var(--lime);
-  letter-spacing:-.5px;
-  transition:color .3s;
+  color:#ffffff;
+  letter-spacing:0.5px;
+  text-align:center;
 }
 
-/* ── TABS ──────────────────────────────────── */
 .tab-bar{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:0;
-  margin:0 -0px;
+  gap:6px;
+  margin:0 0 16px 0;
+  background:rgba(255,255,255,0.05);
+  border-radius:99px;
+  padding:5px;
 }
 
 .tab-btn{
-  padding:12px 20px;
+  padding:10px 20px;
   font-family:var(--font-b);
   font-weight:600;
   font-size:13px;
-  color:var(--text3);
+  color:rgba(255,255,255,0.4);
   background:transparent;
-  border-bottom:2px solid transparent;
-  transition:color .2s, border-color .2s;
+  border:none;
+  border-radius:99px;
+  transition:all .25s;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -183,7 +124,14 @@ img{display:block;max-width:100%}
 }
 
 .tab-btn .tab-icon{font-size:15px}
-.tab-btn.active{color:var(--lime);border-bottom-color:var(--lime)}
+
+.tab-btn.active{
+  background:#f5f0e8;
+  color:#0a0a0a;
+  font-weight:700;
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+/* ── TABS ──────────────────────────────────── */
 
 /* ── CONTENT ──────────────────────────────────── */
 #content{
@@ -1101,30 +1049,19 @@ select.f-input option{background:var(--surface);color:var(--text)}
 <div id="app">
 
   <!-- HEADER -->
-  <header id="header">
-    <div class="header-top">
-      <div class="brand">
-        <div class="brand-mark">T</div>
-        <div>
-          <div class="brand-name">TaskPro</div>
-          <div class="brand-tag">Earn · Post · Grow</div>
-        </div>
-      </div>
-      <div class="balance-chip">
-        <span class="balance-label">Balance</span>
-        <span class="balance-value" id="balanceDisplay">₦3,450</span>
-      </div>
-    </div>
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="tasks" onclick="switchTab('tasks')">
-        <span class="tab-icon">⚡</span> Find Tasks
-      </button>
-      <button class="tab-btn" data-tab="poster" onclick="switchTab('poster')">
-        <span class="tab-icon">📋</span> Post Tasks
-      </button>
-    </div>
-  </header>
-
+<header id="header">
+  <div class="header-top">
+    <div class="app-title">Million Subscribers</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')">
+      Find Tasks
+    </button>
+    <button class="tab-btn active" data-tab="poster" onclick="switchTab('poster')">
+      Post Tasks
+    </button>
+  </div>
+</header>
   <!-- CONTENT -->
   <main id="content">
 
