@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html lang="ha">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign Ad-Network | Synergy Monetization Suite</title>
+    <title>Sovereign Ad-Network | Million Customers</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #060813;
             color: #f3f4f6;
+            background: #020617;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent),
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            min-height: 100vh;
         }
         h1, h2, h3, .brand-font {
             font-family: 'Space Grotesk', sans-serif;
@@ -23,62 +27,46 @@
         .gradient-border-rose { border-left: 4px solid #f43f5e; }
         .gradient-border-gold { border-left: 4px solid #eab308; }
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #060813; }
+        ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-
-        /* Fixed-size ad thumbnail — never affects card height or progress bar */
-        /* Square thumbnail — left-aligned, same shape as reference */
         .ad-thumb {
-            width: 72px;
-            height: 72px;
-            min-width: 72px;
-            border-radius: 10px;
-            object-fit: cover;
-            display: block;
-            background: #1e293b;
+            width: 72px; height: 72px; min-width: 72px;
+            border-radius: 10px; object-fit: cover;
+            display: block; background: #1e293b;
         }
         .ad-thumb-fallback {
-            width: 72px;
-            height: 72px;
-            min-width: 72px;
+            width: 72px; height: 72px; min-width: 72px;
             border-radius: 10px;
             background: linear-gradient(135deg, #1e293b, #0f172a);
-            display: none;
-            align-items: center;
-            justify-content: center;
+            display: none; align-items: center; justify-content: center;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
 
-    <header class="bg-[#060813]/95 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex flex-col items-center gap-3">
-        <!-- Centered title with amber dot -->
+    <header class="bg-[#020617]/95 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex flex-col items-center gap-3">
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
             <span class="brand-font text-xl font-bold tracking-tight text-white">Million Customers</span>
         </div>
-
-        <!-- Wallet badges -->
         <div class="flex items-center gap-3">
             <div class="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-900 text-xs flex items-center gap-1.5">
                 <span class="text-gray-500">Naira:</span>
-                <span id="nairaBalanceDisplay" class="font-bold text-rose-400">₦5,400.00</span>
+                <span id="nairaBalanceDisplay" class="font-bold text-rose-400">&#x20A6;5,400.00</span>
             </div>
             <div class="bg-slate-950/80 px-3 py-1.5 rounded-lg border border-slate-900 text-xs flex items-center gap-1.5">
-                <span class="text-gray-500">Synergy:</span>
-                <span id="tokenBalanceDisplay" class="font-bold text-amber-400">0.00 SYN</span>
+                <span class="text-gray-500">Vonk:</span>
+                <span id="tokenBalanceDisplay" class="font-bold text-amber-400">0.00 VNK</span>
             </div>
         </div>
-
-        <!-- Pill switcher matching reference -->
         <div class="bg-[#111a11] rounded-full p-1 flex items-center w-full max-w-xs">
             <button onclick="togglePortal('advertiser')" id="btn-portal-advertiser"
                 class="flex-1 py-2 rounded-full text-sm font-bold transition-all duration-200 bg-[#f0ede4] text-[#0f1a0f]">
-                Saka Talla
+                Post Ad
             </button>
             <button onclick="togglePortal('earner')" id="btn-portal-earner"
                 class="flex-1 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-[#6b7a6b]">
-                Saka Aiki
+                Earn
             </button>
         </div>
     </header>
@@ -91,50 +79,47 @@
                 <div class="glass-card gradient-border-rose p-6 rounded-2xl space-y-6">
                     <div>
                         <span class="text-[10px] text-rose-400 uppercase tracking-widest font-bold block">Campaign Deployment Launchpad</span>
-                        <h2 class="text-lg font-bold text-white mt-1">Kaddamar da Tallan WhatsApp Status</h2>
-                        <p class="text-xs text-gray-400 mt-1">Saka hoton tallanka da kake son dubunnan matasa su ɗora a status ɗinsu na tsawon awa 24.</p>
+                        <h2 class="text-lg font-bold text-white mt-1">Launch Your WhatsApp Status Ad</h2>
+                        <p class="text-xs text-gray-400 mt-1">Upload your ad creative and let thousands post it on their WhatsApp Status for 24 hours.</p>
                     </div>
                     <form onsubmit="deployNewCampaign(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-2">Sunan Kamfe (Campaign Identity)</label>
-                            <input type="text" id="campTitle" required placeholder="Misali: KanoMart Wholesale Promo" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition">
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Campaign Name</label>
+                            <input type="text" id="campTitle" required placeholder="e.g. KanoMart Wholesale Promo" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-2">Hoton Talla (Ad Image)</label>
-                            <!-- Toggle tabs -->
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Ad Media (Images &amp; Videos)</label>
                             <div class="flex gap-2 mb-2">
                                 <button type="button" onclick="switchMediaTab('upload')" id="tab-upload"
                                     class="px-3 py-1 rounded-lg text-[11px] font-bold transition bg-rose-500 text-white">
-                                    ⬆ Dora Hoto
+                                    &#x2B06; Upload Files
                                 </button>
                                 <button type="button" onclick="switchMediaTab('url')" id="tab-url"
                                     class="px-3 py-1 rounded-lg text-[11px] font-bold transition bg-slate-800 text-gray-400">
-                                    🔗 Saka Link
+                                    &#x1F517; Paste Link
                                 </button>
                             </div>
-                            <!-- Upload zone -->
-                            <div id="media-upload-zone"
-                                onclick="document.getElementById('campMediaFile').click()"
-                                class="w-full bg-slate-950 border-2 border-dashed border-slate-700 hover:border-rose-500 rounded-xl px-4 py-5 text-center cursor-pointer transition group">
-                                <input type="file" id="campMediaFile" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                                <div id="upload-placeholder">
-                                    <p class="text-gray-500 text-xs group-hover:text-rose-400 transition">📷 Danna nan domin zabar hoto</p>
-                                    <p class="text-gray-600 text-[10px] mt-1">JPG, PNG, WEBP — Max 5MB</p>
+                            <div id="media-upload-zone" class="space-y-2">
+                                <div onclick="document.getElementById('campMediaImages').click()"
+                                    class="w-full bg-slate-950 border-2 border-dashed border-slate-700 hover:border-rose-500 rounded-xl px-4 py-3 text-center cursor-pointer transition">
+                                    <input type="file" id="campMediaImages" accept="image/*" multiple class="hidden" onchange="handleAdImages(event)">
+                                    <p class="text-[11px] text-gray-500">&#x1F4F7; Images &mdash; up to 4 (JPG/PNG/WEBP)</p>
+                                    <div id="adImagesPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
                                 </div>
-                                <div id="upload-preview" class="hidden">
-                                    <img id="upload-preview-img" src="" alt="" class="h-24 mx-auto rounded-lg object-cover">
-                                    <p id="upload-preview-name" class="text-[10px] text-gray-400 mt-1 truncate"></p>
+                                <div onclick="document.getElementById('campMediaVideos').click()"
+                                    class="w-full bg-slate-950 border-2 border-dashed border-slate-700 hover:border-rose-500 rounded-xl px-4 py-3 text-center cursor-pointer transition">
+                                    <input type="file" id="campMediaVideos" accept="video/*" multiple class="hidden" onchange="handleAdVideos(event)">
+                                    <p class="text-[11px] text-gray-500">&#x1F3AC; Videos &mdash; up to 2 (MP4/MOV)</p>
+                                    <div id="adVideosPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
                                 </div>
                             </div>
-                            <!-- URL input (hidden by default) -->
-                            <input type="url" id="campMediaUrl" placeholder="https://kanomart.com/promo-banner.jpg"
+                            <input type="url" id="campMediaUrl" placeholder="https://example.com/your-ad-image.jpg"
                                 class="hidden w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition">
-                            <!-- Hidden field that holds the final value used on submit -->
                             <input type="hidden" id="campMedia">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-400 mb-2">Kuɗi ga View 1 (Min: ₦5)</label>
+                                <label class="block text-xs font-medium text-gray-400 mb-2">Pay Per View (Min: &#x20A6;5)</label>
                                 <input type="number" id="payPerView" min="5" required oninput="calculateAdBudget()" placeholder="5" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none">
                             </div>
                             <div>
@@ -143,12 +128,12 @@
                             </div>
                         </div>
                         <div class="p-4 bg-slate-950 rounded-xl border border-slate-900 flex justify-between items-center text-xs">
-                            <span class="text-gray-400">Jimillar Kuɗin Talla (Naira):</span>
-                            <span id="totalAdCostDisplay" class="text-base font-bold text-rose-400">₦0.00</span>
+                            <span class="text-gray-400">Total Campaign Budget (Naira):</span>
+                            <span id="totalAdCostDisplay" class="text-base font-bold text-rose-400">&#x20A6;0.00</span>
                         </div>
-                        <p id="adBudgetWarning" class="text-[11px] text-red-400 hidden">⚠️ Error: Minimum Campaign budget dole ya kai ko ya gota ₦1,000 domin tabbatar da inganci.</p>
+                        <p id="adBudgetWarning" class="text-[11px] text-red-400 hidden">&#x26A0;&#xFE0F; Minimum campaign budget is &#x20A6;1,000.</p>
                         <button type="submit" class="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition duration-300 shadow-md">
-                            Tura Tallan Cikin Tsarin (Deploy Live)
+                            Deploy Campaign Live
                         </button>
                     </form>
                 </div>
@@ -156,8 +141,8 @@
 
             <section class="lg:col-span-7 space-y-6">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Tallace-tallacen da Ke Gudana (Live Network Feed)</h2>
-                    <p class="text-xs text-gray-400 mt-1">Mutum 300 dinka na iya amfani da wannan bangaren don tantance screenshots da kuma bin diddigin yaduwa.</p>
+                    <h2 class="text-lg font-bold text-white">Active Campaigns (Live Network Feed)</h2>
+                    <p class="text-xs text-gray-400 mt-1">Track your active campaigns and monitor view progress in real time.</p>
                 </div>
                 <div id="advertiserFeedContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </section>
@@ -167,8 +152,8 @@
         <div id="earnerPortal" class="lg:col-span-12 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full hidden">
             <section class="lg:col-span-7 space-y-6">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Ayyukan Status Da Ke Akwai</h2>
-                    <p class="text-xs text-gray-400 mt-1">Sauke hoton kowane kamfe, dora shi a WhatsApp dinka na tsawon awa 24, sannan ka turo screenshot.</p>
+                    <h2 class="text-lg font-bold text-white">Available Status Jobs</h2>
+                    <p class="text-xs text-gray-400 mt-1">Download each campaign asset, post it on your WhatsApp Status for 24 hours, then submit your proof.</p>
                 </div>
                 <div id="earnerFeedContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </section>
@@ -177,26 +162,26 @@
                 <div class="glass-card gradient-border-gold p-6 rounded-2xl space-y-6">
                     <div>
                         <span class="text-[10px] text-amber-400 uppercase tracking-widest font-bold block">Vault Gateway // The Value Lock</span>
-                        <h2 class="text-lg font-bold text-white mt-1">Maida Kuɗinka Zuwa Synergy Token</h2>
-                        <p class="text-xs text-gray-400 mt-1">Cire kuɗi a matsayin Naira yana da harajin 10%. Amma idan ka maida shi Synergy Token, zaka sami **20% Kyauta (Bonus)** na musamman nan take!</p>
+                        <h2 class="text-lg font-bold text-white mt-1">Convert Earnings to Vonk</h2>
+                        <p class="text-xs text-gray-400 mt-1">Withdrawing as Naira incurs a 10% fee. Convert to Vonk instead and receive a 20% bonus instantly!</p>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-400 mb-2">Adadin Nairar da Kake Son Canzawa</label>
-                            <input type="number" id="convertNairaAmount" placeholder="Misali: 2000" oninput="calculateTokenSwap()" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                            <label class="block text-xs font-medium text-gray-400 mb-2">Naira Amount to Convert</label>
+                            <input type="number" id="convertNairaAmount" placeholder="2000" oninput="calculateVonkSwap()" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
                         </div>
                         <div class="p-4 bg-slate-950 rounded-xl border border-slate-900 space-y-2 text-xs">
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Zaka Karɓi (Tare da 20% Bonus):</span>
-                                <span id="estimatedTokensDisplay" class="font-bold text-amber-400">0.00 SYN</span>
+                                <span class="text-gray-400">You Will Receive (with 20% Bonus):</span>
+                                <span id="estimatedTokensDisplay" class="font-bold text-amber-400">0.00 VNK</span>
                             </div>
                             <div class="flex justify-between text-[11px] text-gray-500 border-t border-slate-900 pt-2">
-                                <span>Synergy Fixed Rate:</span>
-                                <span>1 SYN = ₦10.00</span>
+                                <span>Vonk Fixed Rate:</span>
+                                <span>1 VNK = &#x20A6;10.00</span>
                             </div>
                         </div>
-                        <button onclick="executeTrojanSwap()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition duration-300">
-                            Canza Zuwa Synergy Token (Claim 20% Bonus)
+                        <button onclick="executeVonkSwap()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition duration-300">
+                            Convert to Vonk (Claim 20% Bonus)
                         </button>
                     </div>
                 </div>
@@ -209,68 +194,79 @@
     <div id="proofVerificationModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
         <div class="glass-card max-w-md w-full p-6 rounded-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-900 pb-3">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Tura Screenshot na Views (Shaida)</h3>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Submit Proof of Views</h3>
                 <button onclick="closeProofModal()" class="text-gray-500 hover:text-white text-xl">&times;</button>
             </div>
-            <p class="text-xs text-gray-400">Tura adadin mutanen da suka kalli status dinka bayan awa 24 don mutum 300 na rukunin gudanarwa su tabbatar da gaskiyar aikin.</p>
+            <p class="text-xs text-gray-400">Upload screenshots and a short video showing your WhatsApp Status view count after 24 hours. Our team will verify your submission.</p>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Adadin Views Da Ka Samu</label>
-                    <input type="number" id="proofViewCount" placeholder="Misali: 150" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Total Views Received</label>
+                    <input type="number" id="proofViewCount" placeholder="e.g. 150" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Manna Link na Screenshot ɗinka</label>
-                    <input type="text" id="proofImgUrl" placeholder="https://imgur.com/your-screenshot.jpg" class="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Screenshots &mdash; up to 4 images</label>
+                    <div onclick="document.getElementById('proofImages').click()"
+                        class="w-full bg-slate-950 border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-xl px-4 py-3 text-center cursor-pointer transition">
+                        <input type="file" id="proofImages" accept="image/*" multiple class="hidden" onchange="handleProofImages(event)">
+                        <p class="text-[11px] text-gray-500">&#x1F4F8; Click to select screenshots (max 4)</p>
+                        <div id="proofImagesPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                    </div>
                 </div>
-                <button onclick="submitProofToNetwork()" class="w-full bg-amber-500 text-black font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Kaddamar da Shaida (Submit)</button>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Videos &mdash; up to 2 videos</label>
+                    <div onclick="document.getElementById('proofVideos').click()"
+                        class="w-full bg-slate-950 border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-xl px-4 py-3 text-center cursor-pointer transition">
+                        <input type="file" id="proofVideos" accept="video/*" multiple class="hidden" onchange="handleProofVideos(event)">
+                        <p class="text-[11px] text-gray-500">&#x1F3AC; Click to select videos (max 2)</p>
+                        <div id="proofVideosPreview" class="flex flex-wrap gap-2 mt-2 justify-center"></div>
+                    </div>
+                </div>
+                <button onclick="submitProofToNetwork()" class="w-full bg-amber-500 text-black font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Submit Proof</button>
             </div>
         </div>
     </div>
 
-    <footer class="border-t border-slate-950 bg-[#060813] px-8 py-5 text-center text-xs text-gray-600">
-        &copy; 2026 Sovereign Ad-Network Engine. Trojan Horse Tokenomics Active.
+    <footer class="border-t border-slate-950 bg-[#020617] px-8 py-5 text-center text-xs text-gray-600">
+        &copy; 2026 Million Customers Ad Network. All rights reserved.
     </footer>
 
     <script>
         let activeCampaigns = [
             { id: 2001, title: "KanoMart Launch Promo Campaign", media: "https://kanomart.com/banner.jpg", rate: 6, target: 1000, filled: 340 },
-            { id: 2002, title: "Synergy Ecosystem Airdrop Awareness", media: "https://synergy.net/airdrop.jpg", rate: 8, target: 500, filled: 120 }
+            { id: 2002, title: "Vonk Ecosystem Airdrop Awareness", media: "https://vonk.net/airdrop.jpg", rate: 8, target: 500, filled: 120 }
         ];
 
         let userNairaWallet = 5400.00;
-        let userSynergyWallet = 0.00;
+        let userVonkWallet  = 0.00;
         let activeSelectedJobId = null;
+        let adImageFiles = [], adVideoFiles = [];
+        let proofImageFiles = [], proofVideoFiles = [];
 
         function togglePortal(target) {
-            const advBtn = document.getElementById('btn-portal-advertiser');
-            const earnBtn = document.getElementById('btn-portal-earner');
-            const advPortal = document.getElementById('advertiserPortal');
+            const advBtn    = document.getElementById('btn-portal-advertiser');
+            const earnBtn   = document.getElementById('btn-portal-earner');
+            const advPortal  = document.getElementById('advertiserPortal');
             const earnPortal = document.getElementById('earnerPortal');
             const ACTIVE   = "flex-1 py-2 rounded-full text-sm font-bold transition-all duration-200 bg-[#f0ede4] text-[#0f1a0f]";
             const INACTIVE = "flex-1 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-[#6b7a6b]";
             if (target === 'advertiser') {
-                advPortal.classList.remove('hidden');
-                earnPortal.classList.add('hidden');
-                advBtn.className = ACTIVE;
-                earnBtn.className = INACTIVE;
+                advPortal.classList.remove('hidden');  earnPortal.classList.add('hidden');
+                advBtn.className = ACTIVE;  earnBtn.className = INACTIVE;
             } else {
-                earnPortal.classList.remove('hidden');
-                advPortal.classList.add('hidden');
-                earnBtn.className = ACTIVE;
-                advBtn.className = INACTIVE;
+                earnPortal.classList.remove('hidden'); advPortal.classList.add('hidden');
+                earnBtn.className = ACTIVE; advBtn.className = INACTIVE;
                 renderEarnerFeed();
             }
         }
 
         function calculateAdBudget() {
-            const pay = parseFloat(document.getElementById('payPerView').value) || 0;
-            const views = parseInt(document.getElementById('targetViews').value) || 0;
+            const pay   = parseFloat(document.getElementById('payPerView').value) || 0;
+            const views = parseInt(document.getElementById('targetViews').value)  || 0;
             const total = pay * views;
-            document.getElementById('totalAdCostDisplay').innerText = `₦${total.toFixed(2)}`;
+            document.getElementById('totalAdCostDisplay').innerText = `\u20A6${total.toFixed(2)}`;
             document.getElementById('adBudgetWarning').classList.toggle('hidden', !(total < 1000 && total > 0));
         }
 
-        // Media tab switcher
         function switchMediaTab(tab) {
             const uploadZone = document.getElementById('media-upload-zone');
             const urlInput   = document.getElementById('campMediaUrl');
@@ -279,89 +275,124 @@
             const ACTIVE   = "px-3 py-1 rounded-lg text-[11px] font-bold transition bg-rose-500 text-white";
             const INACTIVE = "px-3 py-1 rounded-lg text-[11px] font-bold transition bg-slate-800 text-gray-400";
             if (tab === 'upload') {
-                uploadZone.classList.remove('hidden');
-                urlInput.classList.add('hidden');
-                tabUp.className  = ACTIVE;
-                tabUrl.className = INACTIVE;
-                document.getElementById('campMedia').value = uploadZone._dataUrl || '';
+                uploadZone.classList.remove('hidden'); urlInput.classList.add('hidden');
+                tabUp.className = ACTIVE; tabUrl.className = INACTIVE;
+                document.getElementById('campMedia').value = (adImageFiles.length ? document.getElementById('campMedia').value : '');
             } else {
-                uploadZone.classList.add('hidden');
-                urlInput.classList.remove('hidden');
-                tabUp.className  = INACTIVE;
-                tabUrl.className = ACTIVE;
+                uploadZone.classList.add('hidden'); urlInput.classList.remove('hidden');
+                tabUp.className = INACTIVE; tabUrl.className = ACTIVE;
                 document.getElementById('campMedia').value = urlInput.value;
                 urlInput.oninput = () => { document.getElementById('campMedia').value = urlInput.value; };
             }
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) { alert("Hoto ya yi girma! Max 5MB."); return; }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                document.getElementById('upload-placeholder').classList.add('hidden');
-                document.getElementById('upload-preview').classList.remove('hidden');
-                document.getElementById('upload-preview-img').src = dataUrl;
-                document.getElementById('upload-preview-name').textContent = file.name;
-                document.getElementById('media-upload-zone')._dataUrl = dataUrl;
-                document.getElementById('campMedia').value = dataUrl;
-            };
-            reader.readAsDataURL(file);
+        function handleAdImages(event) {
+            const files = Array.from(event.target.files).slice(0, 4);
+            adImageFiles = files;
+            const preview = document.getElementById('adImagesPreview');
+            preview.innerHTML = '';
+            files.forEach(f => {
+                const img = document.createElement('img');
+                img.className = 'h-16 w-16 object-cover rounded-lg border border-slate-700';
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.readAsDataURL(f);
+                preview.appendChild(img);
+            });
+            if (files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = e => { document.getElementById('campMedia').value = e.target.result; };
+                reader.readAsDataURL(files[0]);
+            }
         }
 
-                function deployNewCampaign(e) {
+        function handleAdVideos(event) {
+            const files = Array.from(event.target.files).slice(0, 2);
+            adVideoFiles = files;
+            const preview = document.getElementById('adVideosPreview');
+            preview.innerHTML = '';
+            files.forEach(f => {
+                const tag = document.createElement('div');
+                tag.className = 'flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 text-[10px] text-gray-300';
+                tag.innerHTML = `\u{1F3AC} ${f.name.slice(0, 20)}`;
+                preview.appendChild(tag);
+            });
+        }
+
+        function handleProofImages(event) {
+            const files = Array.from(event.target.files).slice(0, 4);
+            proofImageFiles = files;
+            const preview = document.getElementById('proofImagesPreview');
+            preview.innerHTML = '';
+            files.forEach(f => {
+                const img = document.createElement('img');
+                img.className = 'h-14 w-14 object-cover rounded-lg border border-slate-700';
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.readAsDataURL(f);
+                preview.appendChild(img);
+            });
+        }
+
+        function handleProofVideos(event) {
+            const files = Array.from(event.target.files).slice(0, 2);
+            proofVideoFiles = files;
+            const preview = document.getElementById('proofVideosPreview');
+            preview.innerHTML = '';
+            files.forEach(f => {
+                const tag = document.createElement('div');
+                tag.className = 'flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 text-[10px] text-gray-300';
+                tag.innerHTML = `\u{1F3AC} ${f.name.slice(0, 20)}`;
+                preview.appendChild(tag);
+            });
+        }
+
+        function downloadAdAsset(src, filename) {
+            if (src.startsWith('data:')) {
+                const a = document.createElement('a');
+                a.href = src; a.download = filename || 'ad-asset'; a.click();
+            } else {
+                window.open(src, '_blank');
+            }
+        }
+
+        function deployNewCampaign(e) {
             e.preventDefault();
             const mediaVal = document.getElementById('campMedia').value.trim();
-            if (!mediaVal) { alert('Don Allah saka ko dora hoton talla!'); return; }
-            const pay = parseFloat(document.getElementById('payPerView').value);
+            if (!mediaVal) { alert('Please upload or link your ad media before deploying!'); return; }
+            const pay   = parseFloat(document.getElementById('payPerView').value);
             const views = parseInt(document.getElementById('targetViews').value);
             const totalCost = pay * views;
             if (totalCost < 1000) return;
-            if (userNairaWallet < totalCost) {
-                alert("⚠️ Kudinka bai isa cikin asusunka na Naira don kaddamar da wannan tallan ba!");
-                return;
-            }
+            if (userNairaWallet < totalCost) { alert('\u26A0\uFE0F Insufficient Naira balance to launch this campaign!'); return; }
             userNairaWallet -= totalCost;
-            const newCampaign = {
-                id: Date.now(),
-                title: document.getElementById('campTitle').value,
-                media: document.getElementById('campMedia').value,
-                rate: pay, target: views, filled: 0
-            };
-            activeCampaigns.unshift(newCampaign);
-            alert("🚀 An kaddamar da tallan ku cikin nasara! Mutum 60,000 za su fara gani a WhatsApp yanzu.");
-            document.getElementById('campTitle').value = "";
-            document.getElementById('campMedia').value = "";
-            document.getElementById('campMediaUrl').value = "";
-            document.getElementById('campMediaFile').value = "";
-            document.getElementById('upload-placeholder').classList.remove('hidden');
-            document.getElementById('upload-preview').classList.add('hidden');
-            document.getElementById('media-upload-zone')._dataUrl = '';
-            document.getElementById('payPerView').value = "";
-            document.getElementById('targetViews').value = "";
-            document.getElementById('totalAdCostDisplay').innerText = "₦0.00";
-            updateGlobalUI();
-            renderAdvertiserFeed();
+            activeCampaigns.unshift({ id: Date.now(), title: document.getElementById('campTitle').value, media: mediaVal, rate: pay, target: views, filled: 0 });
+            alert('\u{1F680} Campaign launched successfully! Up to 60,000 users will start posting it on WhatsApp now.');
+            document.getElementById('campTitle').value = '';
+            document.getElementById('campMedia').value = '';
+            document.getElementById('campMediaUrl').value = '';
+            document.getElementById('campMediaImages').value = '';
+            document.getElementById('campMediaVideos').value = '';
+            document.getElementById('adImagesPreview').innerHTML = '';
+            document.getElementById('adVideosPreview').innerHTML = '';
+            adImageFiles = []; adVideoFiles = [];
+            document.getElementById('payPerView').value = '';
+            document.getElementById('targetViews').value = '';
+            document.getElementById('totalAdCostDisplay').innerText = '\u20A60.00';
+            updateGlobalUI(); renderAdvertiserFeed();
         }
 
         function renderAdvertiserFeed() {
             const container = document.getElementById('advertiserFeedContainer');
-            container.innerHTML = "";
+            container.innerHTML = '';
             activeCampaigns.forEach(ad => {
                 const pct = Math.min((ad.filled / ad.target) * 100, 100);
                 const div = document.createElement('div');
-                div.className = "glass-card p-4 rounded-xl border border-slate-900 space-y-3";
+                div.className = 'glass-card p-4 rounded-xl border border-slate-900 space-y-3';
                 div.innerHTML = `
-                    <!-- TOP ROW: square thumb left, title + badge aligned to top -->
                     <div class="flex items-start gap-3">
-                        <img
-                            src="${ad.media}"
-                            alt=""
-                            class="ad-thumb"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                        />
+                        <img src="${ad.media}" alt="" class="ad-thumb"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
                         <div class="ad-thumb-fallback">
                             <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f43f5e" stroke-width="1.5">
                                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/>
@@ -372,40 +403,37 @@
                             <span class="text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded font-bold shrink-0">LIVE</span>
                         </div>
                     </div>
-                    <!-- PROGRESS — below the row, never touched by image -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-[10px] text-gray-500">
                             <span>Views Metric Tracking:</span>
                             <span class="font-bold text-gray-300">${ad.filled} / ${ad.target} Views</span>
                         </div>
                         <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-rose-500 h-full" style="width: ${pct}%"></div>
+                            <div class="bg-rose-500 h-full" style="width:${pct}%"></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(div);
             });
         }
 
         function renderEarnerFeed() {
             const container = document.getElementById('earnerFeedContainer');
-            container.innerHTML = "";
+            container.innerHTML = '';
             activeCampaigns.forEach(ad => {
                 container.innerHTML += `
                     <div class="glass-card p-5 rounded-xl border border-slate-900 flex flex-col justify-between space-y-4">
                         <div class="space-y-1">
                             <div class="flex justify-between text-[10px] text-amber-400 font-bold tracking-wider uppercase">
                                 <span>WhatsApp Monetization</span>
-                                <span>₦${ad.rate.toFixed(2)} Per View</span>
+                                <span>\u20A6${ad.rate.toFixed(2)} Per View</span>
                             </div>
                             <h3 class="text-xs font-bold text-white">${ad.title}</h3>
                         </div>
                         <div class="flex space-x-2 pt-2">
-                            <a href="${ad.media}" target="_blank" class="w-1/2 bg-slate-950 border border-slate-900 text-center hover:bg-slate-900 text-gray-300 py-2 rounded-xl text-[11px] font-bold">Sauke Asset (Download)</a>
-                            <button onclick="openProofSubmissionModal(${ad.id})" class="w-1/2 bg-amber-500 text-black py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider">Tura Shaida</button>
+                            <button onclick="downloadAdAsset('${ad.media}','ad-asset')" class="w-1/2 bg-slate-950 border border-slate-900 text-center hover:bg-slate-900 text-gray-300 py-2 rounded-xl text-[11px] font-bold">Download Asset</button>
+                            <button onclick="openProofSubmissionModal(${ad.id})" class="w-1/2 bg-amber-500 text-black py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider">Submit Proof</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
@@ -413,45 +441,55 @@
             activeSelectedJobId = id;
             document.getElementById('proofVerificationModal').classList.remove('hidden');
         };
+
         window.closeProofModal = () => {
             document.getElementById('proofVerificationModal').classList.add('hidden');
-            document.getElementById('proofViewCount').value = "";
-            document.getElementById('proofImgUrl').value = "";
+            document.getElementById('proofViewCount').value = '';
+            document.getElementById('proofImages').value = '';
+            document.getElementById('proofVideos').value = '';
+            document.getElementById('proofImagesPreview').innerHTML = '';
+            document.getElementById('proofVideosPreview').innerHTML = '';
+            proofImageFiles = []; proofVideoFiles = [];
         };
+
         window.submitProofToNetwork = () => {
             const views = parseInt(document.getElementById('proofViewCount').value) || 0;
-            const img = document.getElementById('proofImgUrl').value;
-            if (views <= 0 || !img) { alert("Don Allah cika dukkan bayanan sirri na shaida dakyau!"); return; }
+            if (views <= 0 || (proofImageFiles.length === 0 && proofVideoFiles.length === 0)) {
+                alert('Please enter your view count and upload at least one screenshot or video!');
+                return;
+            }
             const ad = activeCampaigns.find(a => a.id === activeSelectedJobId);
             if (ad) {
                 const totalPayout = views * ad.rate;
                 ad.filled += views;
                 userNairaWallet += totalPayout;
-                alert(`🎯 An yi nasara! Mutum 300 za su duba screenshot din. An biya ka lada na wucin gadi ₦${totalPayout.toFixed(2)} kai tsaye.`);
-                closeProofModal();
-                updateGlobalUI();
-                renderEarnerFeed();
+                alert(`\u{1F3AF} Proof submitted! Our team will verify your screenshots. Provisional payout of \u20A6${totalPayout.toFixed(2)} has been credited.`);
+                closeProofModal(); updateGlobalUI(); renderEarnerFeed();
             }
         };
-        window.calculateTokenSwap = () => {
+
+        function calculateVonkSwap() {
             const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
-            document.getElementById('estimatedTokensDisplay').innerText = `${((amount / 10) * 1.20).toFixed(2)} SYN`;
-        };
-        window.executeTrojanSwap = () => {
-            const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
-            if (amount <= 0 || amount > userNairaWallet) { alert("Kudin da kake son canzawa ya wuce abinda ke aljihunka!"); return; }
-            const tokensEarned = (amount / 10) * 1.20;
-            userNairaWallet -= amount;
-            userSynergyWallet += tokensEarned;
-            alert(`💎 Madallah! An canza ₦${amount.toFixed(2)} zuwa ${tokensEarned.toFixed(2)} SYN (Hadda 20% Bonus dinka). Yanzu kai babban Holder ne!`);
-            document.getElementById('convertNairaAmount').value = "";
-            document.getElementById('estimatedTokensDisplay').innerText = "0.00 SYN";
-            updateGlobalUI();
-        };
-        function updateGlobalUI() {
-            document.getElementById('nairaBalanceDisplay').innerText = `₦${userNairaWallet.toFixed(2)}`;
-            document.getElementById('tokenBalanceDisplay').innerText = `${userSynergyWallet.toFixed(2)} SYN`;
+            document.getElementById('estimatedTokensDisplay').innerText = `${((amount / 10) * 1.20).toFixed(2)} VNK`;
         }
+
+        function executeVonkSwap() {
+            const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+            if (amount <= 0 || amount > userNairaWallet) { alert('Amount exceeds your available Naira balance!'); return; }
+            const vonkEarned = (amount / 10) * 1.20;
+            userNairaWallet -= amount;
+            userVonkWallet  += vonkEarned;
+            alert(`\u{1F48E} Converted \u20A6${amount.toFixed(2)} \u2192 ${vonkEarned.toFixed(2)} VNK (includes 20% bonus). You are now a Vonk holder!`);
+            document.getElementById('convertNairaAmount').value = '';
+            document.getElementById('estimatedTokensDisplay').innerText = '0.00 VNK';
+            updateGlobalUI();
+        }
+
+        function updateGlobalUI() {
+            document.getElementById('nairaBalanceDisplay').innerText = `\u20A6${userNairaWallet.toFixed(2)}`;
+            document.getElementById('tokenBalanceDisplay').innerText = `${userVonkWallet.toFixed(2)} VNK`;
+        }
+
         window.onload = () => { updateGlobalUI(); renderAdvertiserFeed(); };
     </script>
 </body>
