@@ -449,24 +449,25 @@ img{display:block;max-width:100%}
   line-height:1.1;
 }
 .stat-lbl{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-
 .post-btn-main{
-  width:100%;
-  padding:15px;
-  background:var(--lime);
-  color:var(--bg);
-  border-radius:var(--radius);
-  font-family:var(--font-d);
-  font-weight:800;
-  font-size:15px;
-  letter-spacing:.2px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:auto;
+  align-self:flex-start;
+  padding:10px 24px;
+  background:linear-gradient(135deg,#00f2fe,#7000ff);
+  color:#fff;
+  border-radius:99px;
+  font-family:var(--font-b);
+  font-weight:700;
+  font-size:13px;
+  letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
   transition:transform .15s var(--ease),box-shadow .2s;
   margin-bottom:24px;
+  box-shadow:0 4px 15px rgba(0,242,254,0.2);
 }
 .post-btn-main:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 32px var(--lime-glow);
+  box-shadow:0 8px 20px rgba(0,242,254,0.3);
 }
 
 .section-label{
@@ -908,27 +909,28 @@ select.f-input option{background:var(--surface);color:var(--text)}
 }
 
 .post-submit-btn{
-  width:100%;
-  padding:15px;
-  background:var(--lime);
-  color:var(--bg);
-  border-radius:var(--radius);
-  font-family:var(--font-d);
-  font-weight:800;
-  font-size:15px;
+  width:auto;
+  align-self:center;
+  padding:10px 32px;
+  background:linear-gradient(135deg,#00f2fe,#7000ff);
+  color:#fff;
+  border-radius:99px;
+  font-family:var(--font-b);
+  font-weight:700;
+  font-size:13px;
   display:flex;align-items:center;justify-content:center;gap:8px;
   transition:transform .15s var(--ease),box-shadow .2s;
+  box-shadow:0 4px 15px rgba(0,242,254,0.2);
 }
 .post-submit-btn:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 28px var(--lime-glow);
+  box-shadow:0 8px 20px rgba(0,242,254,0.3);
 }
 .post-submit-btn:disabled{
-  background:var(--surface2);
+  background:rgba(255,255,255,0.05);
   color:var(--text3);
   transform:none;box-shadow:none;cursor:not-allowed;
 }
-
 /* ── TOAST ──────────────────────────────────── */
 #toast{
   position:fixed;
