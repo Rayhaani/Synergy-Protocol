@@ -259,8 +259,20 @@ const currentUser = localStorage.getItem('synergy_user');
             { id: 2002, title: "Vonk Ecosystem Airdrop Awareness", media: "https://vonk.net/airdrop.jpg", rate: 8, target: 500, filled: 120 }
         ];
 
-        let userNairaWallet = 5400.00;
-        let userVonkWallet  = 0.00;
+        let userNairaWallet = 0;
+let userVonkWallet  = 0;
+
+// Load wallet daga Firestore
+function loadUserWallet() {
+    if (!currentUser) return;
+    db.collection("users").doc(currentUser).onSnapshot(doc => {
+        if (doc.exists) {
+            userNairaWallet = doc.data().nairaBalance || 0;
+            userVonkWallet  = doc.data().vonkBalance  || 0;
+            updateGlobalUI();
+        }
+    });
+}
         let activeSelectedJobId = null;
         let adImageFiles = [], adVideoFiles = [];
         let proofImageFiles = [], proofVideoFiles = [];
@@ -530,37 +542,81 @@ function renderEarnerFeed() {
             proofImageFiles = []; proofVideoFiles = [];
         };
 
-        window.submitProofToNetwork = () => {
-            const views = parseInt(document.getElementById('proofViewCount').value) || 0;
-            if (views <= 0 || (proofImageFiles.length === 0 && proofVideoFiles.length === 0)) {
-                alert('Please enter your view count and upload at least one screenshot or video!');
-                return;
-            }
-            const ad = activeCampaigns.find(a => a.id === activeSelectedJobId);
-            if (ad) {
-                const totalPayout = views * ad.rate;
-                ad.filled += views;
-                userNairaWallet += totalPayout;
-                alert(`\u{1F3AF} Proof submitted! Our team will verify your screenshots. Provisional payout of \u20A6${totalPayout.toFixed(2)} has been credited.`);
-                closeProofModal(); updateGlobalUI(); renderEarnerFeed();
-            }
-        };
+        window.submitProofToNetwork = async () => {
+    const views = parseInt(document.getElementById('proofViewCount').value) || 0;
+    if (views <= 0 || (proofImageFiles.length === 0 && proofVideoFiles.length === 0)) {
+        alert('Please enter your view count and upload at least one screenshot or video!');
+        return;
+    }
+    if (!currentUser) { alert('Please login first!'); return; }
 
+    try {
+        // Dauko campaign data
+        const snap = await rtdb.ref(`ad_campaigns/${activeSelectedJobId}`).get();
+        if (!snap.exists()) { alert('Campaign not found!'); return; }
+        const ad = snap.val();
+
+        const totalPayout = views * ad.rate;
+
+        // 1. Ajiye proof submission
+        await db.collection("ad_proof_submissions").add({
+            campaignId: activeSelectedJobId,
+            campaignTitle: ad.title,
+            submittedBy: currentUser,
+            views: views,
+            payout: totalPayout,
+            status: "pending",
+            submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 2. Update filled count a campaign
+        await rtdb.ref(`ad_campaigns/${activeSelectedJobId}`).update({
+            filled: (ad.filled || 0) + views
+        });
+
+        // 3. Credit wallet nan take (provisional)
+        await db.collection("users").doc(currentUser).update({
+            nairaBalance: firebase.firestore.FieldValue.increment(totalPayout)
+        });
+
+        alert(`🎯 Proof submitted! Provisional payout of ₦${totalPayout.toFixed(2)} credited. Pending verification.`);
+        closeProofModal();
+
+    } catch (err) {
+        console.error(err);
+        alert('Error submitting proof. Try again.');
+    }
+};
+        
         function calculateVonkSwap() {
             const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
             document.getElementById('estimatedTokensDisplay').innerText = `${((amount / 10) * 1.20).toFixed(2)} VNK`;
         }
 
-        function executeVonkSwap() {
-            const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
-            if (amount <= 0 || amount > userNairaWallet) { alert('Amount exceeds your available Naira balance!'); return; }
-            const vonkEarned = (amount / 10) * 1.20;
-            userNairaWallet -= amount;
-            userVonkWallet  += vonkEarned;
-            alert(`\u{1F48E} Converted \u20A6${amount.toFixed(2)} \u2192 ${vonkEarned.toFixed(2)} VNK (includes 20% bonus). You are now a Vonk holder!`);
-            document.getElementById('convertNairaAmount').value = '';
-            document.getElementById('estimatedTokensDisplay').innerText = '0.00 VNK';
-            updateGlobalUI();
+        async function executeVonkSwap() {
+    const amount = parseFloat(document.getElementById('convertNairaAmount').value) || 0;
+    if (amount <= 0 || amount > userNairaWallet) { 
+        alert('Amount exceeds your available Naira balance!'); 
+        return; 
+    }
+    if (!currentUser) { alert('Please login first!'); return; }
+
+    const vonkEarned = (amount / 10) * 1.20;
+
+    try {
+        await db.collection("users").doc(currentUser).update({
+            nairaBalance: firebase.firestore.FieldValue.increment(-amount),
+            vonkBalance:  firebase.firestore.FieldValue.increment(vonkEarned)
+        });
+
+        alert(`💎 Converted ₦${amount.toFixed(2)} → ${vonkEarned.toFixed(2)} VNK (includes 20% bonus)!`);
+        document.getElementById('convertNairaAmount').value = '';
+        document.getElementById('estimatedTokensDisplay').innerText = '0.00 VNK';
+
+    } catch (err) {
+        console.error(err);
+        alert('Conversion failed. Try again.');
+    }
         }
 
         function updateGlobalUI() {
@@ -568,7 +624,10 @@ function renderEarnerFeed() {
             document.getElementById('tokenBalanceDisplay').innerText = `${userVonkWallet.toFixed(2)} VNK`;
         }
 
-        window.onload = () => { updateGlobalUI(); renderAdvertiserFeed(); };
+        window.onload = () => {
+    loadUserWallet();
+    renderAdvertiserFeed();
+};
     </script>
 </body>
 </html>
