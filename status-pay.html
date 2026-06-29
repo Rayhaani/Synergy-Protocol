@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sovereign Ad-Network | Million Customers</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -231,6 +236,24 @@
     </footer>
 
     <script>
+    // Firebase Init
+const firebaseConfig = {
+    apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+    authDomain: "synergy-protocol.firebaseapp.com",
+    databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+    projectId: "synergy-protocol",
+    storageBucket: "synergy-protocol.firebasestorage.app",
+    messagingSenderId: "179647543031",
+    appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+};
+
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+const db = firebase.firestore();
+const rtdb = firebase.database();
+
+// Karɓar User daga Parent Website
+const currentUser = localStorage.getItem('synergy_user');
+
         let activeCampaigns = [
             { id: 2001, title: "KanoMart Launch Promo Campaign", media: "https://kanomart.com/banner.jpg", rate: 6, target: 1000, filled: 340 },
             { id: 2002, title: "Vonk Ecosystem Airdrop Awareness", media: "https://vonk.net/airdrop.jpg", rate: 8, target: 500, filled: 120 }
@@ -357,17 +380,43 @@
         }
 
         function deployNewCampaign(e) {
-            e.preventDefault();
-            const mediaVal = document.getElementById('campMedia').value.trim();
-            if (!mediaVal) { alert('Please upload or link your ad media before deploying!'); return; }
-            const pay   = parseFloat(document.getElementById('payPerView').value);
-            const views = parseInt(document.getElementById('targetViews').value);
-            const totalCost = pay * views;
-            if (totalCost < 1000) return;
-            if (userNairaWallet < totalCost) { alert('\u26A0\uFE0F Insufficient Naira balance to launch this campaign!'); return; }
-            userNairaWallet -= totalCost;
-            activeCampaigns.unshift({ id: Date.now(), title: document.getElementById('campTitle').value, media: mediaVal, rate: pay, target: views, filled: 0 });
-            alert('\u{1F680} Campaign launched successfully! Up to 60,000 users will start posting it on WhatsApp now.');
+    e.preventDefault();
+    if (!currentUser) { alert('⚠️ Please login first!'); return; }
+    const mediaVal = document.getElementById('campMedia').value.trim();
+    if (!mediaVal) { alert('Please upload or link your ad media before deploying!'); return; }
+    const pay   = parseFloat(document.getElementById('payPerView').value);
+    const views = parseInt(document.getElementById('targetViews').value);
+    const totalCost = pay * views;
+    if (totalCost < 1000) return;
+
+    // Duba wallet daga Firestore
+    db.collection("users").doc(currentUser).get().then(doc => {
+        const nairaBalance = doc.exists ? (doc.data().nairaBalance || 0) : 0;
+        if (nairaBalance < totalCost) {
+            alert('⚠️ Insufficient Naira balance!');
+            return;
+        }
+
+        // Ajiye campaign zuwa Realtime Database
+        const newCampaign = {
+            title: document.getElementById('campTitle').value,
+            media: mediaVal,
+            rate: pay,
+            target: views,
+            filled: 0,
+            createdBy: currentUser,
+            createdAt: Date.now()
+        };
+
+        rtdb.ref('ad_campaigns').push(newCampaign).then(() => {
+            // Rage kudin daga wallet
+            db.collection("users").doc(currentUser).update({
+                nairaBalance: firebase.firestore.FieldValue.increment(-totalCost)
+            });
+
+            alert('🚀 Campaign launched successfully!');
+
+            // Reset form
             document.getElementById('campTitle').value = '';
             document.getElementById('campMedia').value = '';
             document.getElementById('campMediaUrl').value = '';
@@ -378,65 +427,94 @@
             adImageFiles = []; adVideoFiles = [];
             document.getElementById('payPerView').value = '';
             document.getElementById('targetViews').value = '';
-            document.getElementById('totalAdCostDisplay').innerText = '\u20A60.00';
-            updateGlobalUI(); renderAdvertiserFeed();
+            document.getElementById('totalAdCostDisplay').innerText = '₦0.00';
+        });
+    });
+        }
+        
+
+       function renderAdvertiserFeed() {
+    const container = document.getElementById('advertiserFeedContainer');
+    container.innerHTML = '<p class="text-gray-500 text-xs text-center">Loading...</p>';
+
+    rtdb.ref('ad_campaigns').orderByChild('createdAt').on('value', snapshot => {
+        container.innerHTML = '';
+        const data = snapshot.val();
+        if (!data) {
+            container.innerHTML = '<p class="text-gray-500 text-xs text-center">No campaigns yet.</p>';
+            return;
         }
 
-        function renderAdvertiserFeed() {
-            const container = document.getElementById('advertiserFeedContainer');
-            container.innerHTML = '';
-            activeCampaigns.forEach(ad => {
-                const pct = Math.min((ad.filled / ad.target) * 100, 100);
-                const div = document.createElement('div');
-                div.className = 'glass-card p-4 rounded-xl border border-slate-900 space-y-3';
-                div.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <img src="${ad.media}" alt="" class="ad-thumb"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                        <div class="ad-thumb-fallback">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f43f5e" stroke-width="1.5">
-                                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0 flex items-center justify-between gap-2 mt-2">
-                            <h3 class="text-xs font-bold text-white line-clamp-2 leading-snug">${ad.title}</h3>
-                            <span class="text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded font-bold shrink-0">LIVE</span>
-                        </div>
+        Object.entries(data).reverse().forEach(([key, ad]) => {
+            const pct = Math.min((ad.filled / ad.target) * 100, 100);
+            const div = document.createElement('div');
+            div.className = 'glass-card p-4 rounded-xl border border-slate-900 space-y-3';
+            div.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <img src="${ad.media}" alt="" class="ad-thumb"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+                    <div class="ad-thumb-fallback">
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#f43f5e" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/>
+                        </svg>
                     </div>
+                    <div class="flex-1 min-w-0 flex items-center justify-between gap-2 mt-2">
+                        <h3 class="text-xs font-bold text-white line-clamp-2 leading-snug">${ad.title}</h3>
+                        <span class="text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded font-bold shrink-0">LIVE</span>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-gray-500">
+                        <span>Views:</span>
+                        <span class="font-bold text-gray-300">${ad.filled} / ${ad.target}</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-rose-500 h-full" style="width:${pct}%"></div>
+                    </div>
+                </div>`;
+            container.appendChild(div);
+        });
+    });
+}
+
+function renderEarnerFeed() {
+    const container = document.getElementById('earnerFeedContainer');
+    container.innerHTML = '<p class="text-gray-500 text-xs text-center">Loading...</p>';
+
+    rtdb.ref('ad_campaigns').orderByChild('createdAt').on('value', snapshot => {
+        container.innerHTML = '';
+        const data = snapshot.val();
+        if (!data) {
+            container.innerHTML = '<p class="text-gray-500 text-xs text-center">No jobs available.</p>';
+            return;
+        }
+
+        Object.entries(data).reverse().forEach(([key, ad]) => {
+            if (ad.filled >= ad.target) return; // Cire cikakkun campaigns
+            container.innerHTML += `
+                <div class="glass-card p-5 rounded-xl border border-slate-900 flex flex-col justify-between space-y-4">
                     <div class="space-y-1">
-                        <div class="flex justify-between text-[10px] text-gray-500">
-                            <span>Views Metric Tracking:</span>
-                            <span class="font-bold text-gray-300">${ad.filled} / ${ad.target} Views</span>
+                        <div class="flex justify-between text-[10px] text-amber-400 font-bold tracking-wider uppercase">
+                            <span>WhatsApp Monetization</span>
+                            <span>₦${ad.rate.toFixed(2)} Per View</span>
                         </div>
-                        <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-rose-500 h-full" style="width:${pct}%"></div>
-                        </div>
-                    </div>`;
-                container.appendChild(div);
-            });
-        }
-
-        function renderEarnerFeed() {
-            const container = document.getElementById('earnerFeedContainer');
-            container.innerHTML = '';
-            activeCampaigns.forEach(ad => {
-                container.innerHTML += `
-                    <div class="glass-card p-5 rounded-xl border border-slate-900 flex flex-col justify-between space-y-4">
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[10px] text-amber-400 font-bold tracking-wider uppercase">
-                                <span>WhatsApp Monetization</span>
-                                <span>\u20A6${ad.rate.toFixed(2)} Per View</span>
-                            </div>
-                            <h3 class="text-xs font-bold text-white">${ad.title}</h3>
-                        </div>
-                        <div class="flex space-x-2 pt-2">
-                            <button onclick="downloadAdAsset('${ad.media}','ad-asset')" class="w-1/2 bg-slate-950 border border-slate-900 text-center hover:bg-slate-900 text-gray-300 py-2 rounded-xl text-[11px] font-bold">Download Asset</button>
-                            <button onclick="openProofSubmissionModal(${ad.id})" class="w-1/2 bg-amber-500 text-black py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider">Submit Proof</button>
-                        </div>
-                    </div>`;
-            });
-        }
-
+                        <h3 class="text-xs font-bold text-white">${ad.title}</h3>
+                    </div>
+                    <div class="flex space-x-2 pt-2">
+                        <button onclick="downloadAdAsset('${ad.media}','ad-asset')" 
+                            class="w-1/2 bg-slate-950 border border-slate-900 text-center hover:bg-slate-900 text-gray-300 py-2 rounded-xl text-[11px] font-bold">
+                            Download Asset
+                        </button>
+                        <button onclick="openProofSubmissionModal('${key}')" 
+                            class="w-1/2 bg-amber-500 text-black py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider">
+                            Submit Proof
+                        </button>
+                    </div>
+                </div>`;
+        });
+    });
+} 
+     
         window.openProofSubmissionModal = (id) => {
             activeSelectedJobId = id;
             document.getElementById('proofVerificationModal').classList.remove('hidden');
