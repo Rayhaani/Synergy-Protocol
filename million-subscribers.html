@@ -236,10 +236,11 @@ img{display:block;max-width:100%}
 #taskGrid{display:flex;flex-direction:column;gap:12px}
 
 .task-card{
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 4px solid #eab308;
   border-radius:var(--radius-lg);
   padding:0;
   cursor:pointer;
@@ -249,18 +250,17 @@ img{display:block;max-width:100%}
 }
 .task-card:hover{
   transform:translateY(-3px);
-  border-color:rgba(0,242,254,0.2);
-  box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 0 1px rgba(0,242,254,0.06);
+  box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 0 1px rgba(234,179,8,0.08);
 }
 .task-card:active{transform:translateY(-1px)}
 
-.task-card.featured{border-color:rgba(0,242,254,0.25)}
+.task-card.featured{border-left-color:#eab308}
 .task-card.featured::after{
   content:'';
   position:absolute;
   top:0;left:0;right:0;
   height:2px;
-  background:linear-gradient(90deg,#00f2fe,#7000ff);
+  background:linear-gradient(90deg,#eab308,#FFB800);
 }
 
 .hot-ribbon{
@@ -295,11 +295,11 @@ img{display:block;max-width:100%}
   font-size:11px;
   color:#020617;
   flex-shrink:0;
-  background:linear-gradient(135deg,#00f2fe,#7000ff);
+  background:linear-gradient(135deg,#eab308,#FFB800);
 }
 
 .poster-name{font-size:12px;font-weight:600;color:var(--text2)}
-.poster-verified{font-size:11px;color:#00f2fe;margin-left:3px}
+.poster-verified{font-size:11px;color:#eab308;margin-left:3px}
 .poster-time{font-size:10px;color:var(--text3);margin-top:1px}
 
 .diff-badge{
@@ -355,7 +355,7 @@ img{display:block;max-width:100%}
 .slot-fill{
   height:100%;
   border-radius:99px;
-  background:linear-gradient(90deg,#00f2fe,#7000ff);
+  background:linear-gradient(90deg,#eab308,#FFB800);
   transition:width 1s cubic-bezier(.22,.68,0,1);
   position:relative;
   overflow:hidden;
@@ -388,15 +388,14 @@ img{display:block;max-width:100%}
   font-family:var(--font-m);
   font-weight:700;
   font-size:18px;
-  color:#00f2fe;
+  color:#eab308;
   letter-spacing:-.5px;
   line-height:1;
 }
 .reward-sub{font-size:9px;color:var(--text3);margin-top:2px}
-
 .do-btn{
-  background: linear-gradient(135deg,#00f2fe,#7000ff);
-  color:#fff;
+  background: linear-gradient(135deg,#eab308,#FFB800);
+  color:#0a0a0a;
   border-radius:99px;
   padding:8px 18px;
   font-family:var(--font-d);
@@ -405,11 +404,11 @@ img{display:block;max-width:100%}
   letter-spacing:.5px;
   display:flex;align-items:center;gap:5px;
   transition:transform .15s var(--ease),box-shadow .15s;
-  box-shadow: 0 4px 15px rgba(0,242,254,0.2);
+  box-shadow: 0 4px 15px rgba(234,179,8,0.25);
 }
 .do-btn:hover{
   transform:scale(1.04);
-  box-shadow:0 0 20px rgba(0,242,254,0.4);
+  box-shadow:0 0 20px rgba(234,179,8,0.4);
 }
 .do-btn:active{transform:scale(.98)}
 .do-btn-icon{font-size:12px;transition:transform .2s}
@@ -608,8 +607,8 @@ img{display:block;max-width:100%}
 
 /* Reward hero in modal */
 .reward-hero{
-  background:linear-gradient(135deg,rgba(198,241,53,.1),rgba(198,241,53,.04));
-  border:1px solid rgba(198,241,53,.2);
+  background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(234,179,8,.04));
+  border:1px solid rgba(234,179,8,.2);
   border-radius:var(--radius);
   padding:18px 20px;
   display:flex;
@@ -624,16 +623,17 @@ img{display:block;max-width:100%}
   position:absolute;
   top:-30px;right:-30px;
   width:120px;height:120px;
-  background:radial-gradient(circle,rgba(198,241,53,.15),transparent 70%);
+  background:radial-gradient(circle,rgba(234,179,8,.15),transparent 70%);
   pointer-events:none;
 }
+
 .rh-left{}
 .rh-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
 #modalRewardAmt{
   font-family:var(--font-m);
   font-weight:700;
   font-size:32px;
-  color:var(--lime);
+  color:#eab308;
   letter-spacing:-1px;
   line-height:1.1;
   margin-top:4px;
@@ -658,7 +658,7 @@ img{display:block;max-width:100%}
 }
 .steps-heading{
   font-size:10px;
-  color:var(--lime);
+  color:#eab308;
   font-weight:700;
   text-transform:uppercase;
   letter-spacing:1px;
@@ -680,22 +680,22 @@ img{display:block;max-width:100%}
   display:flex;align-items:center;justify-content:center;
   font-size:10px;
   font-weight:700;
-  color:var(--lime);
+  color:#eab308;
   flex-shrink:0;
   margin-top:1px;
 }
 .task-link-btn{
   display:inline-flex;align-items:center;gap:7px;
   margin-top:8px;
-  background:var(--lime);
-  color:var(--bg);
+  background:#eab308;
+  color:#0a0a0a;
   padding:9px 16px;
   border-radius:8px;
   font-weight:700;
   font-size:12px;
   transition:transform .15s var(--ease),box-shadow .15s;
 }
-.task-link-btn:hover{transform:scale(1.03);box-shadow:0 6px 20px var(--lime-glow)}
+.task-link-btn:hover{transform:scale(1.03);box-shadow:0 6px 20px rgba(234,179,8,.3)}
 
 /* Proof input */
 .proof-label{
@@ -719,8 +719,8 @@ img{display:block;max-width:100%}
   margin-bottom:16px;
 }
 .proof-input:focus{
-  border-color:rgba(198,241,53,.4);
-  box-shadow:0 0 0 3px var(--lime-dim);
+  border-color:rgba(234,179,8,.4);
+  box-shadow:0 0 0 3px rgba(234,179,8,.12);
 }
 .proof-input::placeholder{color:var(--text3)}
 
@@ -734,7 +734,7 @@ img{display:block;max-width:100%}
   transition:all .2s;
   position:relative;
 }
-.upload-zone:hover{border-color:rgba(198,241,53,.4);background:var(--lime-dim)}
+.upload-zone:hover{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.12)}
 .upload-zone input{
   position:absolute;inset:0;
   opacity:0;cursor:pointer;
@@ -747,8 +747,8 @@ img{display:block;max-width:100%}
 .submit-btn{
   width:100%;
   padding:15px;
-  background:var(--lime);
-  color:var(--bg);
+  background:#eab308;
+  color:#0a0a0a;
   border-radius:var(--radius);
   font-family:var(--font-d);
   font-weight:800;
@@ -759,7 +759,7 @@ img{display:block;max-width:100%}
 }
 .submit-btn:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 28px var(--lime-glow);
+  box-shadow:0 8px 28px rgba(234,179,8,.35);
 }
 .submit-btn:disabled{
   background:var(--surface2);
