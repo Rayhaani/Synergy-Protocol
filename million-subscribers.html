@@ -74,11 +74,11 @@ img{display:block;max-width:100%}
   padding:16px 20px 0;
   border-bottom:1px solid rgba(255,255,255,0.06);
 }
-
 .header-top{
   display:flex;
   align-items:center;
   justify-content:center;
+  gap:8px;
   margin-bottom:16px;
 }
 
@@ -96,6 +96,15 @@ img{display:block;max-width:100%}
   text-align:center;
 }
 
+.brand-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#eab308;
+  display:inline-block;
+  flex-shrink:0;
+}
+  
 .tab-bar{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -1048,6 +1057,7 @@ select.f-input option{background:var(--surface);color:var(--text)}
   <!-- HEADER -->
 <header id="header">
   <div class="header-top">
+    <span class="brand-dot"></span>
     <div class="app-title">Million Subscribers</div>
   </div>
   <div class="tab-bar">
