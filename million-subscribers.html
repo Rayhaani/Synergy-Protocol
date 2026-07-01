@@ -1255,6 +1255,54 @@ select.f-input option{background:var(--surface);color:var(--text)}
 
 body { padding-bottom: 90px; }
 
+    /* Status 3D Filter Bar */
+.status-3d-bar{
+  width:100%;
+  background:rgba(2,6,23,.35);
+  border:1px solid rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:8px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  overflow:hidden;
+  perspective:150px;
+  perspective-origin:top;
+  margin-bottom:20px;
+}
+.slope-3d-btn{
+  transform:rotateX(15deg);
+  transform-origin:bottom;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  backface-visibility:hidden;
+  border-radius:0 0 8px 8px;
+  padding:13px 6px;
+  text-align:center;
+  cursor:pointer;
+  background:none;
+  width:100%;
+}
+.slope-3d-btn:hover{
+  transform:rotateX(5deg) translateY(-1px);
+  background-color:rgba(255,255,255,.04);
+}
+.slope-3d-btn .slope-label{
+  font-family:var(--font-d);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  white-space:nowrap;
+  display:block;
+}
+.slope-active{ background:rgba(0,242,254,.03); border-bottom:2px solid rgba(0,242,254,.4);}
+.slope-active .slope-label{ color:#00f2fe; }
+.slope-pending{ background:rgba(234,179,8,.03); border-bottom:2px solid rgba(234,179,8,.4);}
+.slope-pending .slope-label{ color:#eab308; }
+.slope-completed{ background:rgba(0,229,192,.03); border-bottom:2px solid rgba(0,229,192,.4);}
+.slope-completed .slope-label{ color:var(--teal); }
   </style>
 </head>
 <body>
@@ -1391,23 +1439,17 @@ body { padding-bottom: 90px; }
 
       <!-- My overview -->
     <div id="posterOverview">
-        <div class="poster-stats">
-          <div class="stat-box">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-val">1</div>
-            <div class="stat-lbl">Active Tasks</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">💸</div>
-            <div class="stat-val">₦8,200</div>
-            <div class="stat-lbl">Total Spent</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-val">8</div>
-            <div class="stat-lbl">Pending</div>
-          </div>
-        </div>
+       <div class="status-3d-bar">
+  <button class="slope-3d-btn slope-active">
+    <span class="slope-label">Active</span>
+  </button>
+  <button class="slope-3d-btn slope-pending">
+    <span class="slope-label">Pending</span>
+  </button>
+  <button class="slope-3d-btn slope-completed">
+    <span class="slope-label">Completed</span>
+  </button>
+       </div> 
 
         <div class="section-label">My Posted Tasks</div>
 
