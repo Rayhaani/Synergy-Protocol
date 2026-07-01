@@ -253,69 +253,20 @@ img{display:block;max-width:100%}
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 4px solid #eab308;
-  border-radius: 18px;
-  padding: 0;
+  border: 1px solid #0f172a;
+  border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
   transition: transform .22s var(--ease), box-shadow .22s, border-color .22s;
-  overflow: hidden;
-  position: relative;
-  min-height: 200px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 .task-card:hover{
   transform:translateY(-3px);
-  box-shadow:0 16px 48px rgba(0,0,0,.4),0 0 0 1px rgba(234,179,8,0.08);
+  box-shadow:0 16px 48px rgba(0,0,0,.4);
 }
 .task-card:active{transform:translateY(-1px)}
-
-.task-card.featured{border-left-color:#eab308}
-.task-card.featured::after{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:2px;
-  background:linear-gradient(90deg,#eab308,#FFB800);
-}
-
-.hot-ribbon{
-  position:absolute;
-  top:14px;right:-1px;
-  background:var(--red);
-  color:#fff;
-  font-size:9px;
-  font-weight:800;
-  padding:3px 10px 3px 8px;
-  letter-spacing:.8px;
-  text-transform:uppercase;
-  border-radius:4px 0 0 4px;
-  display:flex;align-items:center;gap:3px;
-}
-
-.card-body{padding:24px 20px 20px}
-
-.poster-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.poster-avatar{
-  width:32px;height:32px;
-  border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-m);
-  font-weight:700;
-  font-size:11px;
-  color:#020617;
-  flex-shrink:0;
-  background:linear-gradient(135deg,#eab308,#FFB800);
-}
-
-.poster-name{font-size:12px;font-weight:600;color:var(--text2)}
-.poster-verified{font-size:11px;color:#eab308;margin-left:3px}
-.poster-time{font-size:10px;color:var(--text3);margin-top:1px}
 
 .diff-badge{
   margin-left:auto;
@@ -327,28 +278,24 @@ img{display:block;max-width:100%}
   letter-spacing:.7px;
 }
 
-.card-title{
-  font-family:var(--font-d);
+.find-card-meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  color:#fbbf24;
   font-weight:700;
-  font-size:15px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.find-card-title{
+  font-size:13px;
+  font-weight:700;
   color:var(--text);
-  line-height:1.35;
-  margin-bottom:8px;
-  letter-spacing:-.2px;
+  line-height:1.4;
 }
 
-.card-desc{
-  font-size:12px;
-  color:var(--text2);
-  line-height:1.65;
-  margin-bottom:12px;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
-}
-
-.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.tag-row{display:flex;flex-wrap:wrap;gap:5px}
 .tag{
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.06);
@@ -370,73 +317,50 @@ img{display:block;max-width:100%}
 .slot-fill{
   height:100%;
   border-radius:99px;
-  background:linear-gradient(90deg,#eab308,#FFB800);
+  background:#fbbf24;
   transition:width 1s cubic-bezier(.22,.68,0,1);
-  position:relative;
-  overflow:hidden;
 }
-.slot-fill.hot{background:linear-gradient(90deg,#FF8C42,var(--red))}
-.slot-fill::after{
-  content:'';
-  position:absolute;
-  top:0;left:-100%;
-  width:60%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
-  animation:shimmer 2.2s infinite;
-}
-@keyframes shimmer{
-  0%{left:-100%}100%{left:200%}
-}
-
 .slot-meta{
   display:flex;justify-content:space-between;
   font-size:10px;color:var(--text3);
   font-weight:500;
-  margin-bottom:14px;
 }
 .slot-meta .left-slots{font-weight:700}
 .slot-meta .left-slots.urgent{color:var(--red)}
 .slot-meta .left-slots.ok{color:#00f2fe}
 
-.reward-block{}
-.reward-amt{
-  font-family:var(--font-m);
-  font-weight:700;
-  font-size:22px;
-  color:#eab308;
-  letter-spacing:-.5px;
-  line-height:1;
-}
-.reward-sub{font-size:9px;color:var(--text3);margin-top:2px}
-.do-btn{
-  background: linear-gradient(135deg,#eab308,#FFB800);
-  color:#0a0a0a;
-  border-radius:99px;
-  padding:8px 18px;
-  font-family:var(--font-d);
-  font-weight:800;
-  font-size:11px;
-  letter-spacing:.5px;
-  display:flex;align-items:center;gap:5px;
-  transition:transform .15s var(--ease),box-shadow .15s;
-  box-shadow: 0 4px 15px rgba(234,179,8,0.25);
-}
-.do-btn:hover{
-  transform:scale(1.04);
-  box-shadow:0 0 20px rgba(234,179,8,0.4);
-}
-.do-btn:active{transform:scale(.98)}
-.do-btn-icon{font-size:12px;transition:transform .2s}
-.do-btn:hover .do-btn-icon{transform:translateX(3px)}
-
-.card-actions{
+.find-card-footer{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:16px 20px 20px;
-  border-top:1px solid rgba(255,255,255,0.05);
-  margin-top:4px;
+  gap:8px;
 }
+.find-btn-secondary{
+  flex:1;
+  background:#020617;
+  border:1px solid #0f172a;
+  color:#d1d5db;
+  text-align:center;
+  padding:9px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:700;
+  transition:background .15s;
+}
+.find-btn-secondary:hover{background:#0f172a}
+.find-btn-primary{
+  flex:1;
+  background:#f59e0b;
+  color:#000;
+  text-align:center;
+  padding:9px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  transition:background .15s;
+}
+.find-btn-primary:hover{background:#d97706}
+
 /* ── EMPTY STATE ──────────────────────────────── */
 #emptyState{
   display:none;
@@ -1952,58 +1876,39 @@ function buildCard(t, idx){
   const p = pct(t.slots_filled, t.slots_total);
   const remaining = t.slots_total - t.slots_filled;
   const urgent = p > 85;
-  const isFirst = idx===0;
+  const catLabel = (CATEGORIES.find(c=>c.id===t.category)||{}).label || t.category;
 
   return `
-  <div class="task-card ${isFirst?'featured':''}"
-    onclick="openTask(${t.id})"
-    style="animation:fadeUp .3s ${idx*0.04}s both">
-    ${t.hot ? '<div class="hot-ribbon">🔥 Hot</div>' : ''}
-    <div class="card-body">
-      <div class="poster-row">
-        <div class="poster-avatar">${t.poster.avatar}</div>
-        <div>
-          <div class="poster-name">
-            ${t.poster.name}
-            ${t.poster.verified ? '<span class="poster-verified">✓</span>' : ''}
-          </div>
-          <div class="poster-time">${t.created}</div>
-        </div>
-        <div class="diff-badge" style="
-          background:${DIFF_BG[t.difficulty]};
-          color:${DIFF_COLORS[t.difficulty]};
-          border:1px solid ${DIFF_COLORS[t.difficulty]}44;
-        ">${t.difficulty}</div>
+  <div class="task-card" onclick="openTask(${t.id})" style="animation:fadeUp .3s ${idx*0.04}s both">
+    <div>
+      <div class="find-card-meta">
+        <span>${catLabel}</span>
+        <span>${fmtNGN(t.reward)} Per Task</span>
       </div>
+      <div class="find-card-title">${t.title}</div>
+    </div>
 
-      <div class="card-title">${t.title}</div>
-      <div class="card-desc">${t.desc}</div>
+    <div class="tag-row">
+      ${t.tags.map(tag=>`<span class="tag">#${tag}</span>`).join('')}
+      ${t.time_limit ? `<span class="tag">⏱ ${t.time_limit}min</span>` : ''}
+    </div>
 
-      <div class="tag-row">
-        ${t.tags.map(tag=>`<span class="tag">#${tag}</span>`).join('')}
-        ${t.time_limit ? `<span class="tag">⏱ ${t.time_limit}min</span>` : ''}
-      </div>
-
+    <div>
       <div class="slot-track">
-        <div class="slot-fill ${urgent?'hot':''}" data-pct="${p}" style="width:0%"></div>
+        <div class="slot-fill" data-pct="${p}" style="width:0%"></div>
       </div>
       <div class="slot-meta">
-        <span>${t.slots_filled.toLocaleString()} / ${t.slots_total.toLocaleString()} slots taken</span>
+        <span>${t.slots_filled.toLocaleString()} / ${t.slots_total.toLocaleString()} taken</span>
         <span class="left-slots ${urgent?'urgent':'ok'}">${remaining.toLocaleString()} left</span>
       </div>
     </div>
 
-    <div class="card-actions">
-      <div class="reward-block">
-        <div class="reward-amt">${fmtNGN(t.reward)}</div>
-        <div class="reward-sub">per completed task</div>
-      </div>
-      <div class="do-btn">
-        Start <span class="do-btn-icon">→</span>
-      </div>
+    <div class="find-card-footer">
+      <button class="find-btn-secondary" onclick="event.stopPropagation(); openTask(${t.id})">View Steps</button>
+      <button class="find-btn-primary" onclick="event.stopPropagation(); openTask(${t.id})">Start</button>
     </div>
   </div>`;
-}
+    }
 
 /* ── OPEN TASK ──────────────────────────────── */
 function openTask(id){
