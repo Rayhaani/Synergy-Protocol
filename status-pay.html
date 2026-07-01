@@ -61,6 +61,182 @@ h1, h2, h3, .brand-font {
             background: linear-gradient(135deg, #1e293b, #0f172a);
             display: none; align-items: center; justify-content: center;
         }
+
+    #synergy-dock {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(94%, 460px);
+    z-index: 60000;
+    border-radius: 32px;
+    background: rgba(5, 10, 21, 0.55);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(0, 242, 254, 0.25);
+    box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 242, 254, 0.06);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) 8px;
+}
+
+#dock-trace {
+    position: relative;
+    height: 1px;
+    margin: 0 20px 4px 20px;
+    background: linear-gradient(90deg, transparent, rgba(0,242,254,0.15) 15%, rgba(0,242,254,0.15) 85%, transparent);
+}
+#dock-pulse {
+    position: absolute;
+    top: -2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #00f2fe;
+    box-shadow: 0 0 8px #00f2fe, 0 0 16px rgba(0,242,254,0.6);
+    transition: left 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+#dock-items {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.dock-node {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    padding: 2px 0 0 0;
+    cursor: pointer;
+    background: none;
+    border: none;
+    position: relative;
+}
+
+.dock-icon-shell {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+    background: transparent;
+}
+
+.dock-node svg {
+    width: 24px;
+    height: 24px;
+    stroke: rgba(255,255,255,0.45);
+    fill: none;
+    stroke-width: 2;
+    transition: all 0.3s ease;
+}
+
+.dock-label {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 6.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: all 0.35s ease;
+    overflow: hidden;
+}
+
+.dock-node.active .dock-icon-shell {
+    background: rgba(0, 242, 254, 0.08);
+    box-shadow: 0 0 0 1px rgba(0,242,254,0.25), 0 0 18px rgba(0,242,254,0.15);
+    transform: translateY(-6px);
+}
+.dock-node.active svg { stroke: #00f2fe; }
+.dock-node.active .dock-label {
+    color: #00f2fe;
+    max-height: 12px;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dock-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dock-live-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+    border: 1.5px solid #050a15;
+}
+
+#profile-sheet-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 69999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+#profile-sheet-overlay.active { opacity: 1; pointer-events: auto; }
+
+#profile-sheet {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 100%);
+    width: min(94%, 460px);
+    z-index: 70000;
+    background: rgba(5, 10, 21, 0.97);
+    border: 1px solid rgba(0,242,254,0.15);
+    border-bottom: none;
+    border-top: 2px solid #00f2fe;
+    border-radius: 28px 28px 0 0;
+    padding: 10px 20px calc(28px + env(safe-area-inset-bottom)) 20px;
+    transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
+}
+#profile-sheet.active { transform: translate(-50%, 0); }
+
+.sheet-handle {
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    margin: 8px auto 18px auto;
+}
+
+.sheet-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+}
+.sheet-item:last-child { border-bottom: none; }
+.sheet-item svg { width: 18px; height: 18px; stroke: #00f2fe; fill: none; stroke-width: 2; }
+.sheet-item span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: #eee;
+    font-weight: 500;
+}
+.sheet-item.danger svg { stroke: #f87171; }
+.sheet-item.danger span { color: #f87171; }
+
+body { padding-bottom: 90px; }
+        
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-rose-500 selection:text-white">
@@ -235,6 +411,77 @@ h1, h2, h3, .brand-font {
             </div>
         </div>
     </div>
+
+    <nav id="synergy-dock">
+    <div id="dock-trace">
+        <div id="dock-pulse"></div>
+    </div>
+    <div id="dock-items">
+
+        <button class="dock-node" data-index="0" onclick="setDockActive(0); location.href='status-pay.html'">
+            <div class="dock-icon-shell">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="dock-label">Customers</span>
+        </button>
+
+        <button class="dock-node" data-index="1" onclick="setDockActive(1); location.href='million-subscribers.html'">
+            <div class="dock-icon-shell">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 1.94c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-1.94 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+            </div>
+            <span class="dock-label">Subscribers</span>
+        </button>
+
+        <button class="dock-node" data-index="2" onclick="setDockActive(2); scrollToTasks()">
+            <div class="dock-icon-shell">
+                <svg id="task-ring-svg" class="dock-ring" viewBox="0 0 44 44">
+                    <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"></circle>
+                    <circle id="task-ring-progress" cx="22" cy="22" r="19" fill="none" stroke="#00f2fe" stroke-width="2"
+                        stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
+                        transform="rotate(-90 22 22)" style="transition: stroke-dashoffset 0.8s ease;"></circle>
+                </svg>
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"></path><polygon points="9.545 15.568 9.545 8.432 15.818 12 9.545 15.568" fill="currentColor" stroke="none"></polygon></svg>
+            </div>
+            <span class="dock-label" id="task-dock-label">Tasks</span>
+        </button>
+
+        <button class="dock-node" data-index="3" onclick="setDockActive(3); location.href='task-board.html'">
+            <div class="dock-icon-shell">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H4v4M20 12v4H4v-4M20 12H4M12 4v16"></path></svg>
+            </div>
+            <span class="dock-label">Wallet</span>
+        </button>
+
+        <button class="dock-node" data-index="4" onclick="setDockActive(4); openProfileSheet()">
+            <div class="dock-icon-shell">
+                <div class="dock-live-dot"></div>
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <span class="dock-label">Profile</span>
+        </button>
+
+    </div>
+</nav>
+
+<div id="profile-sheet-overlay" onclick="closeProfileSheet()"></div>
+<div id="profile-sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-item" onclick="location.href='dashboard.html'">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Dashboard</span>
+    </div>
+
+    <div class="sheet-item" onclick="location.href='network.html'">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Network</span>
+    </div>
+
+    <div class="sheet-item danger" onclick="location.href='signin.html'">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Logout</span>
+    </div>
+</div>
 
     <footer class="border-t border-slate-950 bg-[#020617] px-8 py-5 text-center text-xs text-gray-600">
         &copy; 2026 Million Customers Ad Network. All rights reserved.
@@ -633,6 +880,43 @@ function renderEarnerFeed() {
     loadUserWallet();
     renderAdvertiserFeed();
 };
+
+function setDockActive(index) {
+    document.querySelectorAll('.dock-node').forEach(n => n.classList.remove('active'));
+    const node = document.querySelector(`.dock-node[data-index="${index}"]`);
+    if (node) node.classList.add('active');
+
+    const pulse = document.getElementById('dock-pulse');
+    const positions = [10, 30, 50, 70, 90];
+    if (pulse) pulse.style.left = `calc(${positions[index]}% - 2.5px)`;
+}
+
+function scrollToTasks() {
+    const el = document.getElementById('synergy-nodes-wrapper');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openProfileSheet() {
+    document.getElementById('profile-sheet-overlay').classList.add('active');
+    document.getElementById('profile-sheet').classList.add('active');
+}
+function closeProfileSheet() {
+    document.getElementById('profile-sheet-overlay').classList.remove('active');
+    document.getElementById('profile-sheet').classList.remove('active');
+    setDockActive(-1);
+}
+
+function updateDockTaskRing(watched, limit = 5) {
+    const circle = document.getElementById('task-ring-progress');
+    const label = document.getElementById('task-dock-label');
+    if (!circle) return;
+    const circumference = 119.4;
+    const pct = Math.min(watched / limit, 1);
+    circle.style.strokeDashoffset = circumference - (pct * circumference);
+    if (label) label.innerText = `${Math.min(watched, limit)}/${limit}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => setDockActive(-1));
     </script>
 </body>
 </html>
