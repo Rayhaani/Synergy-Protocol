@@ -46,6 +46,7 @@ body {
     color: var(--text);
     background: #020617;
     background-image:
+        radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent),
         url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
     min-height:100vh;
     overflow-x:hidden;
@@ -74,12 +75,19 @@ img{display:block;max-width:100%}
 #header{
   position:sticky;
   top:0;
+  left:50%;
+  width:100vw;
+  margin-left:-50vw;
   z-index:200;
   background:rgba(2,6,23,.97);
   backdrop-filter:blur(20px) saturate(160%);
   -webkit-backdrop-filter:blur(20px) saturate(160%);
-  padding:16px 20px 0;
   border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.header-inner{
+  max-width:520px;
+  margin:0 auto;
+  padding:16px 20px 0;
 }
 .header-top{
   display:flex;
@@ -1254,18 +1262,20 @@ body { padding-bottom: 90px; }
 
   <!-- HEADER -->
 <header id="header">
-  <div class="header-top">
-    <span class="brand-dot"></span>
-    <div class="app-title">Million Subscribers</div>
+  <div class="header-inner">
+    <div class="header-top">
+      <span class="brand-dot"></span>
+      <div class="app-title">Million Subscribers</div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="poster" onclick="switchTab('poster')">
+        Post Tasks
+      </button>
+      <button class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')">
+        Find Tasks
+      </button>
+    </div>
   </div>
-<div class="tab-bar">
-  <button class="tab-btn active" data-tab="poster" onclick="switchTab('poster')">
-    Post Tasks
-  </button>
-  <button class="tab-btn" data-tab="tasks" onclick="switchTab('tasks')">
-    Find Tasks
-  </button>
-</div>
 </header>
   <!-- CONTENT -->
   <main id="content">
