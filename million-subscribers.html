@@ -799,8 +799,19 @@ img{display:block;max-width:100%}
 .success-sub{font-size:13px;color:var(--text3);line-height:1.6}
 
 /* ── CREATE TASK FORM ──────────────────────── */
-#createForm{display:none;flex-direction:column}
+#createForm{display:flex;flex-direction:column}
 
+.create-task-card{
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 4px solid #f43f5e;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+    
 .form-back{
   display:flex;align-items:center;gap:6px;
   font-size:13px;color:var(--text3);
@@ -1292,82 +1303,8 @@ body { padding-bottom: 90px; }
     <!-- ═══ POSTER PANEL ═══ -->
     <div id="posterPanel">
 
-      <!-- My overview -->
-      <div id="posterOverview">
-        <div class="poster-stats">
-          <div class="stat-box">
-            <div class="stat-icon">⚡</div>
-            <div class="stat-val">1</div>
-            <div class="stat-lbl">Active Tasks</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">💸</div>
-            <div class="stat-val">₦8,200</div>
-            <div class="stat-lbl">Total Spent</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-val">8</div>
-            <div class="stat-lbl">Pending</div>
-          </div>
-        </div>
-
-        <button class="post-btn-main" onclick="showCreateForm()">
-          <span>+</span> Post New Task
-        </button>
-
-        <div class="section-label">My Posted Tasks</div>
-
-        <div class="posted-task">
-          <div class="posted-task-top">
-            <div class="posted-task-title">Follow My Instagram Page</div>
-            <span class="status-badge status-active">Active</span>
-          </div>
-          <div class="posted-meta">
-            <div class="pm-item">
-              <div class="pm-lbl">Budget</div>
-              <div class="pm-val">₦15,000</div>
-            </div>
-            <div class="pm-item">
-              <div class="pm-lbl">Spent</div>
-              <div class="pm-val">₦8,200</div>
-            </div>
-            <div class="pm-item">
-              <div class="pm-lbl">Filled</div>
-              <div class="pm-val">54/100</div>
-            </div>
-          </div>
-          <div class="slot-track"><div class="slot-fill" style="width:54%"></div></div>
-          <button class="review-btn" onclick="openReviewModal()">
-            ⏳ Review 8 Pending Proofs →
-          </button>
-        </div>
-
-        <div class="posted-task">
-          <div class="posted-task-top">
-            <div class="posted-task-title">Sign Up on My Trading Platform</div>
-            <span class="status-badge status-done">Completed</span>
-          </div>
-          <div class="posted-meta">
-            <div class="pm-item">
-              <div class="pm-lbl">Budget</div>
-              <div class="pm-val">₦50,000</div>
-            </div>
-            <div class="pm-item">
-              <div class="pm-lbl">Spent</div>
-              <div class="pm-val">₦50,000</div>
-            </div>
-            <div class="pm-item">
-              <div class="pm-lbl">Filled</div>
-              <div class="pm-val">500/500</div>
-            </div>
-          </div>
-          <div class="slot-track"><div class="slot-fill hot" style="width:100%"></div></div>
-        </div>
-      </div>
-
       <!-- Create form (hidden initially) -->
-      <div id="createForm" style="display:none">
+      <div id="createForm" class="create-task-card">
         <button class="form-back" onclick="hideCreateForm()">← Back to My Tasks</button>
         <div style="font-family:var(--font-d);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Create Task</div>
         <div style="font-size:12px;color:var(--text3)">Fill in all fields. Workers will see exactly this.</div>
@@ -1442,6 +1379,81 @@ body { padding-bottom: 90px; }
   </main>
 </div>
 
+
+<!-- My overview -->
+      <div id="posterOverview">
+        <div class="poster-stats">
+          <div class="stat-box">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-val">1</div>
+            <div class="stat-lbl">Active Tasks</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">💸</div>
+            <div class="stat-val">₦8,200</div>
+            <div class="stat-lbl">Total Spent</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-val">8</div>
+            <div class="stat-lbl">Pending</div>
+          </div>
+        </div>
+
+        <button class="post-btn-main" onclick="showCreateForm()">
+          <span>+</span> Post New Task
+        </button>
+
+        <div class="section-label">My Posted Tasks</div>
+
+        <div class="posted-task">
+          <div class="posted-task-top">
+            <div class="posted-task-title">Follow My Instagram Page</div>
+            <span class="status-badge status-active">Active</span>
+          </div>
+          <div class="posted-meta">
+            <div class="pm-item">
+              <div class="pm-lbl">Budget</div>
+              <div class="pm-val">₦15,000</div>
+            </div>
+            <div class="pm-item">
+              <div class="pm-lbl">Spent</div>
+              <div class="pm-val">₦8,200</div>
+            </div>
+            <div class="pm-item">
+              <div class="pm-lbl">Filled</div>
+              <div class="pm-val">54/100</div>
+            </div>
+          </div>
+          <div class="slot-track"><div class="slot-fill" style="width:54%"></div></div>
+          <button class="review-btn" onclick="openReviewModal()">
+            ⏳ Review 8 Pending Proofs →
+          </button>
+        </div>
+
+        <div class="posted-task">
+          <div class="posted-task-top">
+            <div class="posted-task-title">Sign Up on My Trading Platform</div>
+            <span class="status-badge status-done">Completed</span>
+          </div>
+          <div class="posted-meta">
+            <div class="pm-item">
+              <div class="pm-lbl">Budget</div>
+              <div class="pm-val">₦50,000</div>
+            </div>
+            <div class="pm-item">
+              <div class="pm-lbl">Spent</div>
+              <div class="pm-val">₦50,000</div>
+            </div>
+            <div class="pm-item">
+              <div class="pm-lbl">Filled</div>
+              <div class="pm-val">500/500</div>
+            </div>
+          </div>
+          <div class="slot-track"><div class="slot-fill hot" style="width:100%"></div></div>
+        </div>
+      </div>
+  
 <!-- ═══ TASK DETAIL MODAL ═══ -->
 <div id="modalOverlay" onclick="closeModal(event)">
   <div id="modalSheet">
