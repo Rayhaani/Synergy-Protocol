@@ -540,6 +540,9 @@ img{display:block;max-width:100%}
   gap:8px;
   margin-bottom:10px;
 }
+.posted-meta .pm-item:nth-child(1){ text-align:left; }
+.posted-meta .pm-item:nth-child(2){ text-align:center; }
+.posted-meta .pm-item:nth-child(3){ text-align:right; }
 .pm-item{}
 .pm-lbl{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .pm-val{font-size:13px;font-weight:700;color:var(--text2);margin-top:2px}
@@ -948,22 +951,22 @@ select.f-input option{background:var(--surface);color:var(--text)}
 }
 
 .post-submit-btn{
-  width:auto;
-  align-self:center;
-  padding:10px 32px;
-  background:linear-gradient(135deg,#00f2fe,#7000ff);
+  width:100%;
+  padding:14px;
+  background:linear-gradient(90deg,#f43f5e,#e11d48);
   color:#fff;
-  border-radius:99px;
+  border-radius:12px;
   font-family:var(--font-b);
   font-weight:700;
-  font-size:13px;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:transform .15s var(--ease),box-shadow .2s;
-  box-shadow:0 4px 15px rgba(0,242,254,0.2);
+  transition:all .3s;
+  box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
 }
 .post-submit-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(0,242,254,0.3);
+  background:linear-gradient(90deg,#e11d48,#be123c);
 }
 .post-submit-btn:disabled{
   background:rgba(255,255,255,0.05);
@@ -1263,8 +1266,8 @@ body { padding-bottom: 90px; }
   border-radius:14px;
   padding:8px;
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   overflow:hidden;
@@ -1278,25 +1281,27 @@ body { padding-bottom: 90px; }
   transition:all .3s cubic-bezier(.4,0,.2,1);
   backface-visibility:hidden;
   border-radius:0 0 8px 8px;
-  padding:13px 6px;
+  padding:12px 4px;
   text-align:center;
   cursor:pointer;
   background:none;
   width:100%;
 }
-.slope-3d-btn:hover{
+.slope-3d-btn:hover, .slope-3d-btn.selected{
   transform:rotateX(5deg) translateY(-1px);
-  background-color:rgba(255,255,255,.04);
+  background-color:rgba(255,255,255,.05);
 }
 .slope-3d-btn .slope-label{
-  font-family:var(--font-d);
-  font-size:10px;
+  font-family:var(--font-b);
+  font-size:12px;
   font-weight:700;
-  letter-spacing:.8px;
-  text-transform:uppercase;
+  letter-spacing:normal;
+  text-transform:none;
   white-space:nowrap;
   display:block;
 }
+.slope-all{ background:rgba(198,241,53,.03); border-bottom:2px solid rgba(198,241,53,.4);}
+.slope-all .slope-label{ color:var(--lime); }
 .slope-active{ background:rgba(0,242,254,.03); border-bottom:2px solid rgba(0,242,254,.4);}
 .slope-active .slope-label{ color:#00f2fe; }
 .slope-pending{ background:rgba(234,179,8,.03); border-bottom:2px solid rgba(234,179,8,.4);}
@@ -1439,24 +1444,31 @@ body { padding-bottom: 90px; }
 
       <!-- My overview -->
     <div id="posterOverview">
-       <div class="status-3d-bar">
-  <button class="slope-3d-btn slope-active">
-    <span class="slope-label">Active</span>
-  </button>
-  <button class="slope-3d-btn slope-pending">
-    <span class="slope-label">Pending</span>
-  </button>
-  <button class="slope-3d-btn slope-completed">
-    <span class="slope-label">Completed</span>
-  </button>
-       </div> 
+      <div id="posterPanel">
 
+  <!-- SABON WURI: status bar a saman komai -->
+  <div class="status-3d-bar">
+    <button class="slope-3d-btn slope-all selected" onclick="setPosterFilter('all', this)">
+      <span class="slope-label">All</span>
+    </button>
+    <button class="slope-3d-btn slope-active" onclick="setPosterFilter('active', this)">
+      <span class="slope-label">Active</span>
+    </button>
+    <button class="slope-3d-btn slope-pending" onclick="setPosterFilter('pending', this)">
+      <span class="slope-label">Pending</span>
+    </button>
+    <button class="slope-3d-btn slope-completed" onclick="setPosterFilter('completed', this)">
+      <span class="slope-label">Completed</span>
+    </button>
+  </div>
+
+  
         <div class="section-label">My Posted Tasks</div>
 
-        <div class="posted-task">
-          <div class="posted-task-top">
-            <div class="posted-task-title">Follow My Instagram Page</div>
-            <span class="status-badge status-active">Active</span>
+      <div class="posted-task" data-status="active pending">
+  <div class="posted-task-top">
+    <div class="posted-task-title">Follow My Instagram Page</div>  
+        <span class="status-badge status-active">Active</span>
           </div>
           <div class="posted-meta">
             <div class="pm-item">
@@ -1478,10 +1490,10 @@ body { padding-bottom: 90px; }
           </button>
         </div>
 
-        <div class="posted-task">
-          <div class="posted-task-top">
-            <div class="posted-task-title">Sign Up on My Trading Platform</div>
-            <span class="status-badge status-done">Completed</span>
+       <div class="posted-task" data-status="completed">
+  <div class="posted-task-top">
+    <div class="posted-task-title">Sign Up on My Trading Platform</div> 
+        <span class="status-badge status-done">Completed</span>
           </div>
           <div class="posted-meta">
             <div class="pm-item">
@@ -2122,6 +2134,15 @@ function hideCreateForm(){
   document.getElementById('posterOverview').style.display='block';
 }
 
+function setPosterFilter(status, btn){
+  document.querySelectorAll('.slope-3d-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.querySelectorAll('.posted-task').forEach(card=>{
+    const statuses = (card.dataset.status||'').split(' ');
+    card.style.display = (status==='all' || statuses.includes(status)) ? 'block' : 'none';
+  });
+}
+  
 function selectProof(el){
   state.selectedProofType = el.value;
 }
