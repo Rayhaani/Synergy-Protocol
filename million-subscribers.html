@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
+
+*, *::before, *::after { box-sizing: border-box; }
 /* ── TOKENS ─────────────────────────────────── */
 :root {
 --bg:        #020617;
@@ -862,9 +864,9 @@ img{display:block;max-width:100%}
 .f-input::placeholder{color:var(--text3)}
 textarea.f-input{
   resize:vertical;
-  min-height:80px;
+  min-height:60px;
   font-family:var(--font-b);
-  line-height:1.6;
+  line-height:1.5;
 }
 select.f-input{
   appearance:none;
@@ -1339,15 +1341,15 @@ body { padding-bottom: 90px; }
           <input type="url" class="f-input" id="fLink" placeholder="https://yourlink.com/ref/…"/>
         </div>
 
-        <div class="form-section">Proof Required</div>
-        <div class="proof-grid" id="proofGrid">
-          <div class="proof-option selected" data-proof="screenshot" onclick="selectProof(this)"><span class="proof-option-icon">📸</span>Screenshot</div>
-          <div class="proof-option" data-proof="referral_code" onclick="selectProof(this)"><span class="proof-option-icon">🔑</span>Referral Code</div>
-          <div class="proof-option" data-proof="phone" onclick="selectProof(this)"><span class="proof-option-icon">📱</span>Phone Number</div>
-          <div class="proof-option" data-proof="email" onclick="selectProof(this)"><span class="proof-option-icon">📧</span>Email Address</div>
-          <div class="proof-option" data-proof="username" onclick="selectProof(this)"><span class="proof-option-icon">👤</span>Username</div>
-          <div class="proof-option" data-proof="code" onclick="selectProof(this)"><span class="proof-option-icon">#️⃣</span>Custom Code</div>
-        </div>
+       <div class="form-section">Proof Required</div>
+<select class="f-input" id="proofGrid" onchange="selectProof(this)">
+  <option value="screenshot" selected>📸 Screenshot</option>
+  <option value="referral_code">🔑 Referral Code</option>
+  <option value="phone">📱 Phone Number</option>
+  <option value="email">📧 Email Address</option>
+  <option value="username">👤 Username</option>
+  <option value="code">#️⃣ Custom Code</option>
+</select> 
 
         <div class="form-section">Budget & Slots</div>
         <div class="three-col">
@@ -1399,10 +1401,6 @@ body { padding-bottom: 90px; }
             <div class="stat-lbl">Pending</div>
           </div>
         </div>
-
-        <button class="post-btn-main" onclick="showCreateForm()">
-          <span>+</span> Post New Task
-        </button>
 
         <div class="section-label">My Posted Tasks</div>
 
@@ -2076,9 +2074,7 @@ function hideCreateForm(){
 }
 
 function selectProof(el){
-  document.querySelectorAll('.proof-option').forEach(p=>p.classList.remove('selected'));
-  el.classList.add('selected');
-  state.selectedProofType = el.dataset.proof;
+  state.selectedProofType = el.value;
 }
 
 function updateCost(){
