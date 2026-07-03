@@ -42,7 +42,7 @@
 /* ── RESET ──────────────────────────────────── */
 body {
     margin: 0;
-    font-family: var(--font-b);
+    font-family:var(--font-b);
     color: var(--text);
     background: #020617;
     background-image:
@@ -526,15 +526,19 @@ img{display:block;max-width:100%}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:10px 20px;
+  padding:6px 20px;
   border-bottom:1px solid var(--border);
 }
 .sheet-title{
-  font-family:var(--font-d);
+  font-family:var(--font-b);
   font-size:14px;
   font-weight:700;
   color:var(--text);
   letter-spacing:-.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:80%;
 }
 .close-btn{
   width:26px;height:26px;
@@ -694,7 +698,7 @@ img{display:block;max-width:100%}
   background:#eab308;
   color:#0a0a0a;
   border-radius:var(--radius);
-  font-family:var(--font-d);
+  font-family:var(--font-b);
   font-weight:800;
   font-size:15px;
   letter-spacing:.2px;
