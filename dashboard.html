@@ -1705,9 +1705,16 @@ function scrollToTasks() {
 }
 
 function updateDockTaskRing(watched, limit = 5) {
+    const circle = document.getElementById('task-ring-progress');
+    const label = document.getElementById('task-dock-label');
+    if (!circle) return;
+    const circumference = 119.4;
+    const pct = Math.min(watched / limit, 1);
+    circle.style.strokeDashoffset = circumference - (pct * circumference);
+    if (label) label.innerText = `${Math.min(watched, limit)}/${limit}`;
+}
 
 document.addEventListener('DOMContentLoaded', () => setDockActive(-1));
-
 // Kira shi da zaran Dashboard ya bude
 window.addEventListener('load', autoCleanupTasks);
     
