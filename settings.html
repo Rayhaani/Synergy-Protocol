@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Synergy Protocol</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #161922;
+            --surface-2: #1c202b;
+            --border: rgba(255,255,255,0.08);
+            --text-dim: #8b90a0;
+            --accent-1: #a78bfa;
+            --accent-2: #f472b6;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 500;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 40px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+
+        h1, h2, h3, h4 { font-family: 'Quicksand', sans-serif; }
+
+        .back-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .back-btn:hover { background: var(--surface-2); }
+
+        /* ===== HERO ===== */
+        .hero-icon {
+            width: 68px; height: 68px; border-radius: 22px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 30px rgba(167, 139, 250, 0.25);
+        }
+
+        .headline {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+        }
+
+        .subcopy {
+            color: var(--text-dim);
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* ===== SHARE CARD (reused as form card) ===== */
+        .share-card {
+            background: linear-gradient(160deg, rgba(167,139,250,0.14), rgba(244,114,182,0.06));
+            border: 1px solid rgba(167,139,250,0.25);
+            border-radius: 28px;
+        }
+
+        .code-pill {
+            background: rgba(0,0,0,0.25);
+            border: 1px dashed rgba(255,255,255,0.18);
+            border-radius: 18px;
+        }
+        .code-pill input,
+        .code-pill select {
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+        .code-pill select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            color: #fff;
+        }
+        .code-pill select option {
+            background: var(--surface);
+            color: #fff;
+        }
+
+        .field-label {
+            font-size: 11.5px;
+            color: var(--text-dim);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: #0d0f14;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.6; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+        /* ===== STATS style reused as segmented toggle ===== */
+        .stat-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+        .stat-tag {
+            font-size: 11.5px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .toggle-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px;
+        }
+        .toggle-btn {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-dim);
+            border-radius: 15px;
+            transition: all 0.25s ease;
+        }
+        .toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: #0d0f14;
+        }
+
+        /* ===== LIST STYLES ===== */
+        .list-heading {
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .list-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .friend-row {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: all 0.15s ease;
+        }
+
+        .avatar {
+            width: 42px; height: 42px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px;
+            background: linear-gradient(135deg, rgba(167,139,250,0.25), rgba(244,114,182,0.2));
+            color: #e9d5ff;
+        }
+
+        .friend-name { font-weight: 700; font-size: 14px; }
+        .friend-meta { font-size: 11.5px; color: var(--text-dim); font-weight: 500; }
+
+        .badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .badge-active { background: rgba(74,222,128,0.12); color: #4ade80; }
+        .badge-inactive { background: rgba(139,144,160,0.12); color: var(--text-dim); }
+        .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-dim);
+        }
+
+        /* ===== TOAST ===== */
+        .synergy-toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--surface-2);
+            border: 1px solid rgba(167,139,250,0.4);
+            color: white; padding: 12px 24px;
+            border-radius: 16px; z-index: 9999;
+            transition: all 0.5s cubic-bezier(0.19,1,0.22,1);
+            font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 700;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .synergy-toast.show { top: 24px; }
+    </style>
+</head>
+<body>
+
+<main class="max-w-md mx-auto px-5 pt-6 space-y-7">
+
+    <button class="back-btn" onclick="history.back()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+
+    <!-- HERO -->
+    <section class="text-center space-y-4 pt-2">
+        <div class="hero-icon mx-auto">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0d0f14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        </div>
+        <h1 class="headline">Withdrawal<br>Settings</h1>
+        <p class="subcopy px-4">Set up how you'd like to receive your earnings. You can update these details anytime.</p>
+    </section>
+
+    <!-- METHOD TOGGLE -->
+    <section class="toggle-wrap flex gap-1.5">
+        <button id="tab-bank" onclick="switchMethod('bank')" class="toggle-btn active flex-1 py-2.5">Bank Account</button>
+        <button id="tab-wallet" onclick="switchMethod('wallet')" class="toggle-btn flex-1 py-2.5">Wallet Address</button>
+    </section>
+
+    <!-- BANK ACCOUNT FORM -->
+    <section id="bankForm" class="share-card p-5 space-y-4">
+        <p class="text-[12px] font-bold" style="color: var(--accent-1);">Bank Account Details</p>
+
+        <div class="space-y-1.5">
+            <p class="field-label">Bank Name</p>
+            <div class="code-pill flex items-center px-4 py-3.5">
+                <select id="bankName" class="w-full outline-none">
+                    <option value="">Select your bank</option>
+                    <option>Access Bank</option>
+                    <option>Zenith Bank</option>
+                    <option>GTBank</option>
+                    <option>First Bank</option>
+                    <option>UBA</option>
+                    <option>Fidelity Bank</option>
+                    <option>Union Bank</option>
+                    <option>Sterling Bank</option>
+                    <option>Wema Bank</option>
+                    <option>Kuda Bank</option>
+                    <option>OPay</option>
+                    <option>PalmPay</option>
+                    <option>Moniepoint</option>
+                    <option>Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="space-y-1.5">
+            <p class="field-label">Account Number</p>
+            <div class="code-pill flex items-center px-4 py-3.5">
+                <input type="text" id="accountNumber" maxlength="10" inputmode="numeric" placeholder="0123456789" class="bg-transparent w-full outline-none">
+            </div>
+        </div>
+
+        <div class="space-y-1.5">
+            <p class="field-label">Account Holder Name</p>
+            <div class="code-pill flex items-center px-4 py-3.5">
+                <input type="text" id="accountName" placeholder="As it appears on your bank account" class="bg-transparent w-full outline-none">
+            </div>
+        </div>
+    </section>
+
+    <!-- WALLET ADDRESS FORM -->
+    <section id="walletForm" class="share-card p-5 space-y-4 hidden">
+        <p class="text-[12px] font-bold" style="color: var(--accent-1);">Wallet Details</p>
+        <p class="subcopy">For members outside Nigeria. Earnings will be paid to this address.</p>
+
+        <div class="space-y-1.5">
+            <p class="field-label">Network</p>
+            <div class="code-pill flex items-center px-4 py-3.5">
+                <select id="walletNetwork" class="w-full outline-none">
+                    <option value="">Select network</option>
+                    <option>USDT (TRC20)</option>
+                    <option>USDT (BEP20)</option>
+                    <option>USDT (ERC20)</option>
+                    <option>Bitcoin (BTC)</option>
+                    <option>Ethereum (ETH)</option>
+                    <option>Vonk (VNK)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="space-y-1.5">
+            <p class="field-label">Wallet Address</p>
+            <div class="code-pill flex items-center px-4 py-3.5">
+                <input type="text" id="walletAddress" placeholder="Paste your wallet address" class="bg-transparent w-full outline-none" style="font-weight: 500; font-size: 12.5px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- SAVE -->
+    <button id="saveBtn" onclick="saveWithdrawalDetails()" class="btn-primary w-full py-4 rounded-2xl text-[13px]">
+        Save Details
+    </button>
+
+    <!-- CURRENT STATUS -->
+    <section class="friend-row p-4 flex items-center gap-3">
+        <div class="avatar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e9d5ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="friend-name">Current payout method</p>
+            <p id="currentMethodText" class="friend-meta">No details saved yet</p>
+        </div>
+        <span id="statusBadge" class="badge badge-inactive">
+            <span class="badge-dot"></span>Not set
+        </span>
+    </section>
+
+</main>
+
+<script>
+    // 1. INITIALIZE FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+        authDomain: "synergy-protocol.firebaseapp.com",
+        projectId: "synergy-protocol",
+        databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+        storageBucket: "synergy-protocol.firebasestorage.app",
+        messagingSenderId: "179647543031",
+        appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.firestore();
+    let currentUsername = null;
+
+    // 2. TOGGLE BETWEEN BANK / WALLET
+    function switchMethod(method) {
+        const bankForm = document.getElementById('bankForm');
+        const walletForm = document.getElementById('walletForm');
+        const tabBank = document.getElementById('tab-bank');
+        const tabWallet = document.getElementById('tab-wallet');
+
+        if (method === 'bank') {
+            bankForm.classList.remove('hidden');
+            walletForm.classList.add('hidden');
+            tabBank.classList.add('active');
+            tabWallet.classList.remove('active');
+        } else {
+            walletForm.classList.remove('hidden');
+            bankForm.classList.add('hidden');
+            tabWallet.classList.add('active');
+            tabBank.classList.remove('active');
+        }
+    }
+
+    // 3. AUTH & LOAD EXISTING DETAILS
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            db.collection("users").where("email", "==", user.email).get().then((querySnapshot) => {
+                if (querySnapshot.empty) return;
+
+                querySnapshot.forEach((doc) => {
+                    currentUsername = doc.data().username;
+                    const data = doc.data();
+                    populateExistingDetails(data);
+                });
+            }).catch(err => console.error("Error fetching user:", err));
+        } else {
+            window.location.href = "signin.html";
+        }
+    });
+
+    function populateExistingDetails(data) {
+        const statusBadge = document.getElementById('statusBadge');
+        const currentMethodText = document.getElementById('currentMethodText');
+
+        if (data.payoutMethod === 'bank' && data.bankName) {
+            document.getElementById('bankName').value = data.bankName || '';
+            document.getElementById('accountNumber').value = data.accountNumber || '';
+            document.getElementById('accountName').value = data.accountName || '';
+            switchMethod('bank');
+
+            currentMethodText.innerText = `${data.bankName} • ${maskAccount(data.accountNumber)}`;
+            statusBadge.className = 'badge badge-active';
+            statusBadge.innerHTML = '<span class="badge-dot"></span>Bank linked';
+
+        } else if (data.payoutMethod === 'wallet' && data.walletAddress) {
+            document.getElementById('walletNetwork').value = data.walletNetwork || '';
+            document.getElementById('walletAddress').value = data.walletAddress || '';
+            switchMethod('wallet');
+
+            currentMethodText.innerText = `${data.walletNetwork || 'Wallet'} • ${maskWallet(data.walletAddress)}`;
+            statusBadge.className = 'badge badge-active';
+            statusBadge.innerHTML = '<span class="badge-dot"></span>Wallet linked';
+        }
+    }
+
+    function maskAccount(num) {
+        if (!num || num.length < 4) return num || '';
+        return '••••' + num.slice(-4);
+    }
+
+    function maskWallet(addr) {
+        if (!addr || addr.length < 8) return addr || '';
+        return addr.slice(0, 5) + '••••' + addr.slice(-4);
+    }
+
+    // 4. SAVE DETAILS
+    async function saveWithdrawalDetails() {
+        if (!currentUsername) {
+            showToast("Please wait, loading your profile…");
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveBtn');
+        const isBankActive = document.getElementById('tab-bank').classList.contains('active');
+
+        let payload = {};
+
+        if (isBankActive) {
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const accountName = document.getElementById('accountName').value.trim();
+
+            if (!bankName || !accountNumber || !accountName) {
+                showToast("Please fill in all bank fields");
+                return;
+            }
+            if (accountNumber.length !== 10) {
+                showToast("Account number must be 10 digits");
+                return;
+            }
+
+            payload = {
+                payoutMethod: 'bank',
+                bankName: bankName,
+                accountNumber: accountNumber,
+                accountName: accountName,
+                walletNetwork: firebase.firestore.FieldValue.delete(),
+                walletAddress: firebase.firestore.FieldValue.delete()
+            };
+
+        } else {
+            const walletNetwork = document.getElementById('walletNetwork').value.trim();
+            const walletAddress = document.getElementById('walletAddress').value.trim();
+
+            if (!walletNetwork || !walletAddress) {
+                showToast("Please fill in all wallet fields");
+                return;
+            }
+
+            payload = {
+                payoutMethod: 'wallet',
+                walletNetwork: walletNetwork,
+                walletAddress: walletAddress,
+                bankName: firebase.firestore.FieldValue.delete(),
+                accountNumber: firebase.firestore.FieldValue.delete(),
+                accountName: firebase.firestore.FieldValue.delete()
+            };
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Saving…";
+
+        try {
+            await db.collection("users").doc(currentUsername).update(payload);
+            showToast("Withdrawal details saved");
+
+            const statusBadge = document.getElementById('statusBadge');
+            const currentMethodText = document.getElementById('currentMethodText');
+            statusBadge.className = 'badge badge-active';
+
+            if (isBankActive) {
+                statusBadge.innerHTML = '<span class="badge-dot"></span>Bank linked';
+                currentMethodText.innerText = `${payload.bankName} • ${maskAccount(payload.accountNumber)}`;
+            } else {
+                statusBadge.innerHTML = '<span class="badge-dot"></span>Wallet linked';
+                currentMethodText.innerText = `${payload.walletNetwork} • ${maskWallet(payload.walletAddress)}`;
+            }
+
+        } catch (err) {
+            console.error(err);
+            showToast("Something went wrong, try again");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Save Details";
+        }
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('synergy-toast') || document.createElement('div');
+        toast.id = 'synergy-toast';
+        toast.className = 'synergy-toast';
+        document.body.appendChild(toast);
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>
