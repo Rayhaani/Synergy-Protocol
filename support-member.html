@@ -1,1 +1,200 @@
-.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Support — Million Subscribers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#020617; --surface:#050a15; --surface2:#0a0f1e; --surface3:#111827;
+  --border:#222840; --border2:#2C3450;
+  --lime:#C6F135; --lime-dim:rgba(198,241,53,.12);
+  --teal:#00E5C0;
+  --amber:#FFB800;
+  --red:#FF4C6A;
+  --text:#EEEAE0; --text2:#8A91AD; --text3:#3E4460;
+  --radius-sm:10px; --radius:16px;
+  --font-b:'Quicksand',sans-serif;
+  --ease:cubic-bezier(.22,.68,0,1.2);
+}
+html,body{height:100%}
+body{
+  margin:0; font-family:var(--font-b); color:var(--text); background:var(--bg);
+  background-image:radial-gradient(circle at 50% 0%, rgba(112,0,255,.12), transparent 60%),
+    url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+  -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;
+}
+button,input{font-family:inherit;font-size:inherit;border:none;outline:none;background:none}
+button{cursor:pointer}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+#app{max-width:520px;margin:0 auto;width:100%;height:100vh;display:flex;flex-direction:column}
+
+#header{
+  padding:16px 20px 14px; text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  background:rgba(2,6,23,.97); backdrop-filter:blur(20px) saturate(160%);
+  flex-shrink:0;
+}
+.header-top{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}
+.brand-dot{width:10px;height:10px;border-radius:50%;background:var(--lime)}
+.app-title{font-family:var(--font-b);font-size:16px;font-weight:700;color:#fff}
+.app-sub{font-size:10px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.status-live{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--teal);margin-top:6px}
+.status-live .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal)}
+
+#chatMessages{
+  flex:1; overflow-y:auto; padding:18px 18px 8px; display:flex; flex-direction:column; gap:10px;
+}
+.msg{max-width:80%;padding:11px 14px;font-size:13px;line-height:1.55;border-radius:15px}
+.msg-member{align-self:flex-end;background:var(--lime-dim);border:1px solid rgba(198,241,53,.3);color:var(--text);border-bottom-right-radius:3px}
+.msg-admin{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:3px}
+.msg-time{display:block;font-size:8.5px;color:var(--text3);margin-top:4px}
+
+#emptyChat{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:8px;text-align:center;padding:30px}
+#emptyChat .e-icon{font-size:38px;opacity:.35}
+#emptyChat h3{font-family:var(--font-b);font-size:14px;color:var(--text2);margin:0}
+#emptyChat p{font-size:12px;color:var(--text3);margin:0;line-height:1.6}
+
+.chat-input-row{
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border); background:rgba(2,6,23,.97); backdrop-filter:blur(20px);
+  display:flex; gap:8px; flex-shrink:0;
+}
+#chatInput{
+  flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px 15px;color:var(--text);font-size:13px;
+}
+#chatInput::placeholder{color:var(--text3)}
+#sendBtn{
+  background:var(--lime);color:var(--bg);padding:12px 20px;border-radius:var(--radius-sm);
+  font-weight:700;font-size:12px;flex-shrink:0;transition:transform .15s var(--ease);
+}
+#sendBtn:active{transform:scale(.96)}
+#sendBtn:disabled{background:var(--surface2);color:var(--text3)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header id="header">
+    <div class="header-top">
+      <span class="brand-dot"></span>
+      <div class="app-title">Support</div>
+    </div>
+    <div class="app-sub">We usually reply within minutes</div>
+    <div class="status-live"><span class="dot"></span> Agent online</div>
+  </header>
+
+  <div id="chatMessages"></div>
+
+  <div id="emptyChat" style="display:none">
+    <div class="e-icon">💬</div>
+    <h3>Start the conversation</h3>
+    <p>Tell us what's going on and our team will respond shortly.</p>
+  </div>
+
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Type your message…" onkeydown="if(event.key==='Enter')sendMemberMessage()"/>
+    <button id="sendBtn" onclick="sendMemberMessage()">Send</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+  authDomain: "synergy-protocol.firebaseapp.com",
+  databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
+  projectId: "synergy-protocol",
+  storageBucket: "synergy-protocol.firebasestorage.app",
+  messagingSenderId: "179647543031",
+  appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const THREADS_COL = "mc_support_threads";
+
+// Same auth pattern as auth.html — username stored in localStorage after login
+const username = localStorage.getItem('synergy_user');
+if(!username){
+  window.location.href = 'auth.html';
+}
+
+const currentUser = { uid: username, name: username };
+const threadRef = db.collection(THREADS_COL).doc(currentUser.uid);
+
+async function ensureThread(){
+  const snap = await threadRef.get();
+  if(!snap.exists){
+    await threadRef.set({
+      memberName: currentUser.name,
+      memberUid: currentUser.uid,
+      status: 'open',
+      lastMessage: '',
+      lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+      unreadByAdmin: false,
+      unreadByMember: false
+    });
+  }
+}
+ensureThread();
+
+function timeAgo(ts){
+  if(!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = Math.floor((Date.now()-d.getTime())/1000);
+  if(diff<60) return "now";
+  if(diff<3600) return Math.floor(diff/60)+"m";
+  if(diff<86400) return Math.floor(diff/3600)+"h";
+  return Math.floor(diff/86400)+"d";
+}
+
+threadRef.collection("messages").orderBy("createdAt","asc").onSnapshot(snap=>{
+  const messages = snap.docs.map(d=>d.data());
+  const box = document.getElementById('chatMessages');
+  const empty = document.getElementById('emptyChat');
+
+  if(messages.length===0){
+    box.style.display='none';
+    empty.style.display='flex';
+    return;
+  }
+  box.style.display='flex';
+  empty.style.display='none';
+
+  box.innerHTML = messages.map(m=>`
+    <div class="msg ${m.senderRole==='member'?'msg-member':'msg-admin'}">
+      ${m.text}
+      <span class="msg-time">${m.createdAt ? timeAgo(m.createdAt) : 'sending…'}</span>
+    </div>
+  `).join('');
+  box.scrollTop = box.scrollHeight;
+
+  threadRef.update({ unreadByMember:false }).catch(()=>{});
+});
+
+async function sendMemberMessage(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value='';
+
+  await threadRef.collection("messages").add({
+    senderRole:'member', text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  await threadRef.update({
+    lastMessage:text, lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(), unreadByAdmin:true, memberName: currentUser.name
+  });
+}
+</script>
+</body>
+  </html>
+  
