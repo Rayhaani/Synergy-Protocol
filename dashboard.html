@@ -21,7 +21,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
-<script src="profile-sheet.js"></script>
 </head>
   
   <style>
@@ -1705,25 +1704,7 @@ function scrollToTasks() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function openProfileSheet() {
-    document.getElementById('profile-sheet-overlay').classList.add('active');
-    document.getElementById('profile-sheet').classList.add('active');
-}
-function closeProfileSheet() {
-    document.getElementById('profile-sheet-overlay').classList.remove('active');
-    document.getElementById('profile-sheet').classList.remove('active');
-    setDockActive(-1);
-}
-
 function updateDockTaskRing(watched, limit = 5) {
-    const circle = document.getElementById('task-ring-progress');
-    const label = document.getElementById('task-dock-label');
-    if (!circle) return;
-    const circumference = 119.4;
-    const pct = Math.min(watched / limit, 1);
-    circle.style.strokeDashoffset = circumference - (pct * circumference);
-    if (label) label.innerText = `${Math.min(watched, limit)}/${limit}`;
-}
 
 document.addEventListener('DOMContentLoaded', () => setDockActive(-1));
 
@@ -1732,5 +1713,6 @@ window.addEventListener('load', autoCleanupTasks);
     
     
 </script>
+<script src="profile-sheet.js"></script>
 </body>
 </html>
