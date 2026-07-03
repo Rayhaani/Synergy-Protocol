@@ -1832,11 +1832,28 @@ function openProfileSheet() {
     document.getElementById('profile-sheet-overlay').classList.add('active');
     document.getElementById('profile-sheet').classList.add('active');
 }
+
 function closeProfileSheet() {
     document.getElementById('profile-sheet-overlay').classList.remove('active');
     document.getElementById('profile-sheet').classList.remove('active');
     setDockActive(-1);
 }
+
+// Rufe profile-sheet ta atomatik idan an danna ko'ina a dashboard (bayan overlay)
+document.addEventListener('click', function(e) {
+    const sheet = document.getElementById('profile-sheet');
+    const overlay = document.getElementById('profile-sheet-overlay');
+    if (!sheet || !overlay) return;
+
+    const isSheetOpen = sheet.classList.contains('active');
+    const clickedInsideSheet = sheet.contains(e.target);
+    const clickedProfileButton = e.target.closest('.dock-node[data-index="4"]');
+
+    // Idan sheet a bude yake, aka danna waje (ba cikin sheet ba, kuma ba profile button din ba)
+    if (isSheetOpen && !clickedInsideSheet && !clickedProfileButton) {
+        closeProfileSheet();
+    }
+});
 
 function updateDockTaskRing(watched, limit = 5) {
     const circle = document.getElementById('task-ring-progress');
