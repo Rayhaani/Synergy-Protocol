@@ -6,8 +6,7 @@
 <title>Synergy — Support Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box}
 :root{
@@ -15,11 +14,11 @@
   --border:#222840; --border2:#2C3450;
   --lime:#C6F135; --lime-dim:rgba(198,241,53,.12);
   --teal:#00E5C0; --teal-dim:rgba(0,229,192,.10);
-  --amber:#FFB800; --amber-dim:rgba(255,184,0,.10);
+  --amber:#FFB800;
   --red:#FF4C6A; --red-dim:rgba(255,76,106,.10);
   --text:#EEEAE0; --text2:#8A91AD; --text3:#3E4460;
-  --radius-sm:10px; --radius:16px; --radius-lg:22px;
-  --font-d:'Syncopate',sans-serif; --font-b:'Quicksand',sans-serif; --font-m:'Roboto Mono',monospace;
+  --radius-sm:10px; --radius:16px;
+  --font-b:'Quicksand',sans-serif;
   --ease:cubic-bezier(.22,.68,0,1.2);
 }
 body{
@@ -44,7 +43,7 @@ button{cursor:pointer}
 .header-inner{max-width:520px;margin:0 auto;padding:16px 20px}
 .header-top{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}
 .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--lime);flex-shrink:0}
-.app-title{font-family:var(--font-d);font-size:18px;font-weight:700;color:#fff;text-align:center}
+.app-title{font-family:var(--font-b);font-size:18px;font-weight:700;color:#fff;text-align:center}
 .app-sub{font-size:10px;color:var(--text3);text-align:center;letter-spacing:.5px;text-transform:uppercase}
 
 #content{flex:1;padding:18px 20px 40px}
@@ -84,7 +83,7 @@ button{cursor:pointer}
 .thread-preview{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .thread-meta{display:flex;gap:6px;margin-top:6px;align-items:center}
 .status-badge{
-  padding:2px 8px;border-radius:99px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:2px 8px;border-radius:99px;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
 }
 .status-open{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,229,192,.25)}
 .status-resolved{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
@@ -93,10 +92,9 @@ button{cursor:pointer}
 
 #emptyState{display:none;flex-direction:column;align-items:center;padding:60px 20px;text-align:center;gap:8px}
 #emptyState .e-icon{font-size:42px;opacity:.3}
-#emptyState h3{font-family:var(--font-d);font-size:15px;color:var(--text2)}
+#emptyState h3{font-family:var(--font-b);font-size:15px;color:var(--text2)}
 #emptyState p{font-size:12px;color:var(--text3)}
 
-/* Chat sheet */
 #chatOverlay{
   display:none;position:fixed;inset:0;background:rgba(4,5,10,.85);backdrop-filter:blur(14px);
   z-index:61000;align-items:flex-end;justify-content:center;
@@ -141,7 +139,7 @@ button{cursor:pointer}
 #chatInput::placeholder{color:var(--text3)}
 #sendBtn{
   background:var(--lime);color:var(--bg);padding:11px 18px;border-radius:var(--radius-sm);
-  font-weight:800;font-size:12px;flex-shrink:0;transition:transform .15s var(--ease);
+  font-weight:700;font-size:12px;flex-shrink:0;transition:transform .15s var(--ease);
 }
 #sendBtn:active{transform:scale(.96)}
 #sendBtn:disabled{background:var(--surface2);color:var(--text3)}
@@ -185,7 +183,6 @@ button{cursor:pointer}
 
 </div>
 
-<!-- CHAT SHEET -->
 <div id="chatOverlay" onclick="closeChatOnOverlay(event)">
   <div id="chatSheet">
     <div class="sheet-handle"><div class="sheet-handle-bar"></div></div>
@@ -206,41 +203,27 @@ button{cursor:pointer}
   </div>
 </div>
 
-<script type="module">
-/* ═══════════════════════════════════════════════════════════
-   FIREBASE SETUP — replace firebaseConfig with your existing
-   Zynta (synergy-protocol) config, same one used on the
-   Million Customers page.
-   ═══════════════════════════════════════════════════════════ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import {
-  getFirestore, collection, doc, onSnapshot, query, orderBy,
-  addDoc, updateDoc, serverTimestamp, setDoc
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script>
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_ZYNTA_API_KEY",
+  apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
   authDomain: "synergy-protocol.firebaseapp.com",
+  databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com",
   projectId: "synergy-protocol",
-  storageBucket: "synergy-protocol.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  storageBucket: "synergy-protocol.firebasestorage.app",
+  messagingSenderId: "179647543031",
+  appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* Collection: mc_support_threads/{memberUid}
-   Subcollection: mc_support_threads/{memberUid}/messages/{msgId} */
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const THREADS_COL = "mc_support_threads";
 
-/* ── STATE ─────────────────────────────────── */
-let threads = [];           // live cache of all threads
+let threads = [];
 let activeFilter = "all";
 let activeThreadId = null;
 let unsubMessages = null;
 
-/* ── HELPERS ───────────────────────────────── */
 function timeAgo(ts){
   if(!ts) return "";
   const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -254,21 +237,19 @@ function initials(name){
   return (name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()).join("");
 }
 
-/* ── LIVE THREAD LIST ──────────────────────── */
-const threadsQuery = query(collection(db, THREADS_COL), orderBy("lastMessageAt","desc"));
-onSnapshot(threadsQuery, snap=>{
+db.collection(THREADS_COL).orderBy("lastMessageAt","desc").onSnapshot(snap=>{
   threads = snap.docs.map(d=>({ id:d.id, ...d.data() }));
   renderThreads();
 });
 
-window.setFilter = function(filter, btn){
+function setFilter(filter, btn){
   activeFilter = filter;
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   renderThreads();
-};
+}
 
-window.renderThreads = function(){
+function renderThreads(){
   const search = document.getElementById('searchInput').value.toLowerCase().trim();
   let list = threads.filter(t=>{
     if(activeFilter==='unread' && !t.unreadByAdmin) return false;
@@ -307,38 +288,37 @@ window.renderThreads = function(){
       </div>
     </div>
   `).join('');
-};
+}
 
-/* ── OPEN THREAD / LIVE MESSAGES ──────────────── */
-window.openThread = function(threadId){
+function openThread(threadId){
   activeThreadId = threadId;
   const thread = threads.find(t=>t.id===threadId);
   document.getElementById('chatMemberName').textContent = thread?.memberName || 'Member';
 
-  // mark as read by admin
-  updateDoc(doc(db, THREADS_COL, threadId), { unreadByAdmin:false }).catch(()=>{});
+  db.collection(THREADS_COL).doc(threadId).update({ unreadByAdmin:false }).catch(()=>{});
 
   if(unsubMessages) unsubMessages();
-  const msgsQuery = query(collection(db, THREADS_COL, threadId, "messages"), orderBy("createdAt","asc"));
-  unsubMessages = onSnapshot(msgsQuery, snap=>{
-    const messages = snap.docs.map(d=>d.data());
-    const box = document.getElementById('chatMessages');
-    box.innerHTML = messages.map(m=>`
-      <div class="msg ${m.senderRole==='admin'?'msg-admin':'msg-member'}">
-        ${m.text}
-        <span class="msg-time">${m.createdAt ? timeAgo(m.createdAt) : 'sending…'}</span>
-      </div>
-    `).join('');
-    box.scrollTop = box.scrollHeight;
-  });
+  unsubMessages = db.collection(THREADS_COL).doc(threadId).collection("messages")
+    .orderBy("createdAt","asc")
+    .onSnapshot(snap=>{
+      const messages = snap.docs.map(d=>d.data());
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = messages.map(m=>`
+        <div class="msg ${m.senderRole==='admin'?'msg-admin':'msg-member'}">
+          ${m.text}
+          <span class="msg-time">${m.createdAt ? timeAgo(m.createdAt) : 'sending…'}</span>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    });
 
   document.getElementById('chatOverlay').classList.add('open');
   setTimeout(()=>document.getElementById('chatSheet').classList.add('open'), 10);
-};
+}
 
-window.closeChatOnOverlay = function(e){
+function closeChatOnOverlay(e){
   if(e.target===document.getElementById('chatOverlay')) closeChat();
-};
+}
 function closeChat(){
   document.getElementById('chatSheet').classList.remove('open');
   setTimeout(()=>document.getElementById('chatOverlay').classList.remove('open'), 320);
@@ -346,27 +326,24 @@ function closeChat(){
   activeThreadId = null;
 }
 
-/* ── SEND ADMIN REPLY ──────────────────────── */
-window.sendAdminMessage = async function(){
+async function sendAdminMessage(){
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if(!text || !activeThreadId) return;
   input.value='';
 
-  await addDoc(collection(db, THREADS_COL, activeThreadId, "messages"), {
-    senderRole:'admin', text, createdAt: serverTimestamp()
+  await db.collection(THREADS_COL).doc(activeThreadId).collection("messages").add({
+    senderRole:'admin', text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
-  await updateDoc(doc(db, THREADS_COL, activeThreadId), {
-    lastMessage:text, lastMessageAt: serverTimestamp(), unreadByMember:true, status:'open'
+  await db.collection(THREADS_COL).doc(activeThreadId).update({
+    lastMessage:text, lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(), unreadByMember:true, status:'open'
   });
-};
+}
 
-/* ── RESOLVE / BAN ─────────────────────────── */
-window.setThreadStatus = async function(status){
+async function setThreadStatus(status){
   if(!activeThreadId) return;
-  await updateDoc(doc(db, THREADS_COL, activeThreadId), { status });
-};
+  await db.collection(THREADS_COL).doc(activeThreadId).update({ status });
+}
 </script>
 </body>
-    </html>
-    
+</html>
