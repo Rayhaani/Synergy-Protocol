@@ -518,7 +518,7 @@ img{display:block;max-width:100%}
 
 .sheet-handle{
   display:flex;justify-content:center;
-  padding:8px 0 2px;
+  padding:6px 0 0;
 }
 .sheet-handle-bar{width:36px;height:4px;background:var(--border2);border-radius:99px}
 
@@ -526,28 +526,34 @@ img{display:block;max-width:100%}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:6px 20px;
-  border-bottom:1px solid var(--border);
+  padding:8px 16px;
+  margin-bottom:2px;
 }
 .sheet-title{
   font-family:var(--font-b);
-  font-size:14px;
+  font-size:15px;
   font-weight:700;
   color:var(--text);
   letter-spacing:-.2px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  max-width:80%;
+  max-width:82%;
 }
 .close-btn{
-  width:26px;height:26px;
-  background:var(--surface2);
-  border-radius:7px;
+  width:28px;height:28px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--border);
+  border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   color:var(--text2);
-  font-size:14px;
-  transition:background .15s;
+  font-size:13px;
+  flex-shrink:0;
+  transition:background .15s, color .15s;
+}
+.close-btn:hover{
+  background:rgba(255,76,106,.15);
+  color:var(--red);
 }
 .close-btn:hover{background:var(--surface3)}
 
