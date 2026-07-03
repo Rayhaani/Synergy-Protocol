@@ -418,6 +418,19 @@
 .sheet-item.danger span { color: #f87171; }
       
 body { padding-bottom: 90px; }
+
+:root { --bg: #020617; }
+
+#profile-sheet-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 69999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+#profile-sheet-overlay.active { opacity: 1; pointer-events: auto; }
 </style>
     
 </head>
