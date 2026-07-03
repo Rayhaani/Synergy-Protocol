@@ -1017,7 +1017,7 @@ function fetchAndRenderNodes() {
     
 
 // CODE OVERLAY - CODE KAWAI, mai sauqi
-function showCodeOnlyOverlay(id, task) {
+ function showCodeOnlyOverlay(id, task) {
     if (document.getElementById('code-reveal-overlay')) return;
 
     const code = localStorage.getItem(`nodeCode_${id}`) || task.code;
@@ -1032,6 +1032,7 @@ function showCodeOnlyOverlay(id, task) {
         display: flex; flex-direction: column;
         align-items: center; justify-content: center;
         animation: fadeInOverlay 0.4s ease;
+        font-family: 'Quicksand', sans-serif;
     `;
 
     overlay.innerHTML = `
@@ -1041,25 +1042,22 @@ function showCodeOnlyOverlay(id, task) {
                 0%   { text-shadow: 0 0 10px rgba(0,242,254,0.3); }
                 100% { text-shadow: 0 0 25px rgba(0,242,254,0.9), 0 0 50px rgba(0,242,254,0.3); }
             }
-            @keyframes badgePop {
-                0% { transform: scale(0.8); opacity: 0; }
-                100% { transform: scale(1); opacity: 1; }
-            }
             @keyframes scanline {
                 0% { transform: translateY(-100%); }
                 100% { transform: translateY(400%); }
             }
         </style>
 
-        <!-- MAIN CARD -->
+        <!-- MAIN CARD (an rage padding domin rage height) -->
         <div style="
+            font-family: 'Quicksand', sans-serif;
             background: rgba(5, 10, 21, 0.95);
             border: 1px solid rgba(0,242,254,0.12);
             border-top: 2px solid #00f2fe;
-            border-radius: 28px;
-            padding: 32px 36px;
+            border-radius: 24px;
+            padding: 18px 24px;
             text-align: center;
-            max-width: 300px;
+            max-width: 280px;
             width: 88%;
             position: relative;
             overflow: hidden;
@@ -1067,31 +1065,31 @@ function showCodeOnlyOverlay(id, task) {
         ">
             <div style="position:absolute;top:0;left:0;width:100%;height:30px;background:linear-gradient(transparent,rgba(0,242,254,0.02),transparent);animation:scanline 3s linear infinite;pointer-events:none;"></div>
 
-            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);border-radius:50px;padding:5px 14px;margin-bottom:20px;">
+            <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);border-radius:50px;padding:4px 12px;margin-bottom:12px;">
                 <div style="width:5px;height:5px;border-radius:50%;background:#00f2fe;box-shadow:0 0 6px #00f2fe;"></div>
-                <span style="font-family:'Syncopate',sans-serif;font-size:6px;color:rgba(0,242,254,0.6);letter-spacing:3px;text-transform:uppercase;">Hash Code</span>
+                <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:8px;color:rgba(0,242,254,0.6);letter-spacing:2px;text-transform:uppercase;">Hash Code</span>
             </div>
 
-            <div style="font-family:'Roboto Mono',monospace;font-size:2.2rem;font-weight:400;color:#00f2fe;letter-spacing:12px;padding-left:12px;animation:codeGlow 1.8s ease-in-out infinite alternate;margin-bottom:20px;">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:1.9rem;color:#00f2fe;letter-spacing:8px;padding-left:8px;animation:codeGlow 1.8s ease-in-out infinite alternate;margin-bottom:12px;">
                 ${code}
             </div>
 
-            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,242,254,0.15),transparent);margin-bottom:16px;"></div>
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,242,254,0.15),transparent);margin-bottom:10px;"></div>
 
-            <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:1px;margin-bottom:24px;line-height:1.7;">
+            <p style="font-family:'Quicksand',sans-serif;font-size:10px;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-bottom:16px;line-height:1.5;">
                 Memorize this code,<br>then enter it below.
             </p>
 
-            <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
     <button onclick="
         navigator.clipboard.writeText('${code}');
         this.innerText='✓ COPIED!';
         this.style.background='#10b981';
         setTimeout(()=>{ this.innerText='COPY CODE'; this.style.background='rgba(0,242,254,0.08)'; },2000);
-    " style="width:100%;padding:13px;border-radius:14px;background:rgba(0,242,254,0.08);color:#00f2fe;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;">
+    " style="font-family:'Quicksand',sans-serif;width:100%;padding:10px;border-radius:12px;background:rgba(0,242,254,0.08);color:#00f2fe;font-weight:700;font-size:10px;letter-spacing:2px;cursor:pointer;border:1px solid rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;">
         COPY CODE
     </button>
-    <button onclick="closeCodeOverlay('${id}')" style="width:100%;padding:13px;border-radius:14px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-family:'Syncopate',sans-serif;font-weight:700;font-size:9px;letter-spacing:3px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
+    <button onclick="closeCodeOverlay('${id}')" style="font-family:'Quicksand',sans-serif;width:100%;padding:10px;border-radius:12px;background:linear-gradient(135deg,#00f2fe,#0060ff);color:black;font-weight:700;font-size:10px;letter-spacing:2px;cursor:pointer;border:none;box-shadow:0 6px 20px rgba(0,242,254,0.2);transition:all 0.3s;text-transform:uppercase;"
     onmouseover="this.style.transform='translateY(-2px)'"
     onmouseout="this.style.transform='translateY(0)'">
         Got It →
@@ -1101,43 +1099,7 @@ function showCodeOnlyOverlay(id, task) {
     `;
 
     document.body.appendChild(overlay);
-}
-            
-
-// Rufe overlay - nuna verify box
-function closeCodeOverlay(id) {
-    const overlay = document.getElementById('code-reveal-overlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.4s';
-        setTimeout(() => overlay.remove(), 400);
-    }
-
-    // Yanzu nuna input + verify a node din
-    const task = nodesList[id];
-    const infoArea = document.getElementById(`info-area-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-
-    if (infoArea) {
-        infoArea.innerHTML = `
-            <div class="flex flex-col gap-1 w-full">
-                <span class="text-[8px] text-cyan-500 orbitron uppercase font-bold">ENTER CODE</span>
-                <input type="text" id="code-input-${id}" maxlength="6"
-                class="w-full bg-white/5 border border-cyan-500/30 rounded-lg p-2 text-white text-center orbitron text-[12px] outline-none focus:border-cyan-400" 
-                placeholder="••••••">
-            </div>
-        `;
-    }
-
-    if (btn) {
-        btn.innerText = "VERIFY";
-        btn.style.background = "#00f2fe";
-        btn.style.color = "black";
-        btn.style.border = "none";
-        btn.onclick = () => verifyNodeCode(id);
-    }
-}
-
+ }
 
 // VERIFY - bayan overlay ya rufe
 async function verifyNodeCode(id) {
