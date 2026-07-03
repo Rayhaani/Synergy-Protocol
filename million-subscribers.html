@@ -1127,17 +1127,6 @@ select.f-input option{background:var(--surface);color:var(--text)}
     border: 1.5px solid #050a15;
 }
 
-#profile-sheet-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(6px);
-    z-index: 69999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-}
-#profile-sheet-overlay.active { opacity: 1; pointer-events: auto; }
-
 #profile-sheet {
     position: fixed;
     left: 50%;
@@ -1145,41 +1134,73 @@ select.f-input option{background:var(--surface);color:var(--text)}
     transform: translate(-50%, 100%);
     width: min(94%, 460px);
     z-index: 70000;
-    background: rgba(5, 10, 21, 0.97);
+    background: var(--bg);
+    background-image: radial-gradient(circle at 50% 0%, rgba(112, 0, 255, 0.12), transparent 70%);
     border: 1px solid rgba(0,242,254,0.15);
     border-bottom: none;
     border-top: 2px solid #00f2fe;
-    border-radius: 28px 28px 0 0;
-    padding: 10px 20px calc(28px + env(safe-area-inset-bottom)) 20px;
+    border-radius: 24px 24px 0 0;
+    padding: 6px 16px calc(14px + env(safe-area-inset-bottom)) 16px;
     transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
     box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
+    font-family: 'Quicksand', sans-serif;
 }
+
 #profile-sheet.active { transform: translate(-50%, 0); }
 
 .sheet-handle {
-    width: 36px; height: 4px;
+    width: 32px; height: 4px;
     background: rgba(255,255,255,0.15);
     border-radius: 10px;
-    margin: 8px auto 18px auto;
+    margin: 6px auto 8px auto;
 }
 
 .sheet-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 6px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 6px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 .sheet-item:last-child { border-bottom: none; }
-.sheet-item svg { width: 18px; height: 18px; stroke: #00f2fe; fill: none; stroke-width: 2; }
-.sheet-item span {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px;
-    color: #eee;
-    font-weight: 500;
-}
-.sheet-item.danger svg { stroke: #f87171; }
-.sheet-item.danger span { color: #f87171; }
+.sheet-item:hover, .sheet-item:active { background: rgba(255,255,255,0.04); }
 
+.sheet-icon-box {
+    width: 34px; height: 34px;
+    border-radius: 11px;
+    background: rgba(0,242,254,0.08);
+    border: 1px solid rgba(0,242,254,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.sheet-icon-box svg { width: 15px; height: 15px; stroke: #00f2fe; fill: none; stroke-width: 2; }
+.sheet-icon-box.danger-box { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); }
+.sheet-icon-box.danger-box svg { stroke: #f87171; }
+
+.sheet-item-text { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.sheet-item-text span {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 12.5px; font-weight: 700; color: #f1f1f1;
+}
+.sheet-item-text p {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 9.5px; font-weight: 500; color: rgba(255,255,255,0.35); margin: 0;
+}
+.sheet-item.danger .sheet-item-text span { color: #f87171; }
+
+.sheet-item .chevron { width: 14px; height: 14px; stroke: rgba(255,255,255,0.2); fill: none; stroke-width: 2; flex-shrink: 0; }
+
+.sheet-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 2px 4px; }
+
+.sheet-item span {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 12.5px;
+    color: #eee;
+    font-weight: 700;
+}
+.sheet-item.danger span { color: #f87171; }
+    
 body { padding-bottom: 90px; }
 
     /* Status 3D Filter Bar */
@@ -1232,6 +1253,20 @@ body { padding-bottom: 90px; }
 .slope-pending .slope-label{ color:#eab308; }
 .slope-completed{ background:rgba(0,229,192,.03); border-bottom:2px solid rgba(0,229,192,.4);}
 .slope-completed .slope-label{ color:var(--teal); }
+  
+:root { --bg: #020617; }
+
+#profile-sheet-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 69999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+#profile-sheet-overlay.active { opacity: 1; pointer-events: auto; }  
+
   </style>
 </head>
 <body>
@@ -1563,24 +1598,54 @@ body { padding-bottom: 90px; }
 </nav>
 
 <div id="profile-sheet-overlay" onclick="closeProfileSheet()"></div>
+
 <div id="profile-sheet">
     <div class="sheet-handle"></div>
 
-    <div class="sheet-item" onclick="location.href='dashboard.html'">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
+    <div class="sheet-item" onclick="location.href='referrals.html'">
+        <div class="sheet-icon-box">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="sheet-item-text">
+            <span>Referrals</span>
+            <p>Invite friends & earn rewards</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </div>
 
-    <div class="sheet-item" onclick="location.href='network.html'">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        <span>Network</span>
+    <div class="sheet-divider"></div>
+
+    <div class="sheet-item" onclick="location.href='settings.html'">
+        <div class="sheet-icon-box">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <div class="sheet-item-text">
+            <span>Settings</span>
+            <p>Bank details & withdrawal setup</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </div>
+
+    <div class="sheet-item" onclick="location.href='support.html'">
+        <div class="sheet-icon-box">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 18.36a9 9 0 1 0-12.72 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </div>
+        <div class="sheet-item-text">
+            <span>Support</span>
+            <p>Get help from our team</p>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </div>
+
+    <div class="sheet-divider"></div>
 
     <div class="sheet-item danger" onclick="location.href='signin.html'">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        <span>Logout</span>
+        <div class="sheet-icon-box danger-box">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </div>
+        <div class="sheet-item-text"><span>Log out</span></div>
     </div>
-                         </div>  
+</div>
 <script>
 /* ── DATA ─────────────────────────────────── */
 const TASKS = [
@@ -2178,16 +2243,34 @@ function scrollToTasks() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+
 function openProfileSheet() {
     document.getElementById('profile-sheet-overlay').classList.add('active');
     document.getElementById('profile-sheet').classList.add('active');
 }
+
 function closeProfileSheet() {
     document.getElementById('profile-sheet-overlay').classList.remove('active');
     document.getElementById('profile-sheet').classList.remove('active');
     setDockActive(-1);
 }
 
+// Rufe profile-sheet ta atomatik idan an danna ko'ina a dashboard (bayan overlay)
+document.addEventListener('click', function(e) {
+    const sheet = document.getElementById('profile-sheet');
+    const overlay = document.getElementById('profile-sheet-overlay');
+    if (!sheet || !overlay) return;
+
+    const isSheetOpen = sheet.classList.contains('active');
+    const clickedInsideSheet = sheet.contains(e.target);
+    const clickedProfileButton = e.target.closest('.dock-node[data-index="4"]');
+
+    // Idan sheet a bude yake, aka danna waje (ba cikin sheet ba, kuma ba profile button din ba)
+    if (isSheetOpen && !clickedInsideSheet && !clickedProfileButton) {
+        closeProfileSheet();
+    }
+});
+  
 function updateDockTaskRing(watched, limit = 5) {
     const circle = document.getElementById('task-ring-progress');
     const label = document.getElementById('task-dock-label');
