@@ -250,13 +250,11 @@ img{display:block;max-width:100%}
 #taskGrid{display:flex;flex-direction:column;gap:16px}
 
 .task-card{
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #0f172a;
-  border-radius: 12px;
-  padding: 20px;
-  cursor: pointer;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  cursor:pointer;
   transition: transform .22s var(--ease), box-shadow .22s, border-color .22s;
   display:flex;
   flex-direction:column;
