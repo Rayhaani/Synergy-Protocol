@@ -1163,7 +1163,9 @@ select.f-input option{background:var(--surface);color:var(--text)}
     width: min(94%, 460px);
     z-index: 70000;
     background: var(--bg);
-    background-image: radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.12), transparent 70%);
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent),
+        url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
     border: 1px solid rgba(167,139,250,0.15);
     border-bottom: none;
     border-top: 2px solid var(--accent-1);
@@ -1172,7 +1174,7 @@ select.f-input option{background:var(--surface);color:var(--text)}
     transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
     box-shadow: 0 -20px 60px rgba(0,0,0,0.6);
     font-family: 'Quicksand', sans-serif;
-}
+  }
 
 #profile-sheet.active { transform: translate(-50%, 0); }
 
