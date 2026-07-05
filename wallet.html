@@ -14,6 +14,8 @@
     --vonk-b:#22d3ee;   /* cyan */
     --card:#0b1120;
     --line:rgba(148,163,184,0.12);
+    --accent-1:#a78bfa;
+    --accent-2:#f472b6;
   }
   body{
     background: var(--bg);
@@ -101,8 +103,8 @@
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(0, 242, 254, 0.25);
-    box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 242, 254, 0.06);
+    border-top: 1px solid rgba(244, 114, 182, 0.25);
+    box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.7), 0 0 40px rgba(167, 139, 250, 0.06);
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom)) 8px;
 }
 
@@ -110,7 +112,7 @@
     position: relative;
     height: 1px;
     margin: 0 20px 4px 20px;
-    background: linear-gradient(90deg, transparent, rgba(0,242,254,0.15) 15%, rgba(0,242,254,0.15) 85%, transparent);
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.15) 15%, rgba(167, 139, 250, 0.15) 85%, transparent);
 }
 #dock-pulse {
     position: absolute;
@@ -118,8 +120,8 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #00f2fe;
-    box-shadow: 0 0 8px #00f2fe, 0 0 16px rgba(0,242,254,0.6);
+    background: #a78bfa;
+    box-shadow: 0 0 8px #a78bfa, 0 0 16px rgba(167, 139, 250, 0.6);
     transition: left 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
@@ -178,13 +180,13 @@
 }
 
 .dock-node.active .dock-icon-shell {
-    background: rgba(0, 242, 254, 0.08);
-    box-shadow: 0 0 0 1px rgba(0,242,254,0.25), 0 0 18px rgba(0,242,254,0.15);
+    background: rgba(167, 139, 250, 0.08);
+    box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.25), 0 0 18px rgba(167, 139, 250, 0.15);
     transform: translateY(-6px);
 }
-.dock-node.active svg { stroke: #00f2fe; }
+.dock-node.active svg { stroke: #a78bfa; }
 .dock-node.active .dock-label {
-    color: #00f2fe;
+    color: #a78bfa;
     max-height: 12px;
     opacity: 1;
     transform: translateY(0);
@@ -204,8 +206,8 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #00ff88;
-    box-shadow: 0 0 6px #00ff88;
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
     border: 1.5px solid #050a15;
 }
 
@@ -253,12 +255,12 @@
 .sheet-icon-box {
     width: 34px; height: 34px;
     border-radius: 11px;
-    background: rgba(0,242,254,0.08);
-    border: 1px solid rgba(0,242,254,0.15);
+    background: rgba(167, 139, 250, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.15);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
-.sheet-icon-box svg { width: 15px; height: 15px; stroke: #00f2fe; fill: none; stroke-width: 2; }
+.sheet-icon-box svg { width: 15px; height: 15px; stroke: #a78bfa; fill: none; stroke-width: 2; }
 .sheet-icon-box.danger-box { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); }
 .sheet-icon-box.danger-box svg { stroke: #f87171; }
 
@@ -492,7 +494,7 @@ body { padding-bottom: 90px; }
             <div class="dock-icon-shell">
                 <svg id="task-ring-svg" class="dock-ring" viewBox="0 0 44 44">
                     <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"></circle>
-                    <circle id="task-ring-progress" cx="22" cy="22" r="19" fill="none" stroke="#00f2fe" stroke-width="2"
+                    <circle id="task-ring-progress" cx="22" cy="22" r="19" fill="none" stroke="#a78bfa" stroke-width="2"
                         stroke-linecap="round" stroke-dasharray="119.4" stroke-dashoffset="119.4"
                         transform="rotate(-90 22 22)" style="transition: stroke-dashoffset 0.8s ease;"></circle>
                 </svg>
