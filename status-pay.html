@@ -665,6 +665,19 @@
     </div>
 </div>
 
+<!-- AD PROOF REVIEW BOTTOM SHEET (advertiser side) -->
+<div id="adReviewOverlay" class="sheet-overlay" onclick="closeAdReviewModal()"></div>
+<div id="adReviewSheet" class="friend-sheet">
+    <div class="sheet-handle"></div>
+    <div class="flex justify-between items-center mb-4">
+        <p class="list-heading">Review Proofs</p>
+        <button onclick="closeAdReviewModal()" class="back-btn" style="width:32px;height:32px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    <div id="adReviewBody" class="space-y-2.5"></div>
+</div>
+
 <!-- DOCK NAV -->
 <nav id="synergy-dock">
     <div id="dock-trace">
@@ -981,7 +994,7 @@
         const container = document.getElementById('advertiserFeedContainer');
         container.innerHTML = '<p class="empty-state text-[13px]">Loading campaigns…</p>';
 
-        rtdb.ref('ad_campaigns').orderByChild('createdAt').on('value', snapshot => {
+        rtdb.ref('ad_campaigns').orderByChild('createdAt').on('value', async snapshot => {
             container.innerHTML = '';
             const data = snapshot.val();
             if (!data) {
@@ -989,8 +1002,22 @@
                 return;
             }
 
-            Object.entries(data).reverse().forEach(([key, ad]) => {
+            const entries = Object.entries(data).reverse();
+
+            for (const [key, ad] of entries) {
                 const pct = Math.min((ad.filled / ad.target) * 100, 100);
+
+                let pendingCount = 0;
+                try {
+                    const pendingSnap = await db.collection("ad_proof_submissions")
+                        .where("campaignId", "==", key)
+                        .where("status", "==", "pending")
+                        .get();
+                    pendingCount = pendingSnap.size;
+                } catch (err) {
+                    console.error(err);
+                }
+
                 const div = document.createElement('div');
                 div.className = 'friend-row p-4 space-y-3';
                 div.innerHTML = `
@@ -1013,9 +1040,11 @@
                             <span>${ad.filled} / ${ad.target}</span>
                         </div>
                         <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-                    </div>`;
+                    </div>
+                    ${pendingCount > 0 ? `<button onclick="openAdReviewModal('${key}')" class="btn-secondary w-full py-2 rounded-xl text-[11px] mt-1">⏳ Review ${pendingCount} Pending Proof${pendingCount>1?'s':''}</button>` : ''}
+                    `;
                 container.appendChild(div);
-            });
+            }
         });
     }
 
@@ -1070,6 +1099,9 @@
         proofImageFiles = []; proofVideoFiles = [];
     };
 
+    /* ── SUBMIT PROOF (earner side) — now creates a PENDING record only.
+       No wallet is touched here. Vonk is released only after the
+       advertiser approves it in adReviewDecision(). ─────────────────── */
     window.submitProofToNetwork = async () => {
         const views = parseInt(document.getElementById('proofViewCount').value) || 0;
         if (views <= 0 || (proofImageFiles.length === 0 && proofVideoFiles.length === 0)) {
@@ -1097,32 +1129,104 @@
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            await rtdb.ref(`ad_campaigns/${activeSelectedJobId}`).update({
-                filled: (ad.filled || 0) + views
-            });
-
-            await db.collection("users").doc(currentUser).update({
-                vonkBalance: firebase.firestore.FieldValue.increment(totalPayoutVonk),
-                statusPayVonkEarned: firebase.firestore.FieldValue.increment(totalPayoutVonk)
-            });
-
-            // Referral commission: 10% zuwa referrer (idan akwai) — ba ya shafar Dashboard/PTS
-            const earnerDoc = await db.collection("users").doc(currentUser).get();
-            const referredBy = earnerDoc.exists ? earnerDoc.data().referredBy : null;
-            if (referredBy) {
-                const commission = totalPayoutVonk * 0.10;
-                await db.collection("users").doc(referredBy).update({
-                    vonkBalance: firebase.firestore.FieldValue.increment(commission),
-                    referralVonkEarned: firebase.firestore.FieldValue.increment(commission)
-                });
-            }
-
-            showToast(`Proof submitted — ${totalPayoutVonk.toFixed(2)} VNK credited`);
+            showToast('Proof submitted — pending advertiser approval ⏳');
             closeProofModal();
 
         } catch (err) {
             console.error(err);
             showToast('Error submitting proof, try again');
+        }
+    };
+
+    /* ── AD PROOF REVIEW (advertiser side, real Firebase) ──────────────
+       Vonk (plus 10% referral commission, if any) is released to the
+       earner ONLY when the advertiser approves. slots_filled/'filled'
+       on the campaign is also only incremented here. ─────────────────── */
+    window.openAdReviewModal = async (campaignKey) => {
+        activeSelectedJobId = campaignKey;
+        document.getElementById('adReviewOverlay').classList.add('active');
+        document.getElementById('adReviewSheet').classList.add('active');
+
+        const body = document.getElementById('adReviewBody');
+        body.innerHTML = '<p class="empty-state text-[13px]">Loading…</p>';
+
+        const snap = await db.collection("ad_proof_submissions")
+            .where("campaignId", "==", campaignKey)
+            .where("status", "==", "pending")
+            .get();
+
+        if (snap.empty) {
+            body.innerHTML = '<p class="empty-state text-[13px]">No pending proofs.</p>';
+            return;
+        }
+
+        body.innerHTML = snap.docs.map(doc => {
+            const d = doc.data();
+            return `
+            <div class="friend-row p-4 space-y-2" id="adpri_${doc.id}">
+                <div class="flex justify-between items-center">
+                    <span class="friend-name">${d.submittedBy}</span>
+                    <span class="badge badge-accent">${(d.payoutVonk||0).toFixed(2)} VNK</span>
+                </div>
+                <p class="friend-meta">Claimed views: ${d.views}</p>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="adReviewDecision('${doc.id}','approve')" class="btn-primary flex-1 py-2.5 rounded-xl text-[11.5px]">✓ Approve</button>
+                    <button onclick="adReviewDecision('${doc.id}','reject')" class="btn-secondary flex-1 py-2.5 rounded-xl text-[11.5px]" style="color:#f87171;">✕ Reject</button>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    window.closeAdReviewModal = () => {
+        document.getElementById('adReviewOverlay').classList.remove('active');
+        document.getElementById('adReviewSheet').classList.remove('active');
+    };
+
+    window.adReviewDecision = async (submissionId, action) => {
+        const el = document.getElementById(`adpri_${submissionId}`);
+        if (el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
+
+        try {
+            const subRef = db.collection("ad_proof_submissions").doc(submissionId);
+            const subDoc = await subRef.get();
+            if (!subDoc.exists) return;
+            const sub = subDoc.data();
+
+            if (action === 'approve') {
+                const vonkAmount = sub.payoutVonk || 0;
+
+                await db.collection("users").doc(sub.submittedBy).update({
+                    vonkBalance: firebase.firestore.FieldValue.increment(vonkAmount),
+                    statusPayVonkEarned: firebase.firestore.FieldValue.increment(vonkAmount)
+                });
+
+                // Referral commission: 10% zuwa referrer (idan akwai)
+                const earnerDoc = await db.collection("users").doc(sub.submittedBy).get();
+                const referredBy = earnerDoc.exists ? earnerDoc.data().referredBy : null;
+                if (referredBy) {
+                    const commission = vonkAmount * 0.10;
+                    await db.collection("users").doc(referredBy).update({
+                        vonkBalance: firebase.firestore.FieldValue.increment(commission),
+                        referralVonkEarned: firebase.firestore.FieldValue.increment(commission)
+                    });
+                }
+
+                const adSnap = await rtdb.ref(`ad_campaigns/${sub.campaignId}`).get();
+                const currentFilled = adSnap.exists() ? (adSnap.val().filled || 0) : 0;
+                await rtdb.ref(`ad_campaigns/${sub.campaignId}`).update({
+                    filled: currentFilled + sub.views
+                });
+
+                await subRef.update({ status: 'approved' });
+                showToast('✓ Proof approved — Vonk released');
+            } else {
+                await subRef.update({ status: 'rejected' });
+                showToast('✕ Proof rejected');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Error processing review');
+            if (el) { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; }
         }
     };
 
