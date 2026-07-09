@@ -31,10 +31,12 @@
   .brand-font{ font-family:'Syncopate', sans-serif; }
 
   /* ---- spark trace signature element ---- */
-  .spark-edge{
-    position:relative;
-    overflow:hidden;
-  }
+.spark-edge{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  transform:translateZ(0);
+}
   .spark-edge::before{
     content:'';
     position:absolute; inset:0;
@@ -47,6 +49,7 @@
     mask-composite: exclude;
     animation: sparkmove 5s linear infinite;
     pointer-events:none;
+    will-change: background-position;
   }
   @keyframes sparkmove{
     0%{ background-position:0% 0%; }
@@ -84,6 +87,8 @@
     background: rgba(2,6,23,0.72);
     backdrop-filter: blur(3px);
     display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
+    transform:translateZ(0);
+    will-change: backdrop-filter;
   }
   .soon-badge{
     background: linear-gradient(90deg,var(--vonk-a),var(--vonk-b));
