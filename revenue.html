@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE ADMIN — Revenue Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ASALIN ADMIN PANEL STYLES - BA A TABA BA */
+        :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --neon-green: #22c55e; --neon-purple: #a855f7; --bg: #030712; }
+
+        body {
+            background: var(--bg); color: #fff;
+            font-family: 'Quicksand', sans-serif;
+            background-image:
+                linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+        }
+
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
+        .stat-card-slim { background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid var(--aqua); padding: 10px 15px; border-radius: 12px; transition: all 0.3s ease; }
+        .glow-text { text-shadow: 0 0 10px var(--aqua); }
+        table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+        td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 12px 8px; }
+        .v-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+
+        .filter-tab {
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0, 242, 254, 0.15);
+            color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.02); cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .filter-tab.active { background: rgba(0, 242, 254, 0.12); border-color: rgba(0, 242, 254, 0.4); color: #fff; box-shadow: 0 0 15px rgba(0, 242, 254, 0.15); }
+
+        /* --- 3 DOTS MENU --- */
+        .menu-dots { position: fixed; top: 20px; left: 25px; z-index: 1100; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+        .menu-dots span { width: 5px; height: 5px; background: var(--aqua); border-radius: 50%; box-shadow: 0 0 8px var(--aqua); }
+
+        /* --- SIDEBAR MENU --- */
+        .synergy-sidebar {
+            width: 90px; height: 100vh; background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(30px); border-right: 1px solid rgba(0, 242, 254, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            position: fixed; left: -95px; top: 0; z-index: 1050;
+            transition: left 0.3s ease; padding-top: 50px;
+        }
+        .synergy-sidebar.show { left: 0; }
+
+        .nav-link {
+            width: 55px; height: 55px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; border-radius: 12px; position: relative;
+            transition: all 0.3s ease; text-decoration: none; color: rgba(255,255,255,0.4);
+        }
+        .nav-icon { font-size: 22px; filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.1)); z-index: 2; }
+
+        .nav-link.active {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+            color: #fff;
+        }
+        .nav-link.active::before {
+            content: ''; position: absolute; left: -12px; width: 4px; height: 25px;
+            background: var(--aqua); border-radius: 0 4px 4px 0; box-shadow: 0 0 15px var(--aqua);
+        }
+        .logout-link { margin-top: auto; margin-bottom: 40px; background: rgba(255, 0, 85, 0.05); border: 1px solid rgba(255, 0, 85, 0.1); color: #ff0055; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1040; display: none; }
+        .overlay.active { display: block; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="menu-dots" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside class="synergy-sidebar" id="mainSidebar">
+        <a href="content-command.html" class="nav-link">
+    <span class="nav-icon">📈</span>
+        </a>
+        <a href="revenue.html" class="nav-link active" title="Revenue Ledger">
+    <span class="nav-icon">💰</span>
+</a>
+        <a href="upload.html" class="nav-link" title="Video Management">
+    <span class="nav-icon">☁️</span>
+</a>
+
+<a href="withdrawals.html" class="nav-link"><span class="nav-icon">🎥</span></a>
+<a href="comm-center.html" class="nav-link"><span class="nav-icon">📡</span></a>
+<a href="support.html" class="nav-link"><span class="nav-icon">💬</span></a>
+<a href="signout.html" class="nav-link logout-link"><span class="nav-icon">🔑</span></a>
+
+    </aside>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-10 text-center">
+            <h1 class="orbitron text-2xl font-bold glow-text">Revenue Ledger</h1>
+            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">Synergy Protocol Management</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div class="stat-card-slim text-center">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Platform Revenue</p>
+                <p id="total-revenue" class="text-lg font-bold text-cyan-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ffac00;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Advertiser Spend</p>
+                <p id="total-spend" class="text-lg font-bold text-orange-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #22c55e;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Worker Payouts</p>
+                <p id="total-worker" class="text-lg font-bold text-green-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #a855f7;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Referral Payouts</p>
+                <p id="total-referral" class="text-lg font-bold text-purple-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ff0055;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Fee Pending</p>
+                <p id="total-pending" class="text-lg font-bold" style="color:#ff0055;">₦0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+            <div class="stat-card-slim text-center">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">TaskPro Rev.</p>
+                <p id="rev-taskpro" class="text-sm font-bold text-cyan-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">StatusPay Rev.</p>
+                <p id="rev-statuspay" class="text-sm font-bold text-cyan-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #a855f7;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Worker-Ref (10%)</p>
+                <p id="ref-worker" class="text-sm font-bold text-purple-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #a855f7;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Advertiser-Ref (3%)</p>
+                <p id="ref-advertiser" class="text-sm font-bold text-purple-400">₦0</p>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mb-6">
+            <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">All</button>
+            <button class="filter-tab" data-filter="funded" onclick="setFilter('funded')">Funded</button>
+            <button class="filter-tab" data-filter="payout_approved" onclick="setFilter('payout_approved')">Payouts</button>
+        </div>
+
+        <div class="glass-panel rounded-2xl border-t border-cyan-500/20 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-cyan-500/5 sticky top-0 backdrop-blur-md">
+                    <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="w-[15%] pl-6">Type</th>
+                        <th class="w-[15%] text-center">Platform</th>
+                        <th class="w-[30%]">Party</th>
+                        <th class="w-[25%] text-right">Amounts</th>
+                        <th class="w-[15%] pr-6 text-right">Time</th>
+                    </tr>
+                </thead>
+                <tbody id="ledger-table-body" class="divide-y divide-white/5">
+                    <tr><td colspan="5" class="text-center py-10 orbitron text-[10px] text-cyan-400 animate-pulse">Scanning Revenue Ledger...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        if (sessionStorage.getItem('admin_auth') !== 'true') {
+            window.location.replace('admin-login.html');
+        }
+
+        // 1. FIREBASE SETUP
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+            authDomain: "synergy-protocol.firebaseapp.com",
+            projectId: "synergy-protocol",
+            storageBucket: "synergy-protocol.firebasestorage.app",
+            messagingSenderId: "179647543031",
+            appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        function toggleSidebar() {
+            document.getElementById('mainSidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function fmtNGN(n) {
+            return '₦' + (n || 0).toLocaleString('en-NG', { maximumFractionDigits: 2 });
+        }
+
+        let allEntries = [];
+        let activeFilter = 'all';
+
+        function setFilter(f) {
+            activeFilter = f;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f));
+            renderLedger();
+        }
+
+        function computeSummary() {
+            let revenue = 0, spend = 0, workerPayout = 0, referralPayout = 0;
+            let workerReferralPayout = 0, advertiserReferralPayout = 0;
+            let revTaskpro = 0, revStatuspay = 0;
+            let feePoolCollected = 0, feePoolConsumed = 0;
+
+            allEntries.forEach(e => {
+                const isFunded = e.type === 'task_funded' || e.type === 'campaign_funded';
+                if (isFunded) {
+                    spend += e.grossNaira || 0;
+                    feePoolCollected += e.feePoolNaira || 0;
+
+                    const advRef = e.advertiserReferralPayoutNaira || 0;
+                    advertiserReferralPayout += advRef;
+                    referralPayout += advRef;
+                    feePoolConsumed += advRef;
+                    revenue -= advRef;
+                    if (e.platform === 'taskpro') revTaskpro -= advRef;
+                    if (e.platform === 'statuspay') revStatuspay -= advRef;
+                }
+                if (e.type === 'payout_approved') {
+                    workerPayout += e.workerPayoutNaira || 0;
+                    const workerRef = e.referralPayoutNaira || 0;
+                    workerReferralPayout += workerRef;
+                    referralPayout += workerRef;
+                    const net = e.platformNetRevenueNaira || 0;
+                    revenue += net;
+                    feePoolConsumed += e.feePoolConsumedNaira || 0;
+                    if (e.platform === 'taskpro') revTaskpro += net;
+                    if (e.platform === 'statuspay') revStatuspay += net;
+                }
+            });
+
+            document.getElementById('total-revenue').innerText = fmtNGN(revenue);
+            document.getElementById('total-spend').innerText = fmtNGN(spend);
+            document.getElementById('total-worker').innerText = fmtNGN(workerPayout);
+            document.getElementById('total-referral').innerText = fmtNGN(referralPayout);
+            document.getElementById('total-pending').innerText = fmtNGN(feePoolCollected - feePoolConsumed);
+            document.getElementById('rev-taskpro').innerText = fmtNGN(revTaskpro);
+            document.getElementById('rev-statuspay').innerText = fmtNGN(revStatuspay);
+            document.getElementById('ref-worker').innerText = fmtNGN(workerReferralPayout);
+            document.getElementById('ref-advertiser').innerText = fmtNGN(advertiserReferralPayout);
+        }
+
+        function renderLedger() {
+            const body = document.getElementById('ledger-table-body');
+            const filtered = activeFilter === 'all'
+                ? allEntries
+                : activeFilter === 'funded'
+                    ? allEntries.filter(e => e.type === 'task_funded' || e.type === 'campaign_funded')
+                    : allEntries.filter(e => e.type === activeFilter);
+
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-gray-600 text-xs uppercase">No ledger entries found</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = filtered.map(e => {
+                const isFunded = e.type === 'task_funded' || e.type === 'campaign_funded';
+                const time = e.timestamp && e.timestamp.toDate ? e.timestamp.toDate().toLocaleString() : '—';
+                const platBadge = `<span class="v-badge ${e.platform === 'statuspay' ? 'bg-purple-500/10 text-purple-400 border border-purple-400/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-400/20'}">${(e.platform || '—').toUpperCase()}</span>`;
+
+                if (isFunded) {
+                    return `
+                    <tr>
+                        <td class="pl-6 py-4"><span class="v-badge bg-orange-500/10 text-orange-400 border border-orange-400/20">FUNDED</span></td>
+                        <td class="text-center py-4">${platBadge}</td>
+                        <td class="py-4 text-xs text-white">Adv: ${e.advertiser || '—'}${e.advertiserReferrer ? `<br><span class="text-[9px] text-purple-400">Ref: ${e.advertiserReferrer}</span>` : ''}</td>
+                        <td class="text-right py-4 text-xs">
+                            <div class="text-white font-bold">${fmtNGN(e.grossNaira)}</div>
+                            <div class="text-[9px] text-cyan-400">Fee: ${fmtNGN(e.feePoolNaira)}</div>
+                            ${e.advertiserReferralPayoutNaira ? `<div class="text-[9px] text-purple-400">AdvRef: ${fmtNGN(e.advertiserReferralPayoutNaira)}</div>` : ''}
+                        </td>
+                        <td class="pr-6 text-right py-4 text-[9px] text-gray-500">${time}</td>
+                    </tr>`;
+                } else {
+                    return `
+                    <tr>
+                        <td class="pl-6 py-4"><span class="v-badge bg-green-500/10 text-green-400 border border-green-400/20">PAYOUT</span></td>
+                        <td class="text-center py-4">${platBadge}</td>
+                        <td class="py-4 text-xs text-white">Worker: ${e.worker || '—'}${e.referrer ? `<br><span class="text-[9px] text-purple-400">Ref: ${e.referrer}</span>` : ''}</td>
+                        <td class="text-right py-4 text-xs">
+                            <div class="text-green-400 font-bold">${fmtNGN(e.workerPayoutNaira)}</div>
+                            ${e.referralPayoutNaira ? `<div class="text-[9px] text-purple-400">Ref: ${fmtNGN(e.referralPayoutNaira)}</div>` : ''}
+                            <div class="text-[9px] text-cyan-400">Net Rev: ${fmtNGN(e.platformNetRevenueNaira)}</div>
+                        </td>
+                        <td class="pr-6 text-right py-4 text-[9px] text-gray-500">${time}</td>
+                    </tr>`;
+                }
+            }).join('');
+        }
+
+        function loadLedger() {
+            db.collection('revenue_ledger')
+                .orderBy('timestamp', 'desc')
+                .limit(300)
+                .onSnapshot(snap => {
+                    allEntries = snap.docs.map(d => d.data());
+                    computeSummary();
+                    renderLedger();
+                }, err => {
+                    console.error('revenue_ledger snapshot error:', err);
+                    document.getElementById('ledger-table-body').innerHTML =
+                        `<tr><td colspan="5" class="text-center py-10 text-red-500 font-bold uppercase text-xs">Protocol Link Severed: Check Rules</td></tr>`;
+                });
+        }
+
+        loadLedger();
+
+    </script>
+</body>
+</html>
