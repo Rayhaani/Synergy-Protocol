@@ -3,88 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNERGY | CONTENT COMMAND</title>
+    <title>CORE ADMIN</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
-        :root { --aqua: #00f2fe; --neon-red: #ff0055; --bg: #030712; }
+        /* ASALIN ADMIN PANEL STYLES - BA A TABA BA */
+        :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --bg: #030712; }
+        
         body { 
-            background: var(--bg); color: #fff; font-family: 'Quicksand', sans-serif;
-            background-image: linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px), linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px; min-height: 100vh;
+            background: var(--bg); color: #fff; 
+            font-family: 'Quicksand', sans-serif;
+            background-image: 
+                linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
         }
+        
         .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
         .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
+        .stat-card-slim { background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid var(--aqua); padding: 10px 15px; border-radius: 12px; transition: all 0.3s ease; }
+        .btn-action { font-size: 10px; font-weight: 700; padding: 12px; border-radius: 10px; transition: all 0.3s ease; border: 1px solid transparent; text-transform: uppercase; white-space: nowrap; flex: 1; }
+        .btn-suspend { color: var(--neon-gold); border-color: rgba(255, 172, 0, 0.3); background: rgba(255, 172, 0, 0.05); }
+        .btn-suspend:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 15px rgba(255, 172, 0, 0.3); }
+        .btn-ban { color: var(--neon-red); border-color: rgba(255, 0, 85, 0.3); background: rgba(255, 0, 85, 0.05); }
+        .btn-ban:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3); }
+        .btn-delete { color: #fff; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); }
+        .btn-delete:hover { background: #fff; color: black; }
+        .btn-update { color: var(--aqua); border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); padding: 10px 20px; font-size: 10px; font-weight: 700; border-radius: 8px; }
+        tr { cursor: pointer; transition: background 0.3s; }
+        tr:hover { background: rgba(0, 242, 254, 0.05); }
+        .details-row { display: none; }
+        .details-row.active { display: table-row; }
         .glow-text { text-shadow: 0 0 10px var(--aqua); }
-        .input-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(0, 242, 254, 0.1); padding: 15px; border-radius: 12px; outline: none; width: 100%; font-size: 13px; transition: all 0.3s; color: white; }
-        .input-box:focus { border-color: var(--aqua); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); }
-        .btn-prime { background: var(--aqua); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; transition: all 0.3s; cursor: pointer; }
-        .btn-prime:hover { box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); transform: translateY(-2px); }
-        .badge-node { background: rgba(0, 242, 254, 0.1); color: var(--aqua); border: 1px solid rgba(0, 242, 254, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 9px; font-weight: 700; }
+        table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+        td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 12px 8px; }
+        .v-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+
+        /* --- 3 DOTS MENU (TURA SAMA KADAN) --- */
+        .menu-dots {
+            position: fixed; 
+            top: 20px; /* An riga shi sama daga 50px zuwa 20px */
+            left: 25px; 
+            z-index: 1100;
+            cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+        }
+        .menu-dots span {
+            width: 5px; height: 5px; background: var(--aqua);
+            border-radius: 50%; box-shadow: 0 0 8px var(--aqua);
+        }
+
+        /* --- SIDEBAR MENU (ICONS ONLY + GLOW) --- */
+        .synergy-sidebar {
+            width: 90px; height: 100vh; background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(30px); border-right: 1px solid rgba(0, 242, 254, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            position: fixed; left: -95px; top: 0; z-index: 1050;
+            transition: left 0.3s ease; padding-top: 50px;
+        }
+        .synergy-sidebar.show { left: 0; }
+        
+        .nav-link {
+            width: 55px; height: 55px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; border-radius: 12px; position: relative;
+            transition: all 0.3s ease; text-decoration: none; color: rgba(255,255,255,0.4);
+        }
+        .nav-icon { font-size: 22px; filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.1)); z-index: 2; }
+        
+        .nav-link.active {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+            color: #fff;
+        }
+        .nav-link.active::before {
+            content: ''; position: absolute; left: -12px; width: 4px; height: 25px;
+            background: var(--aqua); border-radius: 0 4px 4px 0; box-shadow: 0 0 15px var(--aqua);
+        }
+        .logout-link { margin-top: auto; margin-bottom: 40px; background: rgba(255, 0, 85, 0.05); border: 1px solid rgba(255, 0, 85, 0.1); color: #ff0055; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1040; display: none; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <div class="mb-12 text-center">
-            <h1 class="orbitron text-1xl font-bold glow-text">Content Command</h1>
+    <div class="menu-dots" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside class="synergy-sidebar" id="mainSidebar">
+        <a href="content-command.html" class="nav-link active">
+    <span class="nav-icon">📈</span>
+        </a>
+        <a href="revenue.html" class="nav-link" title="Revenue Ledger">
+    <span class="nav-icon">💰</span>
+</a>
+        <a href="upload.html" class="nav-link" title="Video Management">
+    <span class="nav-icon">☁️</span>
+</a>
+
+<a href="withdrawals.html" class="nav-link"><span class="nav-icon">🎥</span></a>
+<a href="comm-center.html" class="nav-link"><span class="nav-icon">📡</span></a>
+<a href="support.html" class="nav-link"><span class="nav-icon">💬</span></a>
+<a href="signout.html" class="nav-link logout-link"><span class="nav-icon">🔑</span></a>
+        
+            </aside>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-10 text-center">
+            <h1 class="orbitron text-2xl font-bold glow-text">Core Command</h1>
+            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">Synergy Protocol Management</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 space-y-6">
-                <div class="glass-panel p-6 rounded-2xl">
-                    <p class="orbitron text-[10px] text-cyan-400 mb-6 font-bold">Inject New Video</p>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Select Target Channel</label>
-                            <select id="channel-node" class="input-box bg-gray-900">
-                                <option value="@AIWealthAcademy_Global">AI Wealth Academy</option>
-                                <option value="@UrbanVision2050">Urban Vision 2050</option>
-                                <option value="@ZenithNature4K">Zenith Nature 4K</option>
-                                <option value="@CosmicHorizon_X">Cosmic Horizon</option>
-                                <option value="@GlobalWealthSecretHQ">Global Wealth Secret</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Video Title (Exact Search Query)</label>
-                            <input type="text" id="task-title" placeholder="e.g. Urban Vision 2050 Ep 1" class="input-box">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Duration (Secs)</label>
-                                <input type="number" id="task-duration" placeholder="e.g. 300" class="input-box">
-                            </div>
-                            <div>
-                                <label class="text-[9px] uppercase font-bold text-gray-500 mb-2 block">Reward (₦)</label>
-                                <input type="number" id="task-amount" placeholder="50.00" class="input-box">
-                            </div>
-                        </div>
-                        
-                        <button onclick="deployContent()" class="btn-prime w-full mt-4">Deploy to Firebase</button>
-                    </div>
-                </div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+            <div class="stat-card-slim text-center">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Members</p>
+                <p id="total-members" class="text-lg font-bold">0</p>
             </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #22c55e;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Active</p>
+                <p id="total-active" class="text-lg font-bold text-green-400">0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ef4444;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Inactive</p>
+                <p id="total-inactive" class="text-lg font-bold text-red-400">0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ffac00;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Balance</p>
+                <p id="total-balance" class="text-lg font-bold text-orange-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #a855f7;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Payout</p>
+                <p id="total-payout" class="text-lg font-bold text-purple-400">₦0</p>
+            </div>
+        </div>
 
-            <div class="lg:col-span-2">
-                <div class="glass-panel p-6 rounded-2xl h-full">
-                    <p class="orbitron text-[10px] text-cyan-400 font-bold mb-8">Live Firebase Nodes</p>
-                    <div id="live-nodes-container" class="space-y-4">
-                        </div>
-                </div>
-            </div>
+        <div class="glass-panel p-1 rounded-xl mb-6 flex items-center px-4">
+            <span class="text-cyan-400 mr-3 text-sm font-bold">SCAN:</span>
+            <input type="text" id="admin-search" oninput="searchNetwork()" placeholder="Search node database..." 
+                   class="w-full bg-transparent p-3 outline-none text-sm text-white placeholder-gray-600 font-medium">
+        </div>
+
+        <div class="glass-panel rounded-2xl border-t border-cyan-500/20 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-cyan-500/5 sticky top-0 backdrop-blur-md">
+                    <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="w-[30%] pl-6">Username</th>
+                        <th class="w-[20%] text-center">Status</th>
+                        <th class="w-[25%] text-center">Verify</th>
+                        <th class="w-[25%] pr-6 text-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body" class="divide-y divide-white/5">
+                </tbody>
+            </table>
         </div>
     </div>
 
-<script>
-    // 1. FIREBASE CONFIGURATION (Cikakken bayaninka na asali)
+    <script>
+
+        if (sessionStorage.getItem('admin_auth') !== 'true') {
+    window.location.replace('admin-login.html');
+        }
+        
+                // 1. FIREBASE SETUP
     const firebaseConfig = {
       apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
       authDomain: "synergy-protocol.firebaseapp.com",
-      databaseURL: "https://synergy-protocol-default-rtdb.firebaseio.com", 
       projectId: "synergy-protocol",
       storageBucket: "synergy-protocol.firebasestorage.app",
       messagingSenderId: "179647543031",
@@ -92,74 +182,236 @@
     };
 
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    
-    // 2. DEPLOY CONTENT (Tura bidiyo zuwa Firebase)
-    function deployContent() {
-        const channel = document.getElementById('channel-node').value;
-        const title = document.getElementById('task-title').value;
-        const duration = document.getElementById('task-duration').value;
-        const amount = document.getElementById('task-amount').value;
-        
-        if(!title || !duration) {
-        alert("please enter the full details");
-            return;
-        }
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
 
-        const newTaskRef = database.ref('nodes/').push();
-        newTaskRef.set({
-            channel: channel,
-            title: title,
-            duration: parseInt(duration),
-            amount: parseFloat(amount),
-            timestamp: Date.now()
-        }).then(() => {
-            alert("Successfully Deployed to Firebase!");
-            // Share filayen rubutu bayan an gama
-            document.getElementById('task-title').value = '';
-        }).catch((error) => {
-            alert("error occured: " + error.message);
-        });
+    function toggleSidebar() {
+        document.getElementById('mainSidebar').classList.toggle('show');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
     }
 
-    // 3. REAL-TIME LISTENER (Dauko bidiyoyin da ke Firebase a nuna maka su)
-    database.ref('nodes/').on('value', (snapshot) => {
-        const container = document.getElementById('live-nodes-container');
-        container.innerHTML = '';
-        const data = snapshot.val();
-        
-        if (data) {
-            Object.keys(data).reverse().forEach(key => {
-                const task = data[key];
-                const nodeHtml = `
-                    <div class="p-4 rounded-xl flex items-center gap-4 bg-white/5 border-l-2 border-cyan-500 mb-3">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-1">
-                                <span class="badge-node">${task.channel.replace(/-/g, ' ').toUpperCase()}</span>
-                                <span class="text-[10px] text-gray-400 font-bold">WAIT: ${task.duration}s</span>
-                            </div>
-                            <p class="text-xs font-bold text-white uppercase">${task.title}</p>
-                            <p class="text-[10px] text-cyan-400/60">₦${task.amount} | Code: ${task.code}</p>
-                        </div>
-                        <button onclick="deleteNode('${key}')" class="text-red-500 hover:text-red-400 text-xs font-bold">DELETE</button>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', nodeHtml);
+    // 2. FETCH REAL USERS FROM DATABASE
+    async function fetchUsers() {
+        const body = document.getElementById('user-table-body');
+        body.innerHTML = `<tr><td colspan="4" class="text-center py-10 orbitron text-[10px] text-cyan-400 animate-pulse">Scanning Network Database...</td></tr>`;
+
+        try {
+            const snapshot = await db.collection("users").get();
+            const usersList = [];
+
+                        snapshot.forEach(doc => {
+                const data = doc.data();
+                usersList.push({
+                    id: doc.id, 
+                    fullName: data.fullName || "N/A",
+                    
+                    // WANNAN SHINE GYARAN:
+                    phone: data.whatsapp || data.phoneNumber || "N/A", 
+                    
+                    email: data.email || "N/A",
+                    state: data.state || "N/A",
+                    videoBalance: data.pointsBalance || 0,
+                    status: data.isVerified ? "active" : "inactive", 
+                    verified: data.isVerified || false,
+                    payout: data.shareBalance || 0
+                });
             });
-        } else {
-            container.innerHTML = '<p class="text-gray-500 text-xs">No active nodes in database.</p>';
-        }
-    });
+            
 
-    // 4. DELETE FUNCTION (Don goge bidiyo)
-    function deleteNode(key) {
-        if(confirm("Are you sure you want to delete this node?")) {
-            database.ref('nodes/' + key).remove();
+            window.allUsers = usersList;
+            render(usersList);
+
+        } catch (error) {
+            console.error("Error:", error);
+            body.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold uppercase">Protocol Link Severed: Check Rules</td></tr>`;
         }
     }
+
+    function toggleRow(id) {
+        const el = document.getElementById(`details-${id.replace(/\s+/g, '-')}`);
+        const isActive = el.classList.contains('active');
+        document.querySelectorAll('.details-row').forEach(row => row.classList.remove('active'));
+        if (!isActive) el.classList.add('active');
+    }
+
+    function render(data) {
+        const body = document.getElementById('user-table-body');
+        body.innerHTML = data.map(u => `
+            <tr onclick="toggleRow('${u.id}')">
+                <td class="pl-6 py-5">
+                    <div class="text-cyan-400 font-bold text-sm tracking-wide capitalize">${u.id}</div>
+                </td>
+                <td class="text-center py-5">
+                    <span class="text-[9px] px-2 py-0.5 rounded-full ${u.status === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'} border font-bold uppercase">${u.status}</span>
+                </td>
+                <td class="text-center py-5">
+                    <span class="v-badge ${u.verified ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-400/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}">
+                        ${u.verified ? 'VERIFIED' : 'UNVERIFIED'}
+                    </span>
+                </td>
+                <td class="pr-6 text-right py-5 font-bold text-white text-sm">
+    ${u.videoBalance.toLocaleString()} pts
+</td>
+            </tr>
+            <tr id="details-${u.id.replace(/\s+/g, '-')}" class="details-row bg-white/[0.03]">
+                <td colspan="4" class="p-8 border-l-4 border-cyan-400">
+                    <div class="flex flex-col gap-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Full Name</span><br><span class="text-white">${u.fullName}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Phone</span><br><span class="text-white">${u.phone}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Email</span><br><span class="text-white">${u.email}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Location</span><br><span class="text-white">${u.state}</span></div>
+                        </div>
+                        <div class="space-y-6 pt-6 border-t border-white/5">
+                            <div class="flex items-center gap-3">
+                                <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
+                                       class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
+                                <button onclick="event.stopPropagation(); updateBalance('${u.id}')" class="btn-update">Update Balance</button>
+                                       </div>
+                            <div class="flex flex-row gap-3 w-full max-w-2xl">
+                                <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
+                        
+         </div>
+
+<div class="flex flex-row gap-3 w-full max-w-2xl mt-3">
+    <button onclick="event.stopPropagation(); viewScreenshots('${u.id}')" 
+            class="flex-1 py-3 border border-cyan-400/30 text-cyan-400 bg-cyan-400/5 rounded-lg text-[10px] font-bold uppercase hover:bg-cyan-400 hover:text-black transition-all">
+        View Screenshots
+    </button>
+    <button onclick="event.stopPropagation(); approveAndCleanup('${u.id}')" 
+            class="flex-1 py-3 border border-green-500/30 text-green-400 bg-green-500/5 rounded-lg text-[10px] font-bold uppercase hover:bg-green-500 hover:text-black transition-all">
+        Approve & Delete
+    </button>
+</div>
+
+<div id="gallery-${u.id.replace(/\s+/g, '-')}" class="hidden mt-4 p-4 border border-white/5 rounded-xl bg-black/40 flex gap-3 overflow-x-auto">
+    <p class="text-[10px] text-gray-500 italic">Scanning node evidence...</p>
+</div>
+
+                            
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('total-members').innerText = data.length;
+        document.getElementById('total-active').innerText = data.filter(u => u.status === 'active').length;
+        document.getElementById('total-inactive').innerText = data.filter(u => u.status === 'inactive').length;
+        document.getElementById('total-balance').innerText = `${data.reduce((s, u) => s + u.videoBalance, 0).toLocaleString()} pts`;
+        document.getElementById('total-payout').innerText = `${data.reduce((s, u) => s + (u.payout || 0), 0).toLocaleString()} pts`;
+    }
+
+    function searchNetwork() {
+        const q = document.getElementById('admin-search').value.toLowerCase();
+        const f = window.allUsers.filter(u => u.id.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q));
+        render(f);
+    }
+
+    // Initialize Database Scan
+    fetchUsers();
+            
+
+       async function viewScreenshots(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const gallery = document.getElementById(`gallery-${safeId}`);
+    gallery.classList.toggle('hidden');
     
+    if (!gallery.classList.contains('hidden')) {
+        gallery.innerHTML = '<p class="text-[10px] text-cyan-400 animate-pulse">Searching Cloudinary links...</p>';
+        
+        try {
+            // MUHIMMI: Tabbatar akwai field mai suna "username" a cikin kowane document na task_submissions
+            // Idan babu shi, wannan query din ba zai taba kawo komai ba
+            const snap = await db.collection("task_submissions")
+                                 .where("username", "==", username) 
+                                 .get();
+            
+            if (snap.empty) {
+                gallery.innerHTML = '<p class="text-[10px] text-gray-600 text-center py-2">No evidence found. <br><span class="text-[8px]">Check if "username" field exists in Firebase.</span></p>';
+                return;
+            }
+
+            gallery.innerHTML = ""; 
+            snap.forEach(doc => {
+                const data = doc.data();
+                // Na gani a hotonka cewa sunan field din "imageUrl" ne
+                const imgLink = data.imageUrl; 
+                
+                if(imgLink) {
+                    gallery.innerHTML += `
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-[8px] text-gray-500">${data.platform || 'Task'}</span>
+                            <img src="${imgLink}" class="h-32 w-24 object-cover rounded-lg border border-cyan-400/20 hover:border-cyan-400 cursor-pointer transition-all" 
+                                 onclick="window.open('${imgLink}')">
+                        </div>`;
+                }
+            });
+        } catch (e) {
+            gallery.innerHTML = `<p class="text-[10px] text-red-500">Error: ${e.message}</p>`;
+        }
+    }
+       }
+        
+        
+
+async function approveAndCleanup(username) {
+    if (!confirm(`Confirm approval for ${username}?`)) return;
     
+    try {
+        // 1. Update User Status a babban folder na Users
+        await db.collection("users").doc(username).update({ 
+            isVerified: true,
+            status: "active" 
+        });
+
+        // 2. Maimakon mu goge (Delete), sai mu yi UPDATE zuwa "approved"
+        const snap = await db.collection("task_submissions").where("username", "==", username).get();
+        const batch = db.batch();
+        
+        snap.forEach(doc => {
+            // GYARA: Muna canza status ne maimakon batch.delete(doc.ref)
+            batch.update(doc.ref, { status: "approved" }); 
+        });
+        
+        await batch.commit();
+
+        alert("Success: User Approved! Dashboard will open for them now.");
+        fetchUsers();
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+    }
+        
+      async function updateBalance(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const inputEl = document.getElementById(`input-${safeId}`);
+    const newBalance = parseInt(inputEl.value);
+    
+    if (isNaN(newBalance) || newBalance < 0) {
+        alert("Please enter a valid number");
+        return;
+    }
+    
+    if (!confirm(`Set ${username} balance to ${newBalance} pts?`)) return;
+    
+    try {
+        await db.collection("users").doc(username).update({
+            pointsBalance: newBalance
+        });
+        alert(`✓ Balance updated to ${newBalance} pts`);
+        inputEl.value = "";
+        fetchUsers(); // Refresh table
+    } catch(e) {
+        alert("Error: " + e.message);
+    }
+      }
+        
     </script>
 </body>
-</html>
+    </html>
