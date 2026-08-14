@@ -330,7 +330,7 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
       <p>Pick from live tasks — watch, engage, submit proof — and earn VNK the moment it's approved.</p>
       <ul class="path-list">
         <li>Reward is fixed before you start</li>
-        <li>Cash out VNK to Naira anytime</li>
+        <li>Cash out VNK to cash anytime</li>
         <li>Earn extra by referring other workers</li>
       </ul>
       <a href="signup.html" class="path-cta">Start Earning →</a>
@@ -362,12 +362,12 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
     </div>
     <div class="work-step reveal">
       <span class="step-num">03</span>
-      <div class="step-text"><h4>Submit or review proof</h4><p>Every submission is checked by hand before a single Naira moves — no automated guesswork.</p></div>
+<div class="step-text"><h4>Submit or review proof</h4><p>Every submission is checked by hand before a single cent moves — no automated guesswork.</p></div>
     </div>
     <div class="work-step reveal">
       <span class="step-num">04</span>
-      <div class="step-text"><h4>Get paid, instantly</h4><p>Once approved, VNK lands in your wallet immediately and converts to Naira on your terms.</p></div>
-    </div>
+      <div class="step-text"><h4>Get paid, instantly</h4><p>Once approved, VNK lands in your wallet immediately and converts to cash on your terms.</p></div>
+</div>
   </div>
 
   <!-- ===== FEE TRANSPARENCY ===== -->
@@ -409,7 +409,7 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
       </div>
       <div class="trust-item">
         <h4>👁️ Human-reviewed payouts</h4>
-        <p>No task is auto-approved. A real reviewer checks proof before any Naira is released, protecting both workers and advertisers from fraud.</p>
+        <p>No task is auto-approved. A real reviewer checks proof before any payout is released, protecting both workers and advertisers from fraud.</p>
       </div>
       <div class="trust-item">
         <h4>📊 Transparent fee structure</h4>
@@ -426,7 +426,7 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
   <p class="section-eyebrow reveal">What We Stand For</p>
   <div class="principle-container reveal">
     <div class="principle-slide active">
-      <p class="principle-text">"Every task on Zynta is real work, done by a real person, checked by a real reviewer — before a single Naira moves."</p>
+      <p class="principle-text">"Every task on Zynta is real work, done by a real person, checked by a real reviewer — before a single cent moves."</p>
       <p class="principle-tag">— TRUST BY DESIGN</p>
     </div>
     <div class="principle-slide">
@@ -434,8 +434,8 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
       <p class="principle-tag">— RADICAL TRANSPARENCY</p>
     </div>
     <div class="principle-slide">
-      <p class="principle-text">"Whether you're earning ₦500 or funding a ₦500,000 campaign, the payout is instant and the process is identical."</p>
-      <p class="principle-tag">— SPEED FOR EVERYONE</p>
+      <p class="principle-text">"Whether you're earning $5 or funding a $500 campaign, the payout is instant and the process is identical."</p>
+<p class="principle-tag">— SPEED FOR EVERYONE</p>
     </div>
   </div>
 
@@ -508,15 +508,14 @@ h1,h2,h3,h4{ font-family:'Quicksand', sans-serif; }
   }, 4500);
 
   /* Illustrative wallet-demo ticker — purely decorative, not a real balance */
-  let demoBalance = 12450;
+  let demoBalance = 45.20;
   const demoEl = document.getElementById('demoBalance');
   setInterval(() => {
-    demoBalance += Math.floor(Math.random() * 40) + 10;
-    demoEl.textContent = demoBalance.toLocaleString('en-NG');
+    demoBalance += (Math.random() * 0.4) + 0.10;
+    demoEl.textContent = demoBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     demoEl.parentElement.style.transform = 'scale(1.03)';
     setTimeout(() => { demoEl.parentElement.style.transform = 'scale(1)'; }, 200);
   }, 3200);
-
   /* Scroll-triggered reveal, staggered within each group */
   const revealEls = document.querySelectorAll('.reveal');
 
