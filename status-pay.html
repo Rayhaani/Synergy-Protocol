@@ -1102,8 +1102,16 @@
                 nairaBalance: firebase.firestore.FieldValue.increment(totalPayout)
             });
 
+            await db.collection("users").doc(currentUser).collection('transactions').add({
+                type: 'Status Pay Reward',
+                desc: ad.title,
+                amount: totalPayout,
+                unit: '₦',
+                status: 'Success',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
             showToast(`Proof submitted — ₦${totalPayout.toFixed(2)} credited`);
-            closeProofModal();
 
         } catch (err) {
             console.error(err);
@@ -1127,12 +1135,21 @@
         const vonkEarned = (amount / 10) * 1.20;
 
         try {
-            await db.collection("users").doc(currentUser).update({
+           await db.collection("users").doc(currentUser).update({
                 nairaBalance: firebase.firestore.FieldValue.increment(-amount),
                 vonkBalance: firebase.firestore.FieldValue.increment(vonkEarned)
             });
 
-            showToast(`Converted to ${vonkEarned.toFixed(2)} VNK`);
+            await db.collection("users").doc(currentUser).collection('transactions').add({
+                type: 'Convert to VONK',
+                desc: 'Naira to Vonk',
+                amount: vonkEarned,
+                unit: 'VNK',
+                status: 'Success',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            showToast(`Converted to ${vonkEarned.toFixed(2)} VNK`); 
             document.getElementById('convertNairaAmount').value = '';
             document.getElementById('estimatedTokensDisplay').innerText = '0.00 VNK';
 
