@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE ADMIN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ASALIN ADMIN PANEL STYLES - BA A TABA BA */
+        :root { --aqua: #00f2fe; --neon-red: #ff0055; --neon-gold: #ffac00; --bg: #030712; }
+        
+        body { 
+            background: var(--bg); color: #fff; 
+            font-family: 'Quicksand', sans-serif;
+            background-image: 
+                linear-gradient(to bottom, rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+                linear-gradient(to right, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
+        }
+        
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.1); }
+        .stat-card-slim { background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid var(--aqua); padding: 10px 15px; border-radius: 12px; transition: all 0.3s ease; }
+        .btn-action { font-size: 10px; font-weight: 700; padding: 12px; border-radius: 10px; transition: all 0.3s ease; border: 1px solid transparent; text-transform: uppercase; white-space: nowrap; flex: 1; }
+        .btn-suspend { color: var(--neon-gold); border-color: rgba(255, 172, 0, 0.3); background: rgba(255, 172, 0, 0.05); }
+        .btn-suspend:hover { background: var(--neon-gold); color: black; box-shadow: 0 0 15px rgba(255, 172, 0, 0.3); }
+        .btn-ban { color: var(--neon-red); border-color: rgba(255, 0, 85, 0.3); background: rgba(255, 0, 85, 0.05); }
+        .btn-ban:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px rgba(255, 0, 85, 0.3); }
+        .btn-delete { color: #fff; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); }
+        .btn-delete:hover { background: #fff; color: black; }
+        .btn-update { color: var(--aqua); border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); padding: 10px 20px; font-size: 10px; font-weight: 700; border-radius: 8px; }
+        tr { cursor: pointer; transition: background 0.3s; }
+        tr:hover { background: rgba(0, 242, 254, 0.05); }
+        .details-row { display: none; }
+        .details-row.active { display: table-row; }
+        .glow-text { text-shadow: 0 0 10px var(--aqua); }
+        table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+        td, th { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 12px 8px; }
+        .v-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+
+        /* --- 3 DOTS MENU (TURA SAMA KADAN) --- */
+        .menu-dots {
+            position: fixed; 
+            top: 20px; /* An riga shi sama daga 50px zuwa 20px */
+            left: 25px; 
+            z-index: 1100;
+            cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+        }
+        .menu-dots span {
+            width: 5px; height: 5px; background: var(--aqua);
+            border-radius: 50%; box-shadow: 0 0 8px var(--aqua);
+        }
+
+        /* --- SIDEBAR MENU (ICONS ONLY + GLOW) --- */
+        .synergy-sidebar {
+            width: 90px; height: 100vh; background: rgba(2, 6, 23, 0.98);
+            backdrop-filter: blur(30px); border-right: 1px solid rgba(0, 242, 254, 0.1);
+            display: flex; flex-direction: column; align-items: center;
+            position: fixed; left: -95px; top: 0; z-index: 1050;
+            transition: left 0.3s ease; padding-top: 50px;
+        }
+        .synergy-sidebar.show { left: 0; }
+        
+        .nav-link {
+            width: 55px; height: 55px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; border-radius: 12px; position: relative;
+            transition: all 0.3s ease; text-decoration: none; color: rgba(255,255,255,0.4);
+        }
+        .nav-icon { font-size: 22px; filter: drop-shadow(0 0 5px rgba(0, 242, 254, 0.1)); z-index: 2; }
+        
+        .nav-link.active {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+            color: #fff;
+        }
+        .nav-link.active::before {
+            content: ''; position: absolute; left: -12px; width: 4px; height: 25px;
+            background: var(--aqua); border-radius: 0 4px 4px 0; box-shadow: 0 0 15px var(--aqua);
+        }
+        .logout-link { margin-top: auto; margin-bottom: 40px; background: rgba(255, 0, 85, 0.05); border: 1px solid rgba(255, 0, 85, 0.1); color: #ff0055; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1040; display: none; }
+        .overlay.active { display: block; }
+
+        /* --- LEADERS COMMAND OVERLAY --- */
+        .leaders-overlay {
+            position: fixed; inset: 0; z-index: 1300;
+            background: var(--bg);
+            background-image:
+                linear-gradient(to bottom, rgba(255, 172, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(to right, rgba(255, 172, 0, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            display: none;
+            overflow-y: auto;
+        }
+        .leaders-overlay.active { display: block; }
+        .leaders-close-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1310;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,172,0,0.3);
+            color: #ffac00; font-size: 18px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .leaders-close-btn:hover { background: #ffac00; color: black; }
+        .leader-stat-card { background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid var(--neon-gold); padding: 10px 15px; border-radius: 12px; text-align: center; }
+        .leader-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; border: 1px solid transparent; }
+        .leader-badge.active { color: #22c55e; background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); }
+        .leader-badge.suspended { color: var(--neon-gold); background: rgba(255,172,0,0.1); border-color: rgba(255,172,0,0.3); }
+        .leader-badge.banned { color: var(--neon-red); background: rgba(255,0,85,0.1); border-color: rgba(255,0,85,0.3); }
+        .leader-action-btn { font-size: 9px; font-weight: 700; padding: 8px 10px; border-radius: 8px; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+        .leader-action-btn.suspend { color: var(--neon-gold); border-color: rgba(255,172,0,0.3); background: rgba(255,172,0,0.05); }
+        .leader-action-btn.suspend:hover { background: var(--neon-gold); color: black; }
+        .leader-action-btn.reinstate { color: #22c55e; border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); }
+        .leader-action-btn.reinstate:hover { background: #22c55e; color: black; }
+        .leader-action-btn.ban { color: var(--neon-red); border-color: rgba(255,0,85,0.3); background: rgba(255,0,85,0.05); }
+        .leader-action-btn.ban:hover { background: var(--neon-red); color: white; }
+        .leader-action-btn.remove { color: #fff; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        .leader-action-btn.remove:hover { background: #fff; color: black; }
+        .leader-filter-btn { font-size: 10px; font-weight: 700; padding: 8px 14px; border-radius: 8px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+        .leader-filter-btn.active { border-color: var(--neon-gold); color: var(--neon-gold); background: rgba(255,172,0,0.08); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="menu-dots" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside class="synergy-sidebar" id="mainSidebar">
+        <a href="content-command.html" class="nav-link active">
+    <span class="nav-icon">📈</span>
+        </a>
+        <a href="revenue.html" class="nav-link" title="Revenue Ledger">
+    <span class="nav-icon">💰</span>
+</a>
+        <a href="upload.html" class="nav-link" title="Video Management">
+    <span class="nav-icon">☁️</span>
+</a>
+
+<a href="withdrawals.html" class="nav-link"><span class="nav-icon">🎥</span></a>
+<a href="comm-center.html" class="nav-link"><span class="nav-icon">📡</span></a>
+<a href="support.html" class="nav-link"><span class="nav-icon">💬</span></a>
+<a href="#" class="nav-link" title="Leaders Command" onclick="event.preventDefault(); openLeadersOverlay();"><span class="nav-icon">👑</span></a>
+<a href="signout.html" class="nav-link logout-link"><span class="nav-icon">🔑</span></a>
+        
+            </aside>
+
+    <!-- ═══ LEADERS COMMAND OVERLAY ═══ -->
+    <div class="leaders-overlay" id="leadersOverlay">
+        <div class="leaders-close-btn" onclick="closeLeadersOverlay()">✕</div>
+
+        <div class="max-w-6xl mx-auto p-4 md:p-8">
+            <div class="mb-8 text-center">
+                <h1 class="orbitron text-2xl font-bold" style="color:#ffac00; text-shadow:0 0 10px #ffac00;">Leaders Command</h1>
+                <p class="text-[10px] text-amber-400/70 tracking-[6px] uppercase">Leadership Roster Management</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                <div class="leader-stat-card">
+                    <p class="text-[8px] font-bold text-gray-500 uppercase">Total Leaders</p>
+                    <p id="leader-total" class="text-lg font-bold text-white">0</p>
+                </div>
+                <div class="leader-stat-card" style="border-bottom-color:#22c55e;">
+                    <p class="text-[8px] font-bold text-gray-500 uppercase">Active</p>
+                    <p id="leader-active-count" class="text-lg font-bold text-green-400">0</p>
+                </div>
+                <div class="leader-stat-card" style="border-bottom-color:#ffac00;">
+                    <p class="text-[8px] font-bold text-gray-500 uppercase">Suspended</p>
+                    <p id="leader-suspended-count" class="text-lg font-bold text-amber-400">0</p>
+                </div>
+                <div class="leader-stat-card" style="border-bottom-color:#ff0055;">
+                    <p class="text-[8px] font-bold text-gray-500 uppercase">Banned</p>
+                    <p id="leader-banned-count" class="text-lg font-bold" style="color:#ff0055;">0</p>
+                </div>
+            </div>
+
+            <!-- Add Leader -->
+            <div class="glass-panel p-1 rounded-xl mb-4 flex items-center px-4 gap-3">
+                <span class="text-amber-400 mr-1 text-sm font-bold">ADD:</span>
+                <input type="text" id="leader-add-input" placeholder="Username (exact, kamar yadda yake a Firestore)..."
+                       class="w-full bg-transparent p-3 outline-none text-sm text-white placeholder-gray-600 font-medium">
+                <button onclick="addLeader()" class="btn-update" style="color:#ffac00; border-color:rgba(255,172,0,0.3); background:rgba(255,172,0,0.05);">Add Leader</button>
+            </div>
+
+            <!-- Bulk Add -->
+            <div class="glass-panel p-4 rounded-xl mb-4">
+                <p class="text-[10px] font-bold text-amber-400 uppercase mb-2">Bulk Add (ka manna suna daya a kowane layi)</p>
+                <textarea id="leader-bulk-input" rows="4" placeholder="username1&#10;username2&#10;username3..."
+                    class="w-full bg-black/40 border border-white/10 p-3 text-xs rounded-lg outline-none text-white placeholder-gray-600 font-medium resize-y"></textarea>
+                <div class="flex items-center gap-3 mt-3">
+                    <button onclick="bulkAddLeaders()" class="btn-update" style="color:#ffac00; border-color:rgba(255,172,0,0.3); background:rgba(255,172,0,0.05);">Add All</button>
+                    <span id="bulk-add-status" class="text-[10px] text-gray-500"></span>
+                </div>
+            </div>
+
+            <!-- Search + Filter -->
+            <div class="glass-panel p-1 rounded-xl mb-4 flex items-center px-4">
+                <span class="text-amber-400 mr-3 text-sm font-bold">SCAN:</span>
+                <input type="text" id="leader-search" oninput="renderLeaders()" placeholder="Search leader by username or name..."
+                       class="w-full bg-transparent p-3 outline-none text-sm text-white placeholder-gray-600 font-medium">
+            </div>
+            <div class="flex gap-2 mb-6 flex-wrap">
+                <button class="leader-filter-btn active" data-filter="all" onclick="setLeaderFilter('all')">All</button>
+                <button class="leader-filter-btn" data-filter="active" onclick="setLeaderFilter('active')">Active</button>
+                <button class="leader-filter-btn" data-filter="suspended" onclick="setLeaderFilter('suspended')">Suspended</button>
+                <button class="leader-filter-btn" data-filter="banned" onclick="setLeaderFilter('banned')">Banned</button>
+            </div>
+
+            <!-- Leaders List -->
+            <div class="glass-panel rounded-2xl border-t border-amber-500/20 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-amber-500/5 sticky top-0 backdrop-blur-md">
+                        <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <th class="w-[35%] pl-6 py-4">Username</th>
+                            <th class="w-[20%] text-center">Status</th>
+                            <th class="w-[45%] pr-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaders-table-body" class="divide-y divide-white/5">
+                        <tr><td colspan="3" class="text-center py-10 orbitron text-[10px] text-amber-400 animate-pulse">Loading leaders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-10 text-center">
+            <h1 class="orbitron text-2xl font-bold glow-text">Core Command</h1>
+            <p class="text-[10px] text-cyan-400 tracking-[6px] uppercase">Synergy Protocol Management</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+            <div class="stat-card-slim text-center">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Members</p>
+                <p id="total-members" class="text-lg font-bold">0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #22c55e;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Active</p>
+                <p id="total-active" class="text-lg font-bold text-green-400">0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ef4444;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Inactive</p>
+                <p id="total-inactive" class="text-lg font-bold text-red-400">0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #ffac00;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Balance</p>
+                <p id="total-balance" class="text-lg font-bold text-orange-400">₦0</p>
+            </div>
+            <div class="stat-card-slim text-center" style="border-bottom-color: #a855f7;">
+                <p class="text-[8px] font-bold text-gray-500 uppercase">Total Payout</p>
+                <p id="total-payout" class="text-lg font-bold text-purple-400">₦0</p>
+            </div>
+        </div>
+
+        <div class="glass-panel p-1 rounded-xl mb-6 flex items-center px-4">
+            <span class="text-cyan-400 mr-3 text-sm font-bold">SCAN:</span>
+            <input type="text" id="admin-search" oninput="searchNetwork()" placeholder="Search node database..." 
+                   class="w-full bg-transparent p-3 outline-none text-sm text-white placeholder-gray-600 font-medium">
+        </div>
+
+        <div class="glass-panel rounded-2xl border-t border-cyan-500/20 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-cyan-500/5 sticky top-0 backdrop-blur-md">
+                    <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        <th class="w-[30%] pl-6">Username</th>
+                        <th class="w-[20%] text-center">Status</th>
+                        <th class="w-[25%] text-center">Verify</th>
+                        <th class="w-[25%] pr-6 text-right">Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body" class="divide-y divide-white/5">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        if (sessionStorage.getItem('admin_auth') !== 'true') {
+    window.location.replace('admin-login.html');
+        }
+        
+                // 1. FIREBASE SETUP
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLTwLq8Le9vYAwRkRcqXPGxFnEqW1yE2E",
+      authDomain: "synergy-protocol.firebaseapp.com",
+      projectId: "synergy-protocol",
+      storageBucket: "synergy-protocol.firebasestorage.app",
+      messagingSenderId: "179647543031",
+      appId: "1:179647543031:web:388da8a36e1bbbb55d85f2"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // Sabon backend (Render) - dukkan ayyukan admin (fetch/verify/balance/
+    // leaders) yanzu suna wucewa ta nan, domin admin panel din nan BAI
+    // login ta Firebase Auth ba, don haka baya iya wuce Firestore rules.
+    //
+    // GARGADI: ADMIN_KEY din nan a bayyane yake a code din (client-side),
+    // don haka kowa da ya buɗe "View Source" na wannan page zai iya
+    // ganinsa. Wannan yana kare Firestore daga wanda BAI da wannan
+    // fayil ba, amma BA ya kare shi daga wanda ya samu damar wannan
+    // fayil din kansa. Idan kana son mafi tsauri, ka gaya min - za mu
+    // iya haɗa shi da ainihin login (password check a admin-login.html)
+    // domin server ya tantance admin ta wata hanya mafi aminci.
+    const SYNERGY_SERVER_URL = "https://synergy-backend-1-eh93.onrender.com";
+    const ADMIN_KEY = "PASTE-YOUR-ADMIN-KEY-HERE";
+
+    async function adminFetch(path, options = {}) {
+        const res = await fetch(SYNERGY_SERVER_URL + path, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': ADMIN_KEY,
+                ...(options.headers || {})
+            }
+        });
+        return res.json();
+    }
+
+    function toggleSidebar() {
+        document.getElementById('mainSidebar').classList.toggle('show');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    // 2. FETCH REAL USERS FROM DATABASE (ta server, domin admin panel
+    //    baya login ta Firebase Auth kuma rules baya barin "list" kai tsaye)
+    async function fetchUsers() {
+        const body = document.getElementById('user-table-body');
+        body.innerHTML = `<tr><td colspan="4" class="text-center py-10 orbitron text-[10px] text-cyan-400 animate-pulse">Scanning Network Database...</td></tr>`;
+
+        try {
+            const result = await adminFetch('/api/admin/users');
+            if (!result.success) throw new Error(result.message || "Unknown error");
+
+            window.allUsers = result.users;
+            render(result.users);
+
+        } catch (error) {
+            console.error("Error:", error);
+            body.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-500 font-bold uppercase">Protocol Link Severed: Check Rules</td></tr>`;
+        }
+    }
+
+    function toggleRow(id) {
+        const el = document.getElementById(`details-${id.replace(/\s+/g, '-')}`);
+        const isActive = el.classList.contains('active');
+        document.querySelectorAll('.details-row').forEach(row => row.classList.remove('active'));
+        if (!isActive) el.classList.add('active');
+    }
+
+    function render(data) {
+        const body = document.getElementById('user-table-body');
+        body.innerHTML = data.map(u => `
+            <tr onclick="toggleRow('${u.id}')">
+                <td class="pl-6 py-5">
+                    <div class="text-cyan-400 font-bold text-sm tracking-wide capitalize">${u.id}</div>
+                </td>
+                <td class="text-center py-5">
+                    <span class="text-[9px] px-2 py-0.5 rounded-full ${u.status === 'active' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'} border font-bold uppercase">${u.status}</span>
+                </td>
+                <td class="text-center py-5">
+                    <span class="v-badge ${u.verified ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-400/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}">
+                        ${u.verified ? 'VERIFIED' : 'UNVERIFIED'}
+                    </span>
+                </td>
+                <td class="pr-6 text-right py-5 font-bold text-white text-sm">
+    ${u.videoBalance.toLocaleString()} pts
+</td>
+            </tr>
+            <tr id="details-${u.id.replace(/\s+/g, '-')}" class="details-row bg-white/[0.03]">
+                <td colspan="4" class="p-8 border-l-4 border-cyan-400">
+                    <div class="flex flex-col gap-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Full Name</span><br><span class="text-white">${u.fullName}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Phone</span><br><span class="text-white">${u.phone}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Email</span><br><span class="text-white">${u.email}</span></div>
+                            <div><span class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Location</span><br><span class="text-white">${u.state}</span></div>
+                        </div>
+                        <div class="space-y-6 pt-6 border-t border-white/5">
+                            <div class="flex items-center gap-3">
+                                <input type="number" id="input-${u.id.replace(/\s+/g, '-')}" placeholder="New Balance ₦" 
+                                       class="bg-black/40 border border-white/10 p-2 text-xs rounded-lg outline-none text-white w-40 focus:border-cyan-400">
+                                <button onclick="event.stopPropagation(); updateBalance('${u.id}')" class="btn-update">Update Balance</button>
+                                       </div>
+                            <div class="flex flex-row gap-3 w-full max-w-2xl">
+                                <button onclick="event.stopPropagation();" class="btn-action btn-suspend">Suspend</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-ban">Ban Node</button>
+                                <button onclick="event.stopPropagation();" class="btn-action btn-delete">Terminate</button>
+                        
+         </div>
+
+<div class="flex flex-row gap-3 w-full max-w-2xl mt-3">
+    <button onclick="event.stopPropagation(); viewScreenshots('${u.id}')" 
+            class="flex-1 py-3 border border-cyan-400/30 text-cyan-400 bg-cyan-400/5 rounded-lg text-[10px] font-bold uppercase hover:bg-cyan-400 hover:text-black transition-all">
+        View Screenshots
+    </button>
+    <button onclick="event.stopPropagation(); approveAndCleanup('${u.id}')" 
+            class="flex-1 py-3 border border-green-500/30 text-green-400 bg-green-500/5 rounded-lg text-[10px] font-bold uppercase hover:bg-green-500 hover:text-black transition-all">
+        Approve & Delete
+    </button>
+</div>
+
+<div id="gallery-${u.id.replace(/\s+/g, '-')}" class="hidden mt-4 p-4 border border-white/5 rounded-xl bg-black/40 flex gap-3 overflow-x-auto">
+    <p class="text-[10px] text-gray-500 italic">Scanning node evidence...</p>
+</div>
+
+                            
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('total-members').innerText = data.length;
+        document.getElementById('total-active').innerText = data.filter(u => u.status === 'active').length;
+        document.getElementById('total-inactive').innerText = data.filter(u => u.status === 'inactive').length;
+        document.getElementById('total-balance').innerText = `${data.reduce((s, u) => s + u.videoBalance, 0).toLocaleString()} pts`;
+        document.getElementById('total-payout').innerText = `${data.reduce((s, u) => s + (u.payout || 0), 0).toLocaleString()} pts`;
+    }
+
+    function searchNetwork() {
+        const q = document.getElementById('admin-search').value.toLowerCase();
+        const f = window.allUsers.filter(u => u.id.toLowerCase().includes(q) || u.fullName.toLowerCase().includes(q));
+        render(f);
+    }
+
+    // Initialize Database Scan
+    fetchUsers();
+            
+
+       async function viewScreenshots(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const gallery = document.getElementById(`gallery-${safeId}`);
+    gallery.classList.toggle('hidden');
+    
+    if (!gallery.classList.contains('hidden')) {
+        gallery.innerHTML = '<p class="text-[10px] text-cyan-400 animate-pulse">Searching Cloudinary links...</p>';
+        
+        try {
+            const result = await adminFetch(`/api/admin/users/${encodeURIComponent(username)}/screenshots`);
+            if (!result.success) throw new Error(result.message || "Unknown error");
+
+            if (result.screenshots.length === 0) {
+                gallery.innerHTML = '<p class="text-[10px] text-gray-600 text-center py-2">No evidence found. <br><span class="text-[8px]">Check if "username" field exists in Firebase.</span></p>';
+                return;
+            }
+
+            gallery.innerHTML = "";
+            result.screenshots.forEach(s => {
+                gallery.innerHTML += `
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-[8px] text-gray-500">${s.platform}</span>
+                        <img src="${s.imageUrl}" class="h-32 w-24 object-cover rounded-lg border border-cyan-400/20 hover:border-cyan-400 cursor-pointer transition-all" 
+                             onclick="window.open('${s.imageUrl}')">
+                    </div>`;
+            });
+        } catch (e) {
+            gallery.innerHTML = `<p class="text-[10px] text-red-500">Error: ${e.message}</p>`;
+        }
+    }
+       }
+        
+        
+
+async function approveAndCleanup(username) {
+    if (!confirm(`Confirm approval for ${username}?`)) return;
+
+    try {
+        const result = await adminFetch(`/api/admin/users/${encodeURIComponent(username)}/verify`, { method: 'POST' });
+        if (!result.success) throw new Error(result.message || "Unknown error");
+
+        alert("Success: User Approved! Dashboard will open for them now.");
+        fetchUsers();
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+    }
+        
+      async function updateBalance(username) {
+    const safeId = username.replace(/\s+/g, '-');
+    const inputEl = document.getElementById(`input-${safeId}`);
+    const newBalance = parseInt(inputEl.value);
+
+    if (isNaN(newBalance) || newBalance < 0) {
+        alert("Please enter a valid number");
+        return;
+    }
+
+    if (!confirm(`Set ${username} balance to ${newBalance} pts?`)) return;
+
+    try {
+        const result = await adminFetch(`/api/admin/users/${encodeURIComponent(username)}/balance`, {
+            method: 'POST',
+            body: JSON.stringify({ newBalance })
+        });
+        if (!result.success) throw new Error(result.message || "Unknown error");
+
+        alert(`✓ Balance updated to ${newBalance} pts`);
+        inputEl.value = "";
+        fetchUsers(); // Refresh table
+    } catch(e) {
+        alert("Error: " + e.message);
+    }
+      }
+
+    // ============================================================
+    // LEADERS COMMAND OVERLAY
+    // ============================================================
+    let leadersData = [];
+    let leaderFilter = 'all';
+
+    function openLeadersOverlay() {
+        document.getElementById('leadersOverlay').classList.add('active');
+        document.getElementById('mainSidebar').classList.remove('show');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+        fetchLeaders();
+    }
+
+    function closeLeadersOverlay() {
+        document.getElementById('leadersOverlay').classList.remove('active');
+    }
+
+    function setLeaderFilter(f) {
+        leaderFilter = f;
+        document.querySelectorAll('.leader-filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === f);
+        });
+        renderLeaders();
+    }
+
+    async function fetchLeaders() {
+        const body = document.getElementById('leaders-table-body');
+        body.innerHTML = `<tr><td colspan="3" class="text-center py-10 orbitron text-[10px] text-amber-400 animate-pulse">Loading leaders...</td></tr>`;
+
+        try {
+            const result = await adminFetch('/api/admin/leaders');
+            if (!result.success) throw new Error(result.message || "Unknown error");
+
+            leadersData = result.leaders;
+            document.getElementById('leader-total').innerText = result.counts.total;
+            document.getElementById('leader-active-count').innerText = result.counts.active;
+            document.getElementById('leader-suspended-count').innerText = result.counts.suspended;
+            document.getElementById('leader-banned-count').innerText = result.counts.banned;
+
+            renderLeaders();
+        } catch (e) {
+            body.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-red-500 font-bold uppercase">Error: ${e.message}</td></tr>`;
+        }
+    }
+
+    function renderLeaders() {
+        const q = (document.getElementById('leader-search').value || '').toLowerCase();
+        const body = document.getElementById('leaders-table-body');
+
+        let filtered = leadersData;
+        if (leaderFilter !== 'all') {
+            filtered = filtered.filter(l => l.leaderStatus === leaderFilter);
+        }
+        if (q) {
+            filtered = filtered.filter(l =>
+                l.id.toLowerCase().includes(q) || (l.fullName || '').toLowerCase().includes(q)
+            );
+        }
+
+        if (filtered.length === 0) {
+            body.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-gray-500 text-xs">No leaders found.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = filtered.map(l => {
+            let actions = '';
+            if (l.leaderStatus === 'active') {
+                actions = `
+                    <button class="leader-action-btn suspend" onclick="suspendLeader('${l.id}')">Suspend</button>
+                    <button class="leader-action-btn ban" onclick="banLeader('${l.id}')">Ban</button>
+                    <button class="leader-action-btn remove" onclick="removeLeader('${l.id}')">Remove</button>`;
+            } else if (l.leaderStatus === 'suspended') {
+                actions = `
+                    <button class="leader-action-btn reinstate" onclick="reinstateLeader('${l.id}')">Reinstate</button>
+                    <button class="leader-action-btn ban" onclick="banLeader('${l.id}')">Ban</button>
+                    <button class="leader-action-btn remove" onclick="removeLeader('${l.id}')">Remove</button>`;
+            } else if (l.leaderStatus === 'banned') {
+                actions = `
+                    <button class="leader-action-btn reinstate" onclick="reinstateLeader('${l.id}')">Reinstate</button>
+                    <button class="leader-action-btn remove" onclick="removeLeader('${l.id}')">Remove</button>`;
+            }
+
+            return `
+                <tr>
+                    <td class="pl-6 py-4">
+                        <div class="text-amber-400 font-bold text-sm tracking-wide capitalize">${l.id}</div>
+                        <div class="text-gray-500 text-[10px]">${l.fullName}</div>
+                    </td>
+                    <td class="text-center py-4">
+                        <span class="leader-badge ${l.leaderStatus}">${l.leaderStatus}</span>
+                    </td>
+                    <td class="pr-6 py-4">
+                        <div class="flex gap-2 justify-end flex-wrap">${actions}</div>
+                    </td>
+                </tr>`;
+        }).join('');
+    }
+
+    async function addLeader() {
+        const input = document.getElementById('leader-add-input');
+        const username = input.value.trim();
+        if (!username) { alert("Da fatan za a shigar da username."); return; }
+
+        try {
+            const result = await adminFetch(`/api/admin/leaders/${encodeURIComponent(username)}/add`, { method: 'POST' });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+            input.value = '';
+            fetchLeaders();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function bulkAddLeaders() {
+        const textarea = document.getElementById('leader-bulk-input');
+        const statusEl = document.getElementById('bulk-add-status');
+        const usernames = textarea.value.split('\n').map(u => u.trim()).filter(Boolean);
+
+        if (usernames.length === 0) {
+            alert("Da fatan za a manna aƙalla suna guda.");
+            return;
+        }
+
+        statusEl.textContent = `Adding ${usernames.length} leaders...`;
+
+        try {
+            const result = await adminFetch('/api/admin/leaders/bulk-add', {
+                method: 'POST',
+                body: JSON.stringify({ usernames })
+            });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+
+            let msg = `✓ ${result.added.length} added successfully.`;
+            if (result.notFound.length > 0) {
+                msg += ` ⚠ ${result.notFound.length} not found: ${result.notFound.join(', ')}`;
+            }
+            statusEl.textContent = msg;
+            textarea.value = '';
+            fetchLeaders();
+        } catch (e) {
+            statusEl.textContent = '';
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function suspendLeader(username) {
+        if (!confirm(`Suspend ${username} daga leadership?`)) return;
+        try {
+            const result = await adminFetch(`/api/admin/leaders/${encodeURIComponent(username)}/suspend`, { method: 'POST' });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+            fetchLeaders();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function reinstateLeader(username) {
+        if (!confirm(`Mayar da ${username} a matsayin active leader?`)) return;
+        try {
+            const result = await adminFetch(`/api/admin/leaders/${encodeURIComponent(username)}/reinstate`, { method: 'POST' });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+            fetchLeaders();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function banLeader(username) {
+        if (!confirm(`Ban ${username} daga leadership? Wannan ya fi tsanani da suspend.`)) return;
+        try {
+            const result = await adminFetch(`/api/admin/leaders/${encodeURIComponent(username)}/ban`, { method: 'POST' });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+            fetchLeaders();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function removeLeader(username) {
+        if (!confirm(`Cire ${username} gaba daya daga leaders list (zai koma member na yau da kullum)?`)) return;
+        try {
+            const result = await adminFetch(`/api/admin/leaders/${encodeURIComponent(username)}/remove`, { method: 'POST' });
+            if (!result.success) throw new Error(result.message || "Unknown error");
+            fetchLeaders();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+        
+    </script>
+</body>
+    </html>
