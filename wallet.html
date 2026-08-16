@@ -725,6 +725,15 @@ document.addEventListener('DOMContentLoaded', function() {
         vonkBalance: firebase.firestore.FieldValue.increment(vonkGained)
       });
 
+      await db.collection('users').doc(currentUser).collection('transactions').add({
+        type: 'Convert to VONK',
+        desc: 'Pts to Vonk',
+        amount: -amount,
+        unit: 'pts',
+        status: 'Success',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
       alert(`Converted ${amount.toLocaleString()} PTS → ${vonkGained.toFixed(4)} VNK!`);
       document.getElementById('convertPtsAmount').value = '';
       document.getElementById('estimatedTokensDisplay').innerText = '0.0000 VNK';
@@ -735,36 +744,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  const transactions = [
-    {type:"Deposit", desc:"Manual deposit", amount:"+5,000", unit:"pts", time:"Today • 1:42 PM", status:"Success", color:"#34d399", icon:'<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/>'},
-    {type:"TaskPro Reward", desc:"Task #4471 completed", amount:"+120", unit:"pts", time:"Today • 11:05 AM", status:"Success", color:"#22d3ee", icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 15l2 2 4-4"/>'},
-    {type:"Convert to VONK", desc:"Pts to Vonk", amount:"-2,000", unit:"pts", time:"Yesterday • 6:20 PM", status:"Success", color:"#a78bfa", icon:'<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>'},
-    {type:"Withdrawal", desc:"To bank account", amount:"-8,500", unit:"pts", time:"Yesterday • 9:10 AM", status:"Pending", color:"#fb923c", icon:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/>'},
-    {type:"Referral Bonus", desc:"New referral", amount:"+80", unit:"pts", time:"2 June • 3:55 PM", status:"Success", color:"#e2e8f0", icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'},
-  ];
+  const TX_ICONS = {
+    "Deposit":         { color:"#34d399", icon:'<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/>' },
+    "TaskPro Reward":  { color:"#22d3ee", icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 15l2 2 4-4"/>' },
+    "Convert to VONK": { color:"#a78bfa", icon:'<path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/>' },
+    "Withdrawal":      { color:"#fb923c", icon:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/>' },
+    "Referral Bonus":  { color:"#e2e8f0", icon:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
+  };
 
-  function renderTx(){
+  function renderTx(transactions){
     const statusColor = s => s === "Success" ? "#34d399" : s === "Pending" ? "#facc15" : "#f87171";
-    document.getElementById('txList').innerHTML = transactions.map(t => `
+    const list = document.getElementById('txList');
+    if (!transactions.length) {
+      list.innerHTML = `<p class="text-xs text-white/30 text-center py-6">No transactions yet</p>`;
+      return;
+    }
+    list.innerHTML = transactions.map(t => {
+      const meta = TX_ICONS[t.type] || { color:"#e2e8f0", icon:'<circle cx="12" cy="12" r="9"/>' };
+      const sign = t.amount >= 0 ? '+' : '';
+      return `
       <div class="card p-3.5 flex items-center justify-between pressable">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:${t.color}22">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-width="2">${t.icon}</svg>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:${meta.color}22">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${meta.color}" stroke-width="2">${meta.icon}</svg>
           </div>
           <div>
             <p class="text-sm font-medium">${t.type}</p>
-            <p class="text-[11px] text-white/40 mt-0.5">${t.desc}</p>
+            <p class="text-[11px] text-white/40 mt-0.5">${t.desc || ''}</p>
             <p class="text-[10px] text-white/30 mt-0.5">${t.time}</p>
           </div>
         </div>
         <div class="text-right">
-          <p class="text-sm font-bold" style="color:${t.amount.startsWith('+') ? '#34d399' : '#f87171'}">${t.amount} <span class="text-[10px] text-white/40 font-medium">${t.unit}</span></p>
+          <p class="text-sm font-bold" style="color:${t.amount >= 0 ? '#34d399' : '#f87171'}">${sign}${fmt(Math.abs(t.amount),0)} <span class="text-[10px] text-white/40 font-medium">${t.unit}</span></p>
           <p class="text-[10px] mt-1 font-medium" style="color:${statusColor(t.status)}">${t.status}</p>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
-  renderTx();
+
+  function loadTransactions(){
+    if (!currentUser) return;
+    db.collection('users').doc(currentUser).collection('transactions')
+      .orderBy('createdAt', 'desc')
+      .limit(15)
+      .onSnapshot(snapshot => {
+        const transactions = snapshot.docs.map(doc => {
+          const d = doc.data();
+          return {
+            type: d.type,
+            desc: d.desc,
+            amount: d.amount,
+            unit: d.unit || 'pts',
+            status: d.status || 'Success',
+            time: d.createdAt ? d.createdAt.toDate().toLocaleString('en-NG', { dateStyle:'medium', timeStyle:'short' }) : ''
+          };
+        });
+        renderTx(transactions);
+      }, err => {
+        console.error('loadTransactions snapshot error:', err);
+        renderTx([]);
+      });
+  }
+  loadTransactions();
 
   function setDockActive(index) {
     document.querySelectorAll('.dock-node').forEach(n => n.classList.remove('active'));
