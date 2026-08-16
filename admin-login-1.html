@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNERGY | ADMIN ACCESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root { --aqua: #00f2fe; --purple: #7000ff; --bg: #020617; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            background-color: #020617;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.15), transparent), 
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            background-attachment: fixed;
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+        }
+
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(40px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(0, 242, 254, 0.3);
+        }
+
+        .orbitron { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: 2px; }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .step-hidden { opacity: 0; transform: translateY(20px); pointer-events: none; display: none; }
+        .step-visible { 
+            display: block;
+            animation: reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+        }
+
+        .input-glow:focus { 
+            border-color: var(--aqua); 
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15); 
+        }
+
+        .btn-locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
+
+        /* Red pulse for admin icon - musamman don nuna cewa admin ne */
+        @keyframes adminPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 85, 0.8), 0 0 10px #ff0055; }
+        }
+        .admin-icon { animation: adminPulse 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+<div class="glass-card p-6 rounded-[30px] w-full max-w-md mx-4">
+
+    <!-- Icon - Red don admin, ba cyan ba -->
+    <div class="w-10 h-10 rounded-full mx-auto mb-4 admin-icon"
+         style="background: linear-gradient(135deg, #ff0055, #7000ff);"></div>
+
+    <h1 style="font-family: 'Syncopate', sans-serif !important; letter-spacing: -1px; text-align: center; text-transform: lowercase;" 
+        class="text-[22px] font-bold text-white mb-1 w-full">
+        Zynta<span class="text-red-400">.</span>
+    </h1>
+
+    <p style="font-family: 'Space Grotesk', sans-serif; text-align: center;" 
+       class="text-[15px] text-red-400 font-bold w-full mb-8">
+        Admin Authentication
+    </p>
+
+    <div id="form-container" class="space-y-3">
+
+        <div id="step-1" class="step-visible">
+            <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Admin Username</label>
+            <input type="text" id="admin-user" oninput="validateForm()" placeholder="Enter username" 
+                   class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+        </div>
+
+        <div id="step-2" class="step-hidden">
+            <label class="text-[9px] orbitron text-gray-400 ml-2 mb-1 block">Access Password</label>
+            <input type="password" id="admin-pass" oninput="validateForm()" 
+                   onkeydown="if(event.key==='Enter') attemptLogin()"
+                   placeholder="••••••••" 
+                   class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none input-glow transition-all text-white text-md">
+        </div>
+
+        <p id="error-msg" style="display:none; color:#ff4d4d; font-family:'Syncopate',sans-serif; font-size:9px; text-align:center; letter-spacing:2px; padding: 8px 0;">
+            ACCESS DENIED
+        </p>
+
+        <button id="auth-btn" onclick="attemptLogin()" disabled
+                class="btn-locked w-full py-4 rounded-xl font-bold orbitron text-[11px] mt-2 transition-all duration-500 text-black"
+                style="background: linear-gradient(90deg, #ff0055, #7000ff);">
+            AUTHENTICATE
+        </button>
+    </div>
+
+    <div class="border-t border-white/5 my-6"></div>
+
+    <p style="font-family: 'Space Grotesk', sans-serif; text-align: center;"
+       class="text-[12px] text-gray-600">
+        Member login? 
+        <a href="signin.html" class="text-cyan-400 font-bold hover:underline ml-1">Go back</a>
+    </p>
+
+</div>
+
+<script>
+    // Sabon URL na server (Render) - shi ke tabbatar da password yanzu.
+    // Babu wani password/username a wannan file kuma - dukkansu suna
+    // zaune a Render Environment Variables kadai.
+    const SYNERGY_SERVER_URL = "https://synergy-backend-1-eh93.onrender.com";
+
+    function validateForm() {
+        const u = document.getElementById('admin-user').value.trim();
+        const p = document.getElementById('admin-pass').value.trim();
+        const btn = document.getElementById('auth-btn');
+
+        // Bude password field idan username ya cika 3+
+        if (u.length >= 3) {
+            show(2);
+        } else {
+            hide(2);
+        }
+
+        // Unlock button idan duka sun cika
+        if (u.length >= 3 && p.length >= 6) {
+            btn.disabled = false;
+            btn.classList.remove('btn-locked');
+        } else {
+            btn.disabled = true;
+            btn.classList.add('btn-locked');
+        }
+    }
+
+    function show(id) {
+        const el = document.getElementById(`step-${id}`);
+        if (el) { el.classList.remove('step-hidden'); el.classList.add('step-visible'); }
+    }
+
+    function hide(id) {
+        const el = document.getElementById(`step-${id}`);
+        if (el) { el.classList.add('step-hidden'); el.classList.remove('step-visible'); }
+    }
+
+    async function attemptLogin() {
+        const u = document.getElementById('admin-user').value.trim();
+        const p = document.getElementById('admin-pass').value.trim();
+        const btn = document.getElementById('auth-btn');
+        const err = document.getElementById('error-msg');
+
+        btn.innerText = "VERIFYING...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(SYNERGY_SERVER_URL + '/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                sessionStorage.setItem('admin_auth', 'true');
+                sessionStorage.setItem('admin_key', result.adminKey);
+                btn.innerText = "ACCESS GRANTED";
+                btn.style.background = "linear-gradient(90deg, #00f2fe, #22c55e)";
+                setTimeout(() => {
+                    window.location.replace('admin-panel.html');
+                }, 800);
+            } else {
+                err.style.display = 'block';
+                document.getElementById('admin-pass').value = '';
+                btn.innerText = "AUTHENTICATE";
+                btn.disabled = false;
+                btn.classList.add('btn-locked');
+                setTimeout(() => { err.style.display = 'none'; }, 2500);
+            }
+        } catch (e) {
+            err.textContent = "CONNECTION ERROR";
+            err.style.display = 'block';
+            btn.innerText = "AUTHENTICATE";
+            btn.disabled = false;
+            btn.classList.add('btn-locked');
+            setTimeout(() => { err.style.display = 'none'; err.textContent = 'ACCESS DENIED'; }, 2500);
+        }
+    }
+
+    // Idan ya riga ya shiga a wannan session
+    if (sessionStorage.getItem('admin_auth') === 'true') {
+        window.location.replace('admin-panel.html');
+    }
+</script>
+</body>
+</html>
