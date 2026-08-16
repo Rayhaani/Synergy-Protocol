@@ -2307,6 +2307,15 @@ async function reviewAction(submissionId, action){
         subscriberVonkEarned: firebase.firestore.FieldValue.increment(vonkAmount)
       });
 
+      await db.collection("users").doc(sub.submittedBy).collection('transactions').add({
+        type: 'TaskPro Reward',
+        desc: `Task #${sub.taskId} completed`,
+        amount: vonkAmount,
+        unit: 'VNK',
+        status: 'Success',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
       // Referral commission is carved OUT of the 15% fee the advertiser already
       // paid — it is never an extra cost to the platform. Worker's payout above
       // is fixed and unaffected either way.
@@ -2318,8 +2327,16 @@ async function reviewAction(submissionId, action){
           vonkBalance: firebase.firestore.FieldValue.increment(referralVonk),
           referralVonkEarned: firebase.firestore.FieldValue.increment(referralVonk)
         });
-      }
 
+        await db.collection("users").doc(referredBy).collection('transactions').add({
+          type: 'Referral Bonus',
+          desc: 'Worker task reward',
+          amount: referralVonk,
+          unit: 'VNK',
+          status: 'Success',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
       const taskSnap = await rtdb.ref(`subscriber_tasks/${sub.taskId}`).get();
       const currentFilled = taskSnap.exists() ? (taskSnap.val().slots_filled || 0) : 0;
       const taskData = taskSnap.exists() ? taskSnap.val() : {};
