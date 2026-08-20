@@ -386,7 +386,15 @@ body {
         }
         return null;
     }
-
+async function findUsernameByEmail(emailAddr) {
+        try {
+            const q = await db.collection('users').where('email', '==', emailAddr).limit(1).get();
+            if (!q.empty) return q.docs[0].id;
+        } catch (err) {
+            console.warn("Username lookup by email failed:", err);
+        }
+        return null;
+}
     async function login() {
         const loginInput = document.getElementById('login-id').value.trim();
         const pass = document.getElementById('login-pass').value.trim();
@@ -412,6 +420,7 @@ body {
 
         try {
             let email = loginInput;
+            let resolvedUsername = null;
 
             // 1. Nemo Email daga Username (Firestore — cikakken source yanzu)
             //    Amfani da looksLikeEmail maimakon includes('@') domin wasu
@@ -420,6 +429,7 @@ body {
                 const userDoc = await findUserDocByUsername(loginInput);
                 if (userDoc && userDoc.data().email) {
                     email = userDoc.data().email;
+                    resolvedUsername = userDoc.id;
                 } else if (userDoc) {
                     showTopNotif("This account is missing an email on file. Please contact support.", "error");
                     btn.innerText = "SIGN IN";
@@ -444,15 +454,24 @@ body {
             if (!user.emailVerified) {
                 btn.innerText = "SIGN IN";
                 btn.disabled = false;
-                showUnverifiedPrompt(user);
+                showUnverifiedPrompt(user, resolvedUsername);
                 return;
             }
 
             // 4. Nemo ainihin Username (Firestore reverse lookup — reliable
             //    whether the person typed their username or their email)
-            const finalUsername = (await findUsernameByUid(user.uid)) || loginInput.toLowerCase();
-            safeStorage.set('synergy_user', finalUsername);
+            let finalUsername = resolvedUsername
+                || (await findUsernameByUid(user.uid))
+                || (await findUsernameByEmail(user.email));
 
+            if (!finalUsername) {
+                showTopNotif("We found your account but couldn't confirm your username. Please contact support.", "error");
+                btn.innerText = "SIGN IN";
+                btn.disabled = false;
+                return;
+            }
+
+            safeStorage.set('synergy_user', finalUsername);
             // 5. Tura shi Wallet
             showTopNotif("Access Granted! Connecting...", "success");
             setTimeout(() => {
@@ -472,7 +491,7 @@ body {
     // Shown when credentials are correct but the email isn't verified yet —
     // gives a real way forward (resend + auto-detect) instead of a dead end,
     // no matter how long ago the person originally registered.
-    function showUnverifiedPrompt(user) {
+    function showUnverifiedPrompt(user, resolvedUsername) {
         Swal.fire({
             html: `
                 <div class="flex flex-col items-center">
@@ -487,7 +506,7 @@ body {
             confirmButtonText: 'RESEND LINK',
             allowOutsideClick: true,
             customClass: { popup: 'rounded-[35px] border border-[#a78bfa]/30 shadow-2xl', confirmButton: 'resend-btn-neon orbitron' },
-            didOpen: () => { startVerifyListener(user); },
+            didOpen: () => { startVerifyListener(user, resolvedUsername); },
             willClose: () => { if (verifyCheckInterval) clearInterval(verifyCheckInterval); }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -499,7 +518,7 @@ body {
         });
     }
 
-    function startVerifyListener(user) {
+    function startVerifyListener(user, resolvedUsername) {
         if (verifyCheckInterval) clearInterval(verifyCheckInterval);
         verifyCheckInterval = setInterval(async () => {
             await user.reload();
@@ -507,7 +526,9 @@ body {
                 clearInterval(verifyCheckInterval);
                 Swal.close();
                 showTopNotif("Verified! Connecting...", "success");
-                const finalUsername = await findUsernameByUid(user.uid);
+                const finalUsername = resolvedUsername
+                    || (await findUsernameByUid(user.uid))
+                    || (await findUsernameByEmail(user.email));
                 if (finalUsername) {
                     safeStorage.set('synergy_user', finalUsername);
                 }
