@@ -1336,7 +1336,9 @@ async function addEarningsToFirebase(amount) {
     try {
         const user = await waitForAuthUser();
         if (!user) {
-            showSynergyAlert("Session ya kare. Sake shiga (login) don Allah.", "error");
+            showSynergyAlert("Session expired. Please sign in again.", "error");
+            const btnFail = document.getElementById(`btn-${id}`);
+            if (btnFail) { btnFail.disabled = false; btnFail.innerText = "VERIFY"; btnFail.style.opacity = "1"; }
             return;
         }
 
@@ -1357,7 +1359,9 @@ async function addEarningsToFirebase(amount) {
         const data = await response.json();
 
         if (!data.success) {
-            showSynergyAlert(data.message || "An kasa bada points", "error");
+            showSynergyAlert(data.message || "Could not award points. Please try again.", "error");
+            const btnFail = document.getElementById(`btn-${id}`);
+            if (btnFail) { btnFail.disabled = false; btnFail.innerText = "VERIFY"; btnFail.style.opacity = "1"; }
             return;
         }
 
@@ -1381,16 +1385,13 @@ async function addEarningsToFirebase(amount) {
             }
         }, 1500);
         
-    } catch (error) {
+} catch (error) {
         console.error(error);
-        // GYARAN SABO (don gano matsala): nuna ainihin sakon kuskure maimakon
-        // "Database error" gaba daya, don mu gane ainihin dalilin da sauri.
-        showSynergyAlert(`DB Error: ${error.code || ''} ${error.message || error}`, "error");
+        showSynergyAlert("Something went wrong. Please try again.", "error");
+        const btnFail = document.getElementById(`btn-${id}`);
+        if (btnFail) { btnFail.disabled = false; btnFail.innerText = "VERIFY"; btnFail.style.opacity = "1"; }
     }
-  }
-    
-  
-    
+     
 
 function renderToDashboard(id, task) {
     let container;
@@ -1556,21 +1557,32 @@ function fetchAndRenderNodes() {
 async function verifyNodeCode(id) {
     const task = nodesList[id];
     const inputEl = document.getElementById(`code-input-${id}`);
-    
+    const btn = document.getElementById(`btn-${id}`);
+
     if (!inputEl) return;
-    
+
+    // Kar a bar wani danna na biyu ya sake gudu yayin da na farko ke jira
+    if (btn && btn.disabled) return;
+
     // 1. Karanta abin da mamba ya rubuta
     const inputVal = inputEl.value.toUpperCase().trim();
-    
+
     // 2. Dauko ainihin Code din da muka ajiye masa a localStorage
     const storedCode = localStorage.getItem(`nodeCode_${id}`) || "";
 
     // 3. Kwatanta su muga idan sun yi daidai
     if (inputVal === storedCode && storedCode !== "") {
+        // Toshe button din nan take don hana danna sau biyu yayin da ake jira
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "VERIFYING...";
+            btn.style.opacity = "0.6";
+        }
+
         // Idan yayi daidai, goge tarkacen lokaci da code
         localStorage.removeItem(`startTime_${id}`);
-        localStorage.removeItem(`nodeCode_${id}`); 
-        
+        localStorage.removeItem(`nodeCode_${id}`);
+
         // Sannan a bashi pts dinsa!
         await handleSuccess(id, task.amount);
     } else {
@@ -1582,9 +1594,6 @@ async function verifyNodeCode(id) {
     }
 }
     
-    
-
-
     // =============================================
 // GYARAN KARSHE: processNodeViaSearch
 // - Auto-generates unique code (ba shared ba)
